@@ -40,3 +40,111 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.Nav {
+	display: flex;
+}
+
+.Nav>.Link {
+	margin-left: 60px;
+	color: white;
+}
+
+.Link :hover {
+
+	text-decoration: underline;
+	/* sottolinea il testo */
+
+}
+
+.active {
+	text-decoration: underline;
+
+}
+
+.pulsantieraAddTags >*{
+margin-right: 10px;
+}
+.testoPost{
+  width:300px;
+  height: 200px;
+}
+.postCard{
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+fieldset{
+  border-radius: 15px;
+}
+ 
+.spacingdiv > *{
+margin-left: 10px;
+}
+.rutto{
+  width:60vw
+
+}
+.allineatiprofilo{
+  text-align: left;
+  padding-left: 30px;
+}
+*>.allineatiprofilo{
+font-size: 30px;
+}
+
+
+.inputProfilo{
+  height: 30px;
+  font-size: 20px;
+}
+.optionprofilo{
+  height: 40px;
+  font-size: 20px;
+}
+
+ul{
+  text-align: left;
+}
+
+
+
+
+
+
+
+
+
+
+
+table {
+  
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px; /* Aggiunge spazio sopra la tabella */
+}
+
+/* Stile delle celle dell'intestazione */
+th {
+ 
+  border: 1px solid #dddddd;
+ 
+  text-align: left;
+  padding: 15px; /* Aumenta il padding per aggiungere spazio interno */
+}
+
+/* Stile delle celle dei dati */
+td {
+  
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 15px; /* Aumenta il padding per aggiungere spazio interno */
+}
+
+/* Aggiunge uno spazio tra le righe della tabella */
+tr {
+  
+
+  margin-bottom: 10px;
+}
