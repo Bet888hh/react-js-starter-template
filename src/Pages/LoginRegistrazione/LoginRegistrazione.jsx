@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import ErrorInForm from '../../Components/ErrorInForm/ErrorInForm';
 import { useLocation } from 'react-router';
 
@@ -17,25 +17,30 @@ const LoginRegistrazione = () => {
     permesso: '',
   });
 
-  
+  const attemptRegistration = ()=>{
+     
+  }
 
   const validateEmail = (email) => {
     const errors = [];
   
-    // Verifica che l'indirizzo email non sia vuoto
+   
     if(!email){
       errors.push("la mail non può essere vuota")
     }
-      // Verifica la presenza di esattamente una '@'
+     
       if ((email.match(/@/g) || []).length !== 1) {
         errors.push('La mail deve contenere esattamente una @.');
       }
   
-      // Verifica la presenza di almeno un '.'
+  
       if (!/\./.test(email)) {
         errors.push('La mail deve contenere almeno un punto.');
       }
-  
+      const lunghezzaMassima = 25; 
+      if (email.length > lunghezzaMassima) {
+        errors.push(`La mail non può superare i ${lunghezzaMassima} caratteri.`);
+      }
   
   
     return errors;
@@ -71,28 +76,19 @@ const LoginRegistrazione = () => {
     if (!/[A-Z]/.test(password)) {
       errors.push('La password deve contenere almeno una lettera maiuscola.');
     }
-  
- 
     if (!/[a-z]/.test(password)) {
       errors.push('La password deve contenere almeno una lettera minuscola.');
     }
-  
-   
     if (!/\d/.test(password)) {
       errors.push('La password deve contenere almeno un numero.');
-    }
-  
-  
+    }  
     if (!/-/.test(password)) {
       errors.push('La password deve contenere almeno un trattino.');
     }
-  
-   
-    const lunghezzaMassima = 16; 
+    const lunghezzaMassima = 10; 
     if (password.length > lunghezzaMassima) {
       errors.push(`La password non può superare i ${lunghezzaMassima} caratteri.`);
     }
-  
     return errors;
   };
 
@@ -101,22 +97,31 @@ const LoginRegistrazione = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleRegistration = (e) => {
+  const handleRegistration =useCallback( (e) => {
     // Validazione dei campi prima della registrazione
    e.preventDefault()
-   const formData = new FormData(e.target);
-   const email = formData.get('email');
-   const username = formData.get('username');
-   const password = formData.get('password');
+   const formData1 = new FormData(e.target);
+   const email = formData1.get('email');
+   const username = formData1.get('username');
+   const password = formData1.get('password');
    const passwordErrors= validatePassword(password)
    const emailErrors = validateEmail(email)
    const usernameErrors = validateUsername(username)
-   if(passwordErrors.length===0 && emailErrors.length===0&&usernameErrors.length===0){
+  
 
+
+
+   if(passwordErrors.length===0 && emailErrors.length===0&&usernameErrors.length===0&&formData.ruolo!==""){
+    attemptRegistration()
    }else{
+    console.log("asd");
     return
    }
-  };
+
+
+
+
+  },[formData.ruolo]);
 
 
   const handleValidateEmail = (e) => {
@@ -189,7 +194,7 @@ setErrors( prev=>({...prev,passwordErrors:validatePassword(e.target.value)}))
         </>
       )}
 
-      <button onClick={handleRegistration}>Registrati</button>
+      <button type='submit'>Registrati</button>
       </form>
     </div>
   );
