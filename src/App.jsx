@@ -1,4 +1,5 @@
 import './App.css'
+import LoginRegistrazione from './Pages/LoginRegistrazione/LoginRegistrazione'
 
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
 
   return (
     <>
+    <LoginRegistrazione/>
     </>
   )
 }
