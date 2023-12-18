@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from 'react'
 import ErrorInForm from '../../Components/ErrorInForm/ErrorInForm';
 import { useLocation } from 'react-router';
+import { headers, urlbase } from '../../Utility/urls';
+import { error } from 'console';
 
 
 const LoginRegistrazione = () => {
@@ -17,8 +19,41 @@ const LoginRegistrazione = () => {
     permesso: '',
   });
 
-  const attemptRegistration = ()=>{
-     
+  const attemptRegistration = (email,username,password,ruolo,permesso)=>{
+     const newUser = {
+      Email:email,
+      Username:username,
+      Password:password,
+      Ruolo:ruolo,
+      Permesso:permesso
+     }
+
+     fetch(urlbase("USER"))
+       .then((r) => r.json())
+       .then((existingUsers) => {
+         const isEmailTaken = existingUsers.some(
+           (user) => user.Email === email
+         );
+
+         const isUsernameTaken = existingUsers.some(
+           (user) => user.Username === username
+         );
+
+         if (!isEmailTaken && !isUsernameTaken) {
+           fetch(urlbase("USER"), {
+             method: "POST",
+             headers: headers,
+             body: JSON.stringify(newUser),
+           })
+             .then((r) => r.json())
+             .then(() => {});
+         } else {
+           setErrors((prev) => ({
+             ...prev,
+             afterErrors: ["username o password già utilizzato"],
+           }));
+         }
+       });
   }
 
   const validateEmail = (email) => {
@@ -112,7 +147,7 @@ const LoginRegistrazione = () => {
 
 
    if(passwordErrors.length===0 && emailErrors.length===0&&usernameErrors.length===0&&formData.ruolo!==""){
-    attemptRegistration()
+    attemptRegistration(email,username,password,formData.ruolo,formData.permesso)
    }else{
     console.log("asd");
     return
