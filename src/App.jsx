@@ -12,7 +12,7 @@ function App() {
     <>
       <Router>
         <BaseLayer />
-    <LoginRegistrazione/>
+    
       </Router>
     </>
   )
