@@ -1,8 +1,10 @@
 import React, { memo, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
+import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 const Navbar = () => {
     const location = useLocation().pathname;
-
+    const user = useSelector(SelectUserSlice);
 
 
 
@@ -84,7 +86,12 @@ const Navbar = () => {
                         <span>Login/Registrazione</span>
                     </Link>
                 )}
-                {/* sarà un altrà cosa non un link..... */}
+                {user &&(
+                    <div style={{ border: '3px solid', margin: '0 10px 0 10px', borderRadius: "15px" }}>
+                        <span>User: {user.Username} </span>
+                        <span>Ruolo: {user.Ruolo} </span>
+                    </div>
+                )}
             </div>
         </>
     );

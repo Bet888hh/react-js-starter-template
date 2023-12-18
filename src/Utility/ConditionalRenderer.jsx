@@ -7,7 +7,7 @@ const ConditionalRenderer = ({ showContent, children }) => {
       {showContent ? (
         children
       ) : (
-        <h2 style={{ textAlign: 'center' }}>Loading...</h2>
+        <h2 style={{ textAlign: 'center' }}>Caricamento...</h2>
       )}
     </div>
   );
