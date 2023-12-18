@@ -13,9 +13,6 @@ const LoginRegistrazione = () => {
   })
   const [loading,isLoading]=useState(false)
   const [formData, setFormData] = useState({
-    email: '',
-    username: '',
-    password: '',
     ruolo: '',
     permesso: '',
   });
@@ -104,13 +101,21 @@ const LoginRegistrazione = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleRegistration = () => {
+  const handleRegistration = (e) => {
     // Validazione dei campi prima della registrazione
-    const emailError = validateEmail(formData.email);
-    const usernameError = validateUsername(formData.username);
-    const passwordError = validatePassword(formData.password);
+   e.preventDefault()
+   const formData = new FormData(e.target);
+   const email = formData.get('email');
+   const username = formData.get('username');
+   const password = formData.get('password');
+   const passwordErrors= validatePassword(password)
+   const emailErrors = validateEmail(email)
+   const usernameErrors = validateUsername(username)
+   if(passwordErrors.length===0 && emailErrors.length===0&&usernameErrors.length===0){
 
-  
+   }else{
+    return
+   }
   };
 
 
