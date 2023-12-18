@@ -42,11 +42,11 @@
 }
 
 
-.Nav {
+.Navbar {
 	display: flex;
 }
 
-.Nav>.Link {
+.Navbar>.Link {
 	margin-left: 60px;
 	color: white;
 }
