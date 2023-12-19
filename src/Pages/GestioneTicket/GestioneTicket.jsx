@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react'
 import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable';
 const GestioneTicket = () => {
+
+
   const [elementi,setElementi]= useState([])
 
 //cose da mettere in un hook personalizzato 
@@ -9,9 +11,18 @@ const handleTableAction = (e)=>{
   //logica per i pulsanti della tabella  
 
 }
-const handleSort = ()=>{
+
+
+const onSort = ()=>{
   //logica per l'ordinamento 
 }
+
+
+const handleFiltra=(e)=>{
+
+}
+
+
 
 const perTabella = useMemo(() => {
   return elementi.map((e) => {

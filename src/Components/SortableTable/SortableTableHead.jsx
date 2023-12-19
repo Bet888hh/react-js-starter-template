@@ -2,8 +2,8 @@
 import React from 'react'
 
 const SortableTableHead = ({intestazioni,onSort,sortSelezionato}) => {
-        const handleSort = (intestazione) => {
-          onSort(intestazione);
+        const handleSort = (e) => {
+          onSort(e.target.id);
         };
   return (
     <>
@@ -11,7 +11,7 @@ const SortableTableHead = ({intestazioni,onSort,sortSelezionato}) => {
       <tr>
         {intestazioni.map((intestazione) => (
           <th key={intestazione}>
-            <button onClick={() => handleSort(intestazione)}>
+            <button id={intestazione} onClick={handleSort}>
               {intestazione} &#x2195;
             </button>
           </th>
