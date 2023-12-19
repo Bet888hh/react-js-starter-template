@@ -78,14 +78,7 @@ const Navbar = () => {
                     </Link>
                 )}
 
-                {(
-                    <Link
-                        className={`Link ${location.includes("login_registrazione") ? "active" : ""}`}
-                        to="/login_registrazione"
-                    >
-                        <span>Login/Registrazione</span>
-                    </Link>
-                )}
+         
                 {user &&(
                     <div style={{ border: '3px solid', margin: '0 10px 0 10px', borderRadius: "15px" }}>
                         <span>User: {user.Username} </span>
