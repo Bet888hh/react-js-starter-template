@@ -28,6 +28,9 @@ const BaseLayer = () => {
     };
   }, [user.Ruolo]);
 
+
+  
+
   return (
     <fieldset className="rutto">
       {user.Ruolo !== "NOLOG" && (

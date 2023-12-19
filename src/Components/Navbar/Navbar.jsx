@@ -6,7 +6,21 @@ const Navbar = () => {
     const location = useLocation().pathname;
     const user = useSelector(SelectUserSlice);
 
+    const poll = async ()=>{
+        const response = await  fetch();
+       
+       
+       
+       }
+    useEffect(()=>{
 
+        const id = setInterval(poll,20000)
+    
+    
+   return  ()=>{
+        clearInterval(id)
+    }
+      },[])
 
     /* 
     const handleLogoutUser = ()=>{
@@ -28,14 +42,16 @@ const Navbar = () => {
 
 
     const permits = useMemo(() => {
-        return /* {
-      add:  (loggedUser.ROLE === "WRITER" || loggedUser.ROLE === "ADMIN"),
-      logout: loggedUser.ROLE === "ADMIN",
-      myposts:   (loggedUser.ROLE === "WRITER" || loggedUser.ROLE === "ADMIN"),
-      profile:loggedUser.ROLE === "WRITER" || loggedUser.ROLE === "READER",
-      signIn: loggedUser.ROLE === "NOLOG",
-    }; */
-    }, []);
+        return {
+          home: user.Ruolo!=="NOLOG",
+          creaTicket:user.Ruolo!=="NOLOG",
+          mieiTicket:user.Ruolo!=="NOLOG",
+          gestioneTicket:user.Ruolo!=="NOLOG",
+          interni:user.Ruolo!=="NOLOG",
+          loginRegistrazione:user.Ruolo==="NOLOG"
+        };
+      }, [user.Ruolo]);
+    
 
 
 
