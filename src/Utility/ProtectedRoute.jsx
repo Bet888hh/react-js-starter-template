@@ -11,12 +11,6 @@ const ProtectedRoute = ({ condition, redirectTo, children }) => {
     }
   }, [condition, navigate, redirectTo]);
 
-
-if (condition) {
-  return children;
-}else {
- 
-  return null
-}
+  return condition ? children : null;
 };
 export default memo(ProtectedRoute);
