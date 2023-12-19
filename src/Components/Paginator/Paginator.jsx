@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { current } from '@reduxjs/toolkit';
 import React, { useCallback, useEffect, useState } from 'react';
 

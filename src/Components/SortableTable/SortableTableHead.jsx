@@ -2,8 +2,6 @@
 import React from 'react'
 
 const SortableTableHead = ({intestazioni,onSort,sortSelezionato}) => {
-
-   
         const handleSort = (intestazione) => {
           onSort(intestazione);
         };
