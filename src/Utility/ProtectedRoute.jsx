@@ -9,7 +9,7 @@ const ProtectedRoute = ({ condition, redirectTo, children }) => {
     if (!condition) {
       navigate(redirectTo);
     }
-  }, []);
+  }, [condition, navigate, redirectTo]);
 
 
 if (condition) {

@@ -31,7 +31,6 @@ const dispatch = useDispatch()
 
   
 useEffect(()=>{
- 
 const loggedUser = JSON.parse(sessionStorage.getItem("loggedUser"))
 if(user.Ruolo==="NOLOG"&&loggedUser){
   dispatch(setUser(loggedUser))
@@ -55,7 +54,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
         <Route
           path="/login"
           element={
-            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/login"}>
+            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/"}>
               <LoginRegistrazione /* forceRender={forceRender} */ />
             </ProtectedRoute>
           }
@@ -63,7 +62,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
         <Route
           path="/registrazione"
           element={
-            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/login"}>
+            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/"}>
               <LoginRegistrazione /* forceRender={forceRender} */ />
             </ProtectedRoute>
           }
