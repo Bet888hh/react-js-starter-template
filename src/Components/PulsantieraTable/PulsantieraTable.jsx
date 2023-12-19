@@ -2,7 +2,7 @@
 import React, { memo } from "react";
 import { useLocation } from "react-router-dom";
 
-const PulsantieraTable = ({ id, handleTableAction }) => {
+const PulsantieraTable = ({ id, handleTableAction ,stato}) => {
   const location = useLocation();
 
   const action = (e)=>{

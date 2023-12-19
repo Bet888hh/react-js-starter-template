@@ -12,7 +12,7 @@ const PulsantieraFiltri = ({handleFiltra}) => {
       <button onClick={filtra} id="in-lavorazione">In lavorazione</button>
       <button onClick={filtra} id="chiusi">Chiusi</button>
       {location.pathname === "/gestione_ticket" && (
-        <button onClick={filtra} id="inCarico">In Carico</button>
+        <button onClick={filtra} id="in-carico">In Carico</button>
       )}
     </div>
   );
