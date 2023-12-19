@@ -4,6 +4,7 @@ import PulsantieraFiltri from "../../Components/PulsantieraFiltri/PulsantieraFil
 import { headers, urlbase } from "../../Utility/urls";
 import Paginator from "../../Components/Paginator/Paginator";
 import SortableTableHead from "../../Components/SortableTable/SortableTableHead"
+import SortableTableRows from "../../Components/SortableTable/SortableTableRows";
 const GestioneTicket = () => {
   const [elementi, setElementi] = useState([]);
   const [sortConfig, setSortConfig] = useState({ campo: null, ordine: "asc" });
@@ -46,6 +47,7 @@ const GestioneTicket = () => {
     let data = null;
     if (filter === e) {
       setElementi([]);
+      setFilter("")
     } else {
       switch (e) {
         case "APERTO":
@@ -92,7 +94,7 @@ const GestioneTicket = () => {
             Titolo: e.Titolo,
             Testo: e.Testo,
             Categoria: e.Categoria,
-            Apertoil: e.$createdAt,
+            ApertoIl: e.$createdAt,
             UltimaModifica: e.$updatedAt,
             Operatore: e.operatore,
             Messaggi: e.Messaggi,
@@ -107,18 +109,48 @@ const GestioneTicket = () => {
         })
       : null;
   }, [elementi]);
+  
+const tableBody = useMemo(()=>{
+  
+})
+
+
   console.log(perTabella);
-  const intestazioni = Object.keys(perTabella ? perTabella[0] : {});
+  const intestazioni =perTabella.length>0? Object.keys(perTabella[0]):[]
+  const excludeFromSorting = ["Azioni"]
 console.log(intestazioni);
+
+const formatCell = (intestazione, valore, riga) => {
+  switch (intestazione) {
+    case 'Categoria':
+      return valore === 'ALTRO' ? `${valore} - ${riga.categoria_manuale || '-'}` : valore;
+    case 'ApertoIl':
+    case 'UltimaModifica':
+      return valore ? new Date(valore).toLocaleString('it-IT') : '-';
+    case 'Messaggi':
+      return"dafa"
+    default:
+      return valore || '-';
+  }
+};
   return (
     <div>
       <PulsantieraFiltri handleFiltra={handleFiltra} />
-      {elementi.length > 0 && (
+      {(elementi.length>0 && intestazioni.length > 0) && (
         <>
-          <SortableTableHead intestazioni={intestazioni} onSort={onSort}/>
-         {/*  <Paginator elemPerPagina={5}>
+          <SortableTableHead excludeFromSorting={excludeFromSorting} intestazioni={intestazioni} onSort={onSort}/>
+        <tbody>
 
-          </Paginator> */}
+         <Paginator elemPerPagina={5}>
+         {perTabella.map((riga, index) => (
+           <tr key={index}>
+        {intestazioni.map((intestazione) => (
+          <td key={intestazione}>{formatCell(intestazione, riga[intestazione])}</td>
+          ))}
+      </tr>
+    ))}
+          </Paginator> 
+    </tbody>
         </>
       )}
     </div>

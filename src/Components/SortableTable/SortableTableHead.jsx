@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 
-const SortableTableHead = ({intestazioni,onSort,sortSelezionato}) => {
+const SortableTableHead = ({intestazioni,onSort,excludeFromSorting}) => {
         const handleSort = (e) => {
           onSort(e.target.id);
         };
@@ -11,9 +11,9 @@ const SortableTableHead = ({intestazioni,onSort,sortSelezionato}) => {
       <tr>
         {intestazioni.map((intestazione) => (
           <th key={intestazione}>
-            <button id={intestazione} onClick={handleSort}>
+            {!excludeFromSorting.includes(intestazione)?<button id={intestazione} onClick={handleSort}>
               {intestazione} &#x2195;
-            </button>
+            </button>:<span>{intestazione}</span>}
           </th>
         ))}
       </tr>
