@@ -1,5 +1,4 @@
 
-export default CreaTicket
 import React, { useState } from 'react';
 
 const CreaTicket = ({ ruolo, ticketAperti, operatoriSenior }) => {
