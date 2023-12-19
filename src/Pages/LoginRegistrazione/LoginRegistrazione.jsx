@@ -85,7 +85,7 @@ const LoginRegistrazione = () => {
         }
       }
     }
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
 
 

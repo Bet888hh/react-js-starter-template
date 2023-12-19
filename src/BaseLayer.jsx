@@ -103,14 +103,7 @@ const BaseLayer = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/login_registrazione"
-          element={
-            <ProtectedRoute condition={true} redirectTo={"/"}>
-              <LoginRegistrazione />
-            </ProtectedRoute>
-          }
-        />
+     
       </Routes>
     </fieldset>
   );
