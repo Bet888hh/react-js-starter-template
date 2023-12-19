@@ -1,91 +1,128 @@
-import React, { useCallback, useMemo, useState } from 'react'
-import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable';
+import React, { useCallback, useMemo, useState } from "react";
+import PulsantieraTable from "../../Components/PulsantieraTable/PulsantieraTable";
+import PulsantieraFiltri from "../../Components/PulsantieraFiltri/PulsantieraFiltri";
+import { headers, urlbase } from "../../Utility/urls";
+import Paginator from "../../Components/Paginator/Paginator";
+import SortableTableHead from "../../Components/SortableTable/SortableTableHead"
 const GestioneTicket = () => {
+  const [elementi, setElementi] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ campo: null, ordine: "asc" });
+  const [filter, setFilter] = useState("");
 
+  //cose da mettere in un hook personalizzato
+  const handleTableAction = (e) => {
+    //logica per i pulsanti della tabella
+  };
 
-  const [elementi,setElementi]= useState([])
-  const [sortConfig, setSortConfig] = useState({ campo: null, ordine: 'asc' });
+  const onSort = (campo) => {
+    const nuovoOrdine =
+      sortConfig.campo === campo && sortConfig.ordine === "asc"
+        ? "desc"
+        : "asc";
+    setSortConfig({ campo, ordine: nuovoOrdine });
+    sortElementi();
+  };
 
-//cose da mettere in un hook personalizzato 
-const handleTableAction = (e)=>{
+  const sortElementi = useCallback(() => {
+    const datiClone = [...elementi];
+    if (sortConfig.campo) {
+      datiClone.sort((a, b) => {
+        const valoreA = a[sortConfig.campo];
+        const valoreB = b[sortConfig.campo];
 
-  //logica per i pulsanti della tabella  
-
-}
-
-
-const onSort = (campo) => {
-  const nuovoOrdine = sortConfig.campo === campo && sortConfig.ordine === 'asc' ? 'desc' : 'asc';
-  setSortConfig({ campo, ordine: nuovoOrdine });
-  sortElementi()
-};
-
-
-
-const sortElementi = useCallback(()=>{
-  const datiClone = [...elementi];
-  if (sortConfig.campo) {
-    datiClone.sort((a, b) => {
-      const valoreA = a[sortConfig.campo];
-      const valoreB = b[sortConfig.campo];
-
-      if (valoreA < valoreB) {
-        return sortConfig.ordine === 'asc' ? -1 : 1;
-      }
-      if (valoreA > valoreB) {
-        return sortConfig.ordine === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-  setElementi(datiClone)
-},[elementi, sortConfig.campo, sortConfig.ordine])
-
-
-
-const handleFiltra=(e)=>{
-switch(e){
-  case("aperti"):
-  break;
-  case("in-lavorazione"):
-  break;
-  case("chiusi"):
-  break;
-  case("in-carico"):
-  break;
-}
-}
-
-
-
-const perTabella = useMemo(() => {
-  return elementi.map((e) => {
-    return {
-      Titolo:e.Titolo,
-      Testo:e.Testo,
-      Categoria:e.Categoria,
-      Apertoil:e.$createdAt,
-      UltimaModifica:e.$updatedAt,
-      Operatore:e.operatore,
-      Messaggi:e.Messaggi,
-      Azioni:<PulsantieraTable id={e.$id} stato= {e.Stato} handleTableAction={handleTableAction}  />
+        if (valoreA < valoreB) {
+          return sortConfig.ordine === "asc" ? -1 : 1;
+        }
+        if (valoreA > valoreB) {
+          return sortConfig.ordine === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
     }
-  })
-}, [elementi]);
+    setElementi(datiClone);
+  }, [elementi, sortConfig.campo, sortConfig.ordine]);
 
-const intestazioni = Object.keys(perTabella)
+  const handleFiltra = async (e) => {
+    let data = null;
+    if (filter === e) {
+      setElementi([]);
+    } else {
+      switch (e) {
+        case "APERTO":
+          setFilter(e);
+          data = await takeData(e);
+          break;
+        case "IN_LAVORAZIONE":
+          setFilter(e);
+          data = await takeData(e);
+          break;
+        case "CHIUSI":
+          setFilter(e);
+          data = await takeData(e);
+          break;
+        case "in-carico":
+          //dafa
+          break;
+      }
+      setElementi(data);
+    }
+  };
 
+  const takeData = async (type) => {
+    const response = await fetch(
+      urlbase("TICKET") + `?queries[0]=search("Stato",+["${type}"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+    const rs = await response.json();
 
+    if (response.message) {
+      //errori cazzo
+    } else {
+      return rs.documents;
+    }
+  };
 
+  const perTabella = useMemo(() => {
+    return elementi
+      ? elementi.map((e) => {
+          return {
+            Titolo: e.Titolo,
+            Testo: e.Testo,
+            Categoria: e.Categoria,
+            Apertoil: e.$createdAt,
+            UltimaModifica: e.$updatedAt,
+            Operatore: e.operatore,
+            Messaggi: e.Messaggi,
+            Azioni: (
+              <PulsantieraTable
+                id={e.$id}
+                stato={e.Stato}
+                handleTableAction={handleTableAction}
+              />
+            ),
+          };
+        })
+      : null;
+  }, [elementi]);
+  console.log(perTabella);
+  const intestazioni = Object.keys(perTabella ? perTabella[0] : {});
+console.log(intestazioni);
   return (
     <div>
-      
+      <PulsantieraFiltri handleFiltra={handleFiltra} />
+      {elementi.length > 0 && (
+        <>
+          <SortableTableHead intestazioni={intestazioni} onSort={onSort}/>
+         {/*  <Paginator elemPerPagina={5}>
 
-
-
-
+          </Paginator> */}
+        </>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default GestioneTicket
+export default GestioneTicket;

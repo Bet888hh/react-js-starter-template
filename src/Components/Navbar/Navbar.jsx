@@ -7,7 +7,7 @@ const Navbar = () => {
     const user = useSelector(SelectUserSlice);
 
     const poll = async ()=>{
-        const response = await  fetch();
+      /*   const response = await  fetch(); */
        
        
        

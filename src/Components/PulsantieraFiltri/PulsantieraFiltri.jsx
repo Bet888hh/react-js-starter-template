@@ -4,13 +4,13 @@ import { useLocation } from "react-router-dom";
 const PulsantieraFiltri = ({handleFiltra}) => {
   const location = useLocation();
   const filtra = (e)=>{
-    handleFiltra(e.target.td)
+    handleFiltra(e.target.id)
   }
   return (
     <div>
-      <button onClick={filtra} id="aperti">Aperti</button>
-      <button onClick={filtra} id="in-lavorazione">In lavorazione</button>
-      <button onClick={filtra} id="chiusi">Chiusi</button>
+      <button onClick={filtra} id="APERTO">Aperti</button>
+      <button onClick={filtra} id="IN_LAVORAZIONE">In lavorazione</button>
+      <button onClick={filtra} id="CHIUSI">Chiusi</button>
       {location.pathname === "/gestione_ticket" && (
         <button onClick={filtra} id="in-carico">In Carico</button>
       )}
