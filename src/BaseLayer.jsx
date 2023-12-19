@@ -38,7 +38,11 @@ const BaseLayer = () => {
       )}
       <br />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={
+       < ProtectedRoute condition={permits.home}  redirectTo={"/login"}>
+        <Home />
+        </ProtectedRoute>
+        } />
         <Route
           path="/login"
           element={
