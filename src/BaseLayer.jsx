@@ -56,7 +56,15 @@ const BaseLayer = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
-          path="/login_registrazione"
+          path="/login"
+          element={
+            <ProtectedRoute  condition={true}  redirectTo={"/"}>
+              <LoginRegistrazione /* forceRender={forceRender} */ />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/registrazione"
           element={
             <ProtectedRoute  condition={true}  redirectTo={"/"}>
               <LoginRegistrazione /* forceRender={forceRender} */ />
