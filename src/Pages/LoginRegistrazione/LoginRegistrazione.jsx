@@ -3,7 +3,10 @@ import ErrorInForm from "../../Components/ErrorInForm/ErrorInForm";
 import { useLocation, useNavigate } from "react-router";
 import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer"
-import { useDispatch } from "@reduxjs/toolkit";
+import { useDispatch } from "react-redux";
+import {  setUser } from "../../store/Reducer/Slices/UserSlice/UserSlice";
+
+
 function generateRandomId() {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -18,9 +21,14 @@ function generateRandomId() {
 }
 
 const LoginRegistrazione = () => {
+  
+
+ 
+  
+  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate()
-  const dispatch = useDispatch()
+  
   const isRegistration = location.pathname === "/registrazione";
   const [errors, setErrors] = useState({
     emailErrors: "",
@@ -69,13 +77,15 @@ const LoginRegistrazione = () => {
         
         if (documents[0].Password === password) {
          //pssword corretta posso loggarmi 
-
+        
+          dispatch(setUser(documents[0]))
+          navigate("/")
 
 
         }
       }
     }
-  }, []);
+  }, [dispatch]);
 
 
 
