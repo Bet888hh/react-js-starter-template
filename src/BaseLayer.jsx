@@ -5,17 +5,17 @@ import GestioneTicket from "./Pages/GestioneTicket/GestioneTicket";
 import Interni from "./Pages/Interni/Interni";
 import LoginRegistrazione from "./Pages/LoginRegistrazione/LoginRegistrazione";
 import MieiTicket from "./Pages/MieiTicket/MieiTicket";
-import { SelectUserSlice } from "./store/Reducer/Slices/UserSlice/UserSlice";
+import { SelectUserSlice, setUser } from "./store/Reducer/Slices/UserSlice/UserSlice";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { memo, useEffect, useMemo } from "react";
 import Home from "./Pages/Home/Home";
 import ProtectedRoute from "./Utility/ProtectedRoute";
-
+import { useDispatch } from "react-redux";
 const BaseLayer = () => {
 
   const user = useSelector(SelectUserSlice);
   const navigate = useNavigate();
-
+const dispatch = useDispatch()
 
   const permits = useMemo(() => {
     return {
@@ -30,6 +30,15 @@ const BaseLayer = () => {
 
 
   
+useEffect(()=>{
+ 
+const loggedUser = JSON.parse(sessionStorage.getItem("loggedUser"))
+if(user.Ruolo==="NOLOG"&&loggedUser){
+  dispatch(setUser(loggedUser))
+}
+},[])
+
+
 
   return (
     <fieldset className="rutto">
