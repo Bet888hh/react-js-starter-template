@@ -82,6 +82,12 @@ const LoginRegistrazione = () => {
           navigate("/")
 
 
+        }else{
+          setLoading(false)
+          setErrors((prev) => ({
+            ...prev,
+            afterErrors: ["password is incorrect"],
+          }));
         }
       }
     }

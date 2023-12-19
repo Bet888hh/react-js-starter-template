@@ -1,4 +1,3 @@
-
 import { useSelector } from "react-redux";
 import Navbar from "./Components/Navbar/Navbar";
 import CreaTicket from "./Pages/CreaTicket/CreaTicket";
@@ -7,58 +6,40 @@ import Interni from "./Pages/Interni/Interni";
 import LoginRegistrazione from "./Pages/LoginRegistrazione/LoginRegistrazione";
 import MieiTicket from "./Pages/MieiTicket/MieiTicket";
 import { SelectUserSlice } from "./store/Reducer/Slices/UserSlice/UserSlice";
-import { Route , Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { memo, useEffect, useMemo } from "react";
 import Home from "./Pages/Home/Home";
 import ProtectedRoute from "./Utility/ProtectedRoute";
 
 const BaseLayer = () => {
- /*  const [render, setRender] = useState(false); */
- const user = useSelector(SelectUserSlice);
+
+  const user = useSelector(SelectUserSlice);
   const navigate = useNavigate();
-  /* const { loggedUser, setLoggedUser,isLogged,setisLogged } = useLoggedUser(); */
+
 
   const permits = useMemo(() => {
-    return {/* 
-      add: loggedUser.ROLE !== "READER" && loggedUser.ROLE !== "NOLOG",
-      myposts: loggedUser.ROLE === "WRITER" || loggedUser.ROLE === "ADMIN",
-      profile: loggedUser.ROLE === "WRITER" || loggedUser.ROLE === "READER",
-      signIn: !isLogged,
-      deletePostPage: loggedUser.ROLE === "ADMIN", */
+    return {
+      home: user.Ruolo!=="NOLOG",
+      creaTicket:user.Ruolo!=="NOLOG",
+      mieiTicket:user.Ruolo!=="NOLOG",
+      gestioneTicket:user.Ruolo!=="NOLOG",
+      interni:user.Ruolo!=="NOLOG",
+      loginRegistrazione:user.Ruolo==="NOLOG"
     };
-  }, [/* isLogged, loggedUser.ROLE */]);
-
-  /* const forceRender = useCallback(() => {
-    setRender((prev) => !prev);
-  }, []); */
-
-  useEffect(() => {
-    /* const user = useSelector(SelectUserSlice); */
-    /* const logged = JSON.parse(sessionStorage.getItem("logged"));
-    setLoggedUser(
-      user
-        ? user
-        : {
-            id: -1,
-            email: "NOLOG",
-            username: "NOLOG",
-            password: "NOLOG",
-            ROLE: "NOLOG",
-          }
-    );
-    setisLogged(logged) */
-  }, [/* render */]);
+  }, [user.Ruolo]);
 
   return (
     <fieldset className="rutto">
-      <Navbar /* render={render} forceRender={forceRender}  *//>
+      {user.Ruolo !== "NOLOG" && (
+        <Navbar /* render={render} forceRender={forceRender}  */ />
+      )}
       <br />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
           path="/login"
           element={
-            <ProtectedRoute  condition={true}  redirectTo={"/"}>
+            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/login"}>
               <LoginRegistrazione /* forceRender={forceRender} */ />
             </ProtectedRoute>
           }
@@ -66,7 +47,7 @@ const BaseLayer = () => {
         <Route
           path="/registrazione"
           element={
-            <ProtectedRoute  condition={true}  redirectTo={"/"}>
+            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/login"}>
               <LoginRegistrazione /* forceRender={forceRender} */ />
             </ProtectedRoute>
           }
@@ -74,7 +55,7 @@ const BaseLayer = () => {
         <Route
           path="/crea_ticket"
           element={
-            <ProtectedRoute condition={true} redirectTo={"/"}>
+            <ProtectedRoute condition={permits.creaTicket} redirectTo={"/login"}>
               <CreaTicket />
             </ProtectedRoute>
           }
@@ -82,7 +63,7 @@ const BaseLayer = () => {
         <Route
           path="/miei_ticket"
           element={
-            <ProtectedRoute condition={true} redirectTo={"/"}>
+            <ProtectedRoute condition={permits.mieiTicket} redirectTo={"/login"}>
               <MieiTicket />
             </ProtectedRoute>
           }
@@ -90,7 +71,7 @@ const BaseLayer = () => {
         <Route
           path="/gestione_ticket"
           element={
-            <ProtectedRoute condition={true} redirectTo={"/"}>
+            <ProtectedRoute condition={permits.gestioneTicket} redirectTo={"/login"}>
               <GestioneTicket /* forceRender={forceRender} */ />
             </ProtectedRoute>
           }
@@ -98,12 +79,11 @@ const BaseLayer = () => {
         <Route
           path="/interni"
           element={
-            <ProtectedRoute condition={true} redirectTo={"/"}>
+            <ProtectedRoute condition={permits.interni} redirectTo={"/login"}>
               <Interni />
             </ProtectedRoute>
           }
         />
-     
       </Routes>
     </fieldset>
   );
