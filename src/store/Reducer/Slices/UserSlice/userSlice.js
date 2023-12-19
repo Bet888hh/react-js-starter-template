@@ -7,13 +7,15 @@ const initialState = {
     Ruolo: "NOLOG",
     Permesso: "NOLOG",
 }
+const loggedUser = sessionStorage.getItem("loggedUser")
 
+const state = loggedUser? loggedUser:initialState;
 const userSlice = createSlice({
     name: 'user',
-    initialState,
+    state,
     reducers: {
         setUser: (state, action) => {
-            console.log("setuser");
+           sessionStorage.setItem("loggedUser",initialState)
             return {
                 ...action.payload
             }
