@@ -88,13 +88,15 @@ const CreaTicket = ({ ticketDaLavorare }) => {
   }, []);
 
   const contoMieiTicketApertiInLavorazione = useCallback(() => {
-    fetch(urlbase("TICKET") + `?queries[0]=search("Assegnatario",+["${user.Username}"]&queries[1]=search("Stato",+["APERTO"])|queries[2]=search("Stato",+["IN_LAVORAZIONE"]))`
+    fetch(urlbase("TICKET") + `?queries[0]=search("Utente",+["${user.Username}"])&queries[1]=search("Stato",+["APERTO"])|queries[2]=search("Stato",+["IN_LAVORAZIONE"])`
       , {
         method: "GET",
         headers: headers,
       })
       .then(res => res.json())
-      .then(res => setMieiTicketApertiLavorazione(res.total))
+      .then(res => {
+        debugger
+        setMieiTicketApertiLavorazione(res.total)})
   }, [user.Username]);
 
 
