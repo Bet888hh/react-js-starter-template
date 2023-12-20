@@ -25,7 +25,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       Categoria: categoria !== "Altro" ? categoria : categoriaManuale,
       Assegnatario: assegnaA,
     }
-    
+    let navigazione;
 
     if (user.Ruolo === 'SEMPLICE') {
       if (mieiTicketApertiInLavorazione > 2) {
@@ -33,8 +33,10 @@ const CreaTicket = ({ ticketDaLavorare }) => {
         return;
       }
       ticket = { ...ticket, Utente: user.Username, Stato: "APERTO" }
+      navigazione = '../miei_ticket'
     } else {
       ticket = { ...ticket, Operatore: user.Username, Stato: "INTERNO" }
+      navigazione = '../gestione_ticket'
     }
 
     const request = {
@@ -51,7 +53,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       .then(
         () => alert('Ticket creato con successo!')
       )
-      .then(()=>{navigate('../miei_ticket') })
+      .then(()=>{navigate(navigazione)})
   };
 
   const ottieniListaAssegnatari = useCallback(() => {
