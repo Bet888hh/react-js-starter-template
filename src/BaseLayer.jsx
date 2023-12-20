@@ -71,7 +71,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
           path="/crea_ticket"
           element={
             <ProtectedRoute condition={permits.creaTicket} redirectTo={"/login"}>
-              <CreaTicket />
+              <CreaTicket ticketDaLavorare={{}} />
             </ProtectedRoute>
           }
         />
