@@ -12,8 +12,13 @@ const GestioneTicket = () => {
   const [totali,setTotali]= useState({aperti:-1,chiusi:-1,inLavorazione:-1, inCarico:-1})
   const [isloading, setIsLoading] = useState(false)
   //cose da mettere in un hook personalizzato
+  
   const handleTableAction = (e) => {
-    //logica per i pulsanti della tabella
+    console.log(e);
+    switch(e){
+      case"rimuovi":
+      break;
+    }
   };
 
   const onSort = (campo) => {
@@ -156,29 +161,36 @@ const GestioneTicket = () => {
     }
   };
 
-  useEffect(()=>{
-    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
-   async function init (){
-    const responses = await Promise.all(
-      stati.map((stato) =>
-        fetch(
-          urlbase("TICKET") + `?queries[0]=search("Stato", ["${stato}"])`,
-          {
-            method: "GET",
-            headers: headers,
-          }
-        )
+  async function init (){
+   const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+  const responses = await Promise.all(
+    stati.map((stato) =>
+      fetch(
+        urlbase("TICKET") + `?queries[0]=search("Stato", ["${stato}"])`,
+        {
+          method: "GET",
+          headers: headers,
+        }
       )
-      
-      
-    );
-    const jsonResponses = await Promise.all(
-      responses.map((response) => response.json())
-    );
-    const [{documents:dAperti,total:totalAperti},{documents:dlavorazione,total:totalLavorazione},{documents:dchiusi,total:totalChiusi}]=jsonResponses;
+    )
     
-    setTotali(prev=>({...prev,aperti:totalAperti,chiusi:totalChiusi,inLavorazione:totalLavorazione}))
-    }
+    
+  );
+  const jsonResponses = await Promise.all(
+    responses.map((response) => response.json())
+  );
+  const [
+    { documents: dAperti, total: totalAperti },
+    { documents: dlavorazione, total: totalLavorazione },
+    { documents: dchiusi, total: totalChiusi },
+  ] = jsonResponses;
+  
+  setTotali(prev=>({...prev,aperti:totalAperti,chiusi:totalChiusi,inLavorazione:totalLavorazione}))
+
+  }
+
+
+  useEffect(()=>{
   
   init()
   

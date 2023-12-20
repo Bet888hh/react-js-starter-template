@@ -13,9 +13,32 @@ const MieiTicket = () => {
   const [filter, setFilter] = useState("");
   const user = useSelector(SelectUserSlice);
   //cose da mettere in un hook personalizzato
+
+  const deletePost = useCallback(async (id)=>{
+    const response = await fetch(
+      urlbase("TICKET") + "/"+id,
+      {
+        method: "delete",
+        headers: headers,
+      }
+    );
+    if(response.status===204){
+      console.log("olè");
+      setElementi(prev=> prev.filter(el=>el.$id!==id))
+      init()
+    }
+  },[])
   const handleTableAction = (e) => {
-    //logica per i pulsanti della tabella
+    console.log(e);
+    const [action,id]=e.split("-");
+    switch (action) {
+      case("rimuovi"):
+      deletePost(id);
+      break;
+    }
   };
+  
+
   const [totali,setTotali]= useState({aperti:-1,chiusi:-1,inLavorazione:-1, inCarico:-1})
   const onSort = (campo) => {
     const nuovoOrdine =
@@ -153,33 +176,33 @@ const MieiTicket = () => {
         return valore || "-";
     }
   };
-  useEffect(()=>{
-    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
-   async function init (){
-    const responses = await Promise.all(
-      stati.map((stato) =>
-        fetch(
-          urlbase("TICKET") + `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
-          {
-            method: "GET",
-            headers: headers,
-          }
-        )
+  async function init (){
+   const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+  const responses = await Promise.all(
+    stati.map((stato) =>
+      fetch(
+        urlbase("TICKET") + `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
+        {
+          method: "GET",
+          headers: headers,
+        }
       )
-      
-      
-    );
-    const jsonResponses = await Promise.all(
-      responses.map((response) => response.json())
-    );
-    const [{documents:dAperti,total:totalAperti},{documents:dlavorazione,total:totalLavorazione},{documents:dchiusi,total:totalChiusi}]=jsonResponses;
+    )
     
-    setTotali(prev=>({...prev,aperti:totalAperti,chiusi:totalChiusi,inLavorazione:totalLavorazione}))
-    }
+    
+  );
+  const jsonResponses = await Promise.all(
+    responses.map((response) => response.json())
+  );
+  const [{documents:dAperti,total:totalAperti},{documents:dlavorazione,total:totalLavorazione},{documents:dchiusi,total:totalChiusi}]=jsonResponses;
+  
+  setTotali(prev=>({...prev,aperti:totalAperti,chiusi:totalChiusi,inLavorazione:totalLavorazione}))
+  }
+  useEffect(()=>{
   
   init()
   
-  },[user.Username])
+  },[])
   return (
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />

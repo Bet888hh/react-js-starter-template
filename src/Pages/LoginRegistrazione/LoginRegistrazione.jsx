@@ -273,7 +273,7 @@ const LoginRegistrazione = () => {
           formData.permesso
         );
       } else {
-        console.log("asd");
+      
         return;
       }
     },

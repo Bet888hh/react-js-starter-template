@@ -19,7 +19,7 @@ const PulsantieraTable = ({ id, handleTableAction ,stato}) => {
       )}
       {location.pathname == "/miei_ticket" && (
         <>
-          <button onClick={action} id={"rimuovi-" + id}>rimuovi</button>
+        {stato==="APERTO"&&  <button onClick={action} id={"rimuovi-" + id}>rimuovi</button>}
           <button onClick={action} id={"riapri-" + id}>riapri</button>
         </>
       )}
