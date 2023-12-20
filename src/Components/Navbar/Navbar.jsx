@@ -7,10 +7,7 @@ const Navbar = () => {
     const user = useSelector(SelectUserSlice);
 
     const poll = async ()=>{
-      /*   const response = await  fetch(); */
-       
-       
-       
+      
        }
     useEffect(()=>{
 
@@ -21,24 +18,6 @@ const Navbar = () => {
         clearInterval(id)
     }
       },[])
-
-    /* 
-    const handleLogoutUser = ()=>{
-      logoutUser(forceRender)
-    }
-     */
-
-    /*  useEffect(() => {
-    
-        const user = JSON.parse(sessionStorage.getItem("user"));
-       setLoggedUser(user? user : {id:-1,email:"NOLOG",username:"NOLOG",password:"NOLOG",ROLE:"NOLOG"}); 
-     }, [location, setLoggedUser]); */
-
-    /*  useEffect(() => {
-    
-       const user = JSON.parse(sessionStorage.getItem("user"));
-      setLoggedUser(user? user : {id:-1,email:"NOLOG",username:"NOLOG",password:"NOLOG",ROLE:"NOLOG"}); 
-    }, [render]); */
 
 
     const permits = useMemo(() => {
