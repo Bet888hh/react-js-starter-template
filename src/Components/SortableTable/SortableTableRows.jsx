@@ -8,6 +8,7 @@ const SortableTableRows = ({dati,intestazioni, formatCell}) => {
   
 
 
+
   return (
     <>
      {dati.map((riga, index) => (
@@ -20,5 +21,4 @@ const SortableTableRows = ({dati,intestazioni, formatCell}) => {
     </>
   )
 }
-
 export default memo(SortableTableRows)

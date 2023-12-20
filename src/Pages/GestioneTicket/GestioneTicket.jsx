@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import PulsantieraTable from "../../Components/PulsantieraTable/PulsantieraTable";
 import PulsantieraFiltri from "../../Components/PulsantieraFiltri/PulsantieraFiltri";
 import { headers, urlbase } from "../../Utility/urls";
@@ -7,7 +7,7 @@ import SortableTableHead from "../../Components/SortableTable/SortableTableHead"
 import SortableTableRows from "../../Components/SortableTable/SortableTableRows";
 const GestioneTicket = () => {
   const [elementi, setElementi] = useState([]);
-  const [sortConfig, setSortConfig] = useState({ campo: null, ordine: "asc" });
+  const sortConfig= useRef({ campo: "Titolo", ordine: "asc" });
   const [filter, setFilter] = useState("");
 
   //cose da mettere in un hook personalizzato
@@ -17,31 +17,48 @@ const GestioneTicket = () => {
 
   const onSort = (campo) => {
     const nuovoOrdine =
-      sortConfig.campo === campo && sortConfig.ordine === "asc"
+      sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
         ? "desc"
         : "asc";
-    setSortConfig({ campo, ordine: nuovoOrdine });
+  sortConfig.current = {campo : campo, ordine :nuovoOrdine}
     sortElementi();
   };
-
   const sortElementi = useCallback(() => {
     const datiClone = [...elementi];
-    if (sortConfig.campo) {
+  
+    if (sortConfig.current.campo) {
       datiClone.sort((a, b) => {
-        const valoreA = a[sortConfig.campo];
-        const valoreB = b[sortConfig.campo];
-
+        const valoreA = a[sortConfig.current.campo];
+        const valoreB = b[sortConfig.current.campo];
+  
+        // Parsing delle date se i campi sono "ApertoIl" o "UltimaModifica"
+        if (sortConfig.current.campo === 'ApertoIl' || sortConfig.current.campo === 'UltimaModifica') {
+          const dataA = new Date(valoreA);
+          const dataB = new Date(valoreB);
+  
+          if (dataA < dataB) {
+            return sortConfig.current.ordine === "asc" ? -1 : 1;
+          }
+          if (dataA > dataB) {
+            return sortConfig.current.ordine === "asc" ? 1 : -1;
+          }
+          return 0;
+        }
+  
+        // Gestione generale per gli altri tipi di dati
         if (valoreA < valoreB) {
-          return sortConfig.ordine === "asc" ? -1 : 1;
+          return sortConfig.current.ordine === "asc" ? -1 : 1;
         }
         if (valoreA > valoreB) {
-          return sortConfig.ordine === "asc" ? 1 : -1;
+          return sortConfig.current.ordine === "asc" ? 1 : -1;
         }
         return 0;
       });
     }
     setElementi(datiClone);
-  }, [elementi, sortConfig.campo, sortConfig.ordine]);
+  }, [elementi, sortConfig]);
+  
+
 
   const handleFiltra = async (e) => {
     let data = null;
@@ -80,10 +97,12 @@ const GestioneTicket = () => {
     );
     const rs = await response.json();
 
-    if (response.message) {
+    if (rs.message) {
       //errori cazzo
     } else {
-      return rs.documents;
+ 
+      return rs.documents.map(doc=>({...doc,ApertoIl:doc.$createdAt,UltimaModifica:doc.$updatedAt}))
+      
     }
   };
 
@@ -94,8 +113,8 @@ const GestioneTicket = () => {
             Titolo: e.Titolo,
             Testo: e.Testo,
             Categoria: e.Categoria,
-            ApertoIl: e.$createdAt,
-            UltimaModifica: e.$updatedAt,
+            ApertoIl: e.ApertoIl,
+            UltimaModifica: e.UltimaModifica,
             Operatore: e.operatore,
             Messaggi: e.Messaggi,
             Azioni: (
@@ -115,10 +134,10 @@ const tableBody = useMemo(()=>{
 })
 
 
-  console.log(perTabella);
+  
   const intestazioni =perTabella.length>0? Object.keys(perTabella[0]):[]
   const excludeFromSorting = ["Azioni"]
-console.log(intestazioni);
+
 
 const formatCell = (intestazione, valore, riga) => {
   switch (intestazione) {
