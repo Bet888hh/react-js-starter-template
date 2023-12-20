@@ -154,11 +154,11 @@ const MieiTicket = () => {
       if (rs.message) {
         //errori cazzo
       } else {
-        return rs.documents.map((doc) => ({
+        return rs.total>0? rs.documents.map((doc) => ({
           ...doc,
           ApertoIl: doc.$createdAt,
           UltimaModifica: doc.$updatedAt,
-        }));
+        })):[];
       }
     },
     [user.Username]

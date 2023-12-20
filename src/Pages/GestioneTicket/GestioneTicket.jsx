@@ -1,34 +1,78 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import PulsantieraTable from "../../Components/PulsantieraTable/PulsantieraTable";
 import PulsantieraFiltri from "../../Components/PulsantieraFiltri/PulsantieraFiltri";
 import { headers, urlbase } from "../../Utility/urls";
 import Paginator from "../../Components/Paginator/Paginator";
 import SortableTableHead from "../../Components/SortableTable/SortableTableHead";
 import SortableTableRows from "../../Components/SortableTable/SortableTableRows";
+import { useSelector } from "react-redux";
+
+import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 const GestioneTicket = () => {
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
   const [filter, setFilter] = useState("");
-  const [totali,setTotali]= useState({aperti:-1,chiusi:-1,inLavorazione:-1, inCarico:-1})
-  const [isloading, setIsLoading] = useState(false)
+  const [totali, setTotali] = useState({
+    aperti: -1,
+    chiusi: -1,
+    inLavorazione: -1,
+    inCarico: -1,
+  });
+  const [isloading, setIsLoading] = useState(false);
   //cose da mettere in un hook personalizzato
-  
-  const handleTableAction = (e) => {
-    console.log(e);
-    switch(e){
-      case"rimuovi":
-      break;
+  const user = useSelector(SelectUserSlice);
+  const handleTableAction = useCallback((e) => {
+    const [action, id] = e.split("-");
+    switch (action) {
+      case "prendi":
+        console.log("lol");
+        break;
     }
-  };
+  }, []);
 
-  const onSort = (campo) => {
-    const nuovoOrdine =
-      sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
-        ? "desc"
-        : "asc";
-    sortConfig.current = { campo: campo, ordine: nuovoOrdine };
-    sortElementi();
-  };
+  const getTicketAperti = useCallback(() => {
+    return fetch(
+      urlbase("TICKET") + `?queries[0]=search("Stato", ["APERTO"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, []);
+  const getTicketLavorazione = useCallback(async () => {
+    return fetch(
+      urlbase("TICKET") + `?queries[0]=search("Stato", ["IN_LAVORAZIONE"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, []);
+  const getTicketChiusi = useCallback(() => {
+    return fetch(
+      urlbase("TICKET") +
+        `?queries[0]=search("Stato", ["CHIUSO"])&queries[1]=search("Utente", ["${user.Username}"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, []);
+  const getOperatori = useCallback(() => {
+    return fetch(
+      urlbase("USER") + `?queries[0]=search("Ruolo", ["OPERATORE"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, []);
   const sortElementi = useCallback(() => {
     const datiClone = [...elementi];
 
@@ -67,41 +111,19 @@ const GestioneTicket = () => {
     setElementi(datiClone);
   }, [elementi, sortConfig]);
 
-  const handleFiltra = async (e) => {
-    let data = null;
-    if (filter === e) {
-      setElementi([]);
-      setFilter("");
-    } else {
-      switch (e) {
-        case "APERTO":
-          setFilter(e);
-          data = await takeData(e);
-          break;
-        case "IN_LAVORAZIONE":
-          setFilter(e);
-          data = await takeData(e);
-          break;
-        case "CHIUSI":
-          setFilter(e);
-          data = await takeData(e);
-          break;
-        case "in-carico":
-          //dafa
-          break;
-      }
-      setElementi(data);
-    }
-  };
-
-  const takeData = async (type) => {
-    const response = await fetch(
-      urlbase("TICKET") + `?queries[0]=search("Stato",+["${type}"])`,
-      {
-        method: "GET",
-        headers: headers,
-      }
-    );
+  const onSort = useCallback(
+    (campo) => {
+      const nuovoOrdine =
+        sortConfig.current.campo === campo &&
+        sortConfig.current.ordine === "asc"
+          ? "desc"
+          : "asc";
+      sortConfig.current = { campo: campo, ordine: nuovoOrdine };
+      sortElementi();
+    },
+    [sortElementi]
+  );
+  const takeData = useCallback(async (response) => {
     const rs = await response.json();
 
     if (rs.message) {
@@ -113,7 +135,67 @@ const GestioneTicket = () => {
         UltimaModifica: doc.$updatedAt,
       }));
     }
-  };
+  }, []);
+
+  const handleFiltra = useCallback(
+    async (e) => {
+      let data = null;
+      let operatoriJunior;
+      if (filter === e) {
+        setElementi([]);
+        setFilter("");
+      } else {
+        switch (e) {
+          case "APERTO":
+            setFilter(e);
+            data = await getTicketAperti();
+            data = await data.json();
+
+            break;
+          case "IN_LAVORAZIONE":
+            setFilter(e);
+            operatoriJunior = await getOperatori();
+            operatoriJunior = await operatoriJunior.json();
+            operatoriJunior = operatoriJunior.documents
+              .filter((e) => e.Permesso === "JUNIOR")
+              .map((e) => e.Username);
+            data = await getTicketLavorazione();
+            data = await data.json();
+            data.documents = data.documents.filter((e) =>
+              operatoriJunior.includes(e.Operatore)
+            );
+            break;
+          case "CHIUSI":
+            setFilter(e);
+            data = await getTicketChiusi();
+            data =await data.json();
+            break;
+          case "in-carico":
+            setFilter(e);
+            data = await getTicketLavorazione();
+            data = await data.json();
+            data = data.documents.filter((e) => e.Utente === user.Username);
+            break;
+        }
+  
+       data.total===0? setElementi([]):setElementi(
+          data.documents.map((doc) => ({
+            ...doc,
+            ApertoIl: doc.$createdAt,
+            UltimaModifica: doc.$updatedAt,
+          }))
+        );
+      }
+    },
+    [
+      filter,
+      getOperatori,
+      getTicketAperti,
+      getTicketChiusi,
+      getTicketLavorazione,
+      user.Username,
+    ]
+  );
 
   const perTabella = useMemo(() => {
     return elementi
@@ -124,11 +206,13 @@ const GestioneTicket = () => {
             Categoria: e.Categoria,
             ApertoIl: e.ApertoIl,
             UltimaModifica: e.UltimaModifica,
-            Operatore: e.operatore,
+            Operatore: e.Operatore,
             Messaggi: e.Messaggi,
-            Assegnatario: "",
+            Assegnatario: e.Assegnatario,
             Azioni: (
               <PulsantieraTable
+                operatore={e.Operatore}
+                assegnatario={e.Assegnatario}
                 id={e.$id}
                 stato={e.Stato}
                 handleTableAction={handleTableAction}
@@ -137,7 +221,7 @@ const GestioneTicket = () => {
           };
         })
       : null;
-  }, [elementi]);
+  }, [elementi, handleTableAction]);
 
   const tableBody = useMemo(() => {});
 
@@ -161,40 +245,47 @@ const GestioneTicket = () => {
     }
   };
 
-  async function init (){
-   const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
-  const responses = await Promise.all(
-    stati.map((stato) =>
-      fetch(
-        urlbase("TICKET") + `?queries[0]=search("Stato", ["${stato}"])`,
-        {
-          method: "GET",
-          headers: headers,
-        }
-      )
-    )
-    
-    
-  );
-  const jsonResponses = await Promise.all(
-    responses.map((response) => response.json())
-  );
-  const [
-    { documents: dAperti, total: totalAperti },
-    { documents: dlavorazione, total: totalLavorazione },
-    { documents: dchiusi, total: totalChiusi },
-  ] = jsonResponses;
-  
-  setTotali(prev=>({...prev,aperti:totalAperti,chiusi:totalChiusi,inLavorazione:totalLavorazione}))
+  const init = useCallback(async () => {
+    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+    const responses = await Promise.all([
+      getTicketAperti(),
+      getTicketLavorazione(),
+      getOperatori(),
+      getTicketChiusi(),
+    ]);
+    const jsonResponses = await Promise.all(
+      responses.map((response) => response.json())
+    );
 
-  }
+    const [
+      { documents: dAperti, total: totalAperti },
+      { documents: dlavorazione, total: totalLavorazione },
+      { documents: operatori, total: tootalOperatori },
+      { documents: dchiusiUtente, total: totalChiusiUtente },
+    ] = jsonResponses;
 
+    const inLavorazioneUtenteLoggato = dlavorazione.map(
+      (e) => e.Utente === user.Username
+    ).length;
+    const junior = operatori.map((e) => e.Permesso === "JUNIOR" && e.Username);
+    const lavorazioneJunior = dlavorazione.map(
+      (e) => junior.includes(e.Username) && e
+    );
+    setTotali((prev) => ({
+      inCarico:
+        inLavorazioneUtenteLoggato.length > 0
+          ? inLavorazioneUtenteLoggato.length
+          : 0,
+      aperti: totalAperti,
+      chiusi: totalChiusiUtente,
+      inLavorazione:
+        lavorazioneJunior.length > 0 ? lavorazioneJunior.length : 0,
+    }));
+  }, []);
 
-  useEffect(()=>{
-  
-  init()
-  
-  },[])
+  useEffect(() => {
+    init();
+  }, [init]);
 
   return (
     <div>
@@ -229,6 +320,7 @@ const GestioneTicket = () => {
           </tbody>
         </>
       )}
+      {filter&&elementi.length===0&&<>no</>}
     </div>
   );
 };
