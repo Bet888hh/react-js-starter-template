@@ -13,10 +13,12 @@ import { headers, urlbase } from "../../Utility/urls";
 import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
+import { useNavigate } from "react-router-dom";
 const MieiTicket = () => {
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
   const [filter, setFilter] = useState("");
+  const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
   //cose da mettere in un hook personalizzato
   const init = useCallback(async ()=> {
@@ -50,7 +52,9 @@ const MieiTicket = () => {
     }));
   },[])
 
-
+  const dettaglioTicket = useCallback((id)=>{
+    navigate("../dettaglio_ticket/"+id)
+  },[])
 
   const deletePost = useCallback(
     async (id) => {
@@ -75,6 +79,9 @@ const MieiTicket = () => {
       switch (action) {
         case "rimuovi":
           deletePost(id);
+          break;
+        case "dettaglio":
+          dettaglioTicket(id);
           break;
       }
     },

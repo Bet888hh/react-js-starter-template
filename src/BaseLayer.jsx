@@ -11,6 +11,7 @@ import { memo, useEffect, useMemo } from "react";
 import Home from "./Pages/Home/Home";
 import ProtectedRoute from "./Utility/ProtectedRoute";
 import { useDispatch } from "react-redux";
+import DettaglioTicket from "./Pages/DettaglioTicket/DettaglioTicket";
 const BaseLayer = () => {
 
   const user = useSelector(SelectUserSlice);
@@ -96,6 +97,14 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
           element={
             <ProtectedRoute condition={permits.interni} redirectTo={"/login"}>
               <Interni />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dettaglio_ticket"
+          element={
+            <ProtectedRoute condition={""} redirectTo={"/login"}>
+              <DettaglioTicket />
             </ProtectedRoute>
           }
         />
