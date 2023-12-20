@@ -95,7 +95,6 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       })
       .then(res => res.json())
       .then(res => {
-        debugger
         setMieiTicketApertiLavorazione(res.total)})
   }, [user.Username]);
 
