@@ -1,20 +1,22 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable'
 import Paginator from '../../Components/Paginator/Paginator';
 import SortableTableHead from '../../Components/SortableTable/SortableTableHead';
 import PulsantieraFiltri from '../../Components/PulsantieraFiltri/PulsantieraFiltri';
 import { headers, urlbase } from '../../Utility/urls';
+import { useSelector } from "react-redux";
 
+import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 const MieiTicket = () => {
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
   const [filter, setFilter] = useState("");
-
+  const user = useSelector(SelectUserSlice);
   //cose da mettere in un hook personalizzato
   const handleTableAction = (e) => {
     //logica per i pulsanti della tabella
   };
-
+  const [totali,setTotali]= useState({aperti:-1,chiusi:-1,inLavorazione:-1, inCarico:-1})
   const onSort = (campo) => {
     const nuovoOrdine =
       sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
@@ -87,7 +89,7 @@ const MieiTicket = () => {
 
   const takeData = async (type) => {
     const response = await fetch(
-      urlbase("TICKET") + `?queries[0]=search("Stato",+["${type}"])`,
+      urlbase("TICKET") + `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Utente",+["${user.Username}"])`,
       {
         method: "GET",
         headers: headers,
@@ -151,9 +153,36 @@ const MieiTicket = () => {
         return valore || "-";
     }
   };
+  useEffect(()=>{
+    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+   async function init (){
+    const responses = await Promise.all(
+      stati.map((stato) =>
+        fetch(
+          urlbase("TICKET") + `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
+          {
+            method: "GET",
+            headers: headers,
+          }
+        )
+      )
+      
+      
+    );
+    const jsonResponses = await Promise.all(
+      responses.map((response) => response.json())
+    );
+    const [{documents:dAperti,total:totalAperti},{documents:dlavorazione,total:totalLavorazione},{documents:dchiusi,total:totalChiusi}]=jsonResponses;
+    
+    setTotali(prev=>({...prev,aperti:totalAperti,chiusi:totalChiusi,inLavorazione:totalLavorazione}))
+    }
+  
+  init()
+  
+  },[user.Username])
   return (
     <div>
-      <PulsantieraFiltri handleFiltra={handleFiltra} />
+      <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
       {elementi.length > 0 && intestazioni.length > 0 && (
         <>
           <SortableTableHead

@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Paginator from '../../Components/Paginator/Paginator';
 import SortableTableHead from '../../Components/SortableTable/SortableTableHead';
 import PulsantieraFiltri from '../../Components/PulsantieraFiltri/PulsantieraFiltri';
 import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable';
+import { headers, urlbase } from '../../Utility/urls';
 
 function Interni() {
   const [elementi, setElementi] = useState([]);
@@ -14,14 +15,7 @@ function Interni() {
     //logica per i pulsanti della tabella
   };
 
-  const onSort = (campo) => {
-    const nuovoOrdine =
-      sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
-        ? "desc"
-        : "asc";
-    sortConfig.current = { campo: campo, ordine: nuovoOrdine };
-    sortElementi();
-  };
+ 
   const sortElementi = useCallback(() => {
     const datiClone = [...elementi];
 
@@ -60,39 +54,21 @@ function Interni() {
     setElementi(datiClone);
   }, [elementi, sortConfig]);
 
-  const handleFiltra = async (e) => {
-    let data = null;
-    if (filter === e) {
-      setElementi([]);
-      setFilter("");
-    } else {
-      switch (e) {
-        case "APERTO":
-          setFilter(e);
-          data = await takeData(e);
-          break;
-        case "IN_LAVORAZIONE":
-          setFilter(e);
-          data = await takeData(e);
-          break;
-        case "CHIUSI":
-          setFilter(e);
-          data = await takeData(e);
-          break;
-        case "in-carico":
-          //dafa
-          break;
-      }
-      setElementi(data);
-    }
-  };
+  const onSort = useCallback((campo) => {
+    const nuovoOrdine =
+      sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
+        ? "desc"
+        : "asc";
+    sortConfig.current = { campo: campo, ordine: nuovoOrdine };
+    sortElementi();
+  },[sortElementi]);
 
-  const takeData = async (type) => {
+/*   const takeData = useCallback(async (type) => {
     const response = await fetch(
       urlbase("TICKET") + `?queries[0]=search("Stato",+["${type}"])`,
       {
         method: "GET",
-        headers: headers,
+        headers: headers ,
       }
     );
     const rs = await response.json();
@@ -106,7 +82,7 @@ function Interni() {
         UltimaModifica: doc.$updatedAt,
       }));
     }
-  };
+  },[]); */
 
   const perTabella = useMemo(() => {
     return elementi
@@ -132,13 +108,12 @@ function Interni() {
       : null;
   }, [elementi]);
 
-  const tableBody = useMemo(() => {});
 
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0]) : [];
-  const excludeFromSorting = ["Azioni"];
-  const includeInTableIf = { filter: "in-carico", include: "Assegnatario" };
+  const excludeFromSorting = [""];
+  const includeInTableIf = { filter: "nan", include: "nan" };
 
-  const formatCell = (intestazione, valore, riga) => {
+  const formatCell = useCallback((intestazione, valore, riga) => {
     switch (intestazione) {
       case "Categoria":
         return valore === "ALTRO"
@@ -152,15 +127,33 @@ function Interni() {
       default:
         return valore || "-";
     }
-  };
+  },[]);
+  useEffect( ()=>{
+   async  function init (){
+
+     const response = await fetch(
+       urlbase("TICKET") + `?queries[0]=search("Stato",+["INTERNO"])`,
+       {
+         method: "GET",
+         headers: headers ,
+       })
+       const rs = await response.json() 
+       
+       setElementi(rs.documents.map((doc) => ({
+        ...doc,
+        ApertoIl: doc.$createdAt,
+        UltimaModifica: doc.$updatedAt,
+      })))
+    }
+    init()
+
+  },[])
   return (
     <div>
-      <PulsantieraFiltri handleFiltra={handleFiltra} />
+     
       {elementi.length > 0 && intestazioni.length > 0 && (
         <>
           <SortableTableHead
-            filter={filter}
-            includeInTableIf={includeInTableIf}
             excludeFromSorting={excludeFromSorting}
             intestazioni={intestazioni}
             onSort={onSort}

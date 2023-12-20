@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 
-const SortableTableHead = ({intestazioni,onSort,excludeFromSorting,includeInTableIf,filter}) => {
+const SortableTableHead = ({intestazioni,onSort,excludeFromSorting,includeInTableIf={ filter: "nan", include: "nan" },filter=""}) => {
         const handleSort = (e) => {
           onSort(e.target.id);
         };

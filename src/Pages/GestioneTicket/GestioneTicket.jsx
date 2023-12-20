@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PulsantieraTable from "../../Components/PulsantieraTable/PulsantieraTable";
 import PulsantieraFiltri from "../../Components/PulsantieraFiltri/PulsantieraFiltri";
 import { headers, urlbase } from "../../Utility/urls";
@@ -9,7 +9,8 @@ const GestioneTicket = () => {
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
   const [filter, setFilter] = useState("");
-
+  const [totali,setTotali]= useState({aperti:-1,chiusi:-1,inLavorazione:-1, inCarico:-1})
+  const [isloading, setIsLoading] = useState(false)
   //cose da mettere in un hook personalizzato
   const handleTableAction = (e) => {
     //logica per i pulsanti della tabella
@@ -154,9 +155,38 @@ const GestioneTicket = () => {
         return valore || "-";
     }
   };
+
+  useEffect(()=>{
+    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+   async function init (){
+    const responses = await Promise.all(
+      stati.map((stato) =>
+        fetch(
+          urlbase("TICKET") + `?queries[0]=search("Stato", ["${stato}"])`,
+          {
+            method: "GET",
+            headers: headers,
+          }
+        )
+      )
+      
+      
+    );
+    const jsonResponses = await Promise.all(
+      responses.map((response) => response.json())
+    );
+    const [{documents:dAperti,total:totalAperti},{documents:dlavorazione,total:totalLavorazione},{documents:dchiusi,total:totalChiusi}]=jsonResponses;
+    
+    setTotali(prev=>({...prev,aperti:totalAperti,chiusi:totalChiusi,inLavorazione:totalLavorazione}))
+    }
+  
+  init()
+  
+  },[])
+
   return (
     <div>
-      <PulsantieraFiltri handleFiltra={handleFiltra} />
+      <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
       {elementi.length > 0 && intestazioni.length > 0 && (
         <>
           <SortableTableHead
