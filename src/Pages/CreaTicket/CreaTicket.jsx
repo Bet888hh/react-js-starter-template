@@ -3,10 +3,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { SelectUserSlice } from '../../store/Reducer/Slices/UserSlice/UserSlice';
 import { headers, urlbase } from '../../Utility/urls';
+import { useNavigate } from 'react-router-dom';
 
-const CreaTicket = () => {
+const CreaTicket = ({ ticketDaLavorare }) => {
+  const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
-  const [ticketApertiInLavorazione, setTicketApertiLavorazione] = useState(0);
+  const [mieiTicketApertiInLavorazione, setMieiTicketApertiLavorazione] = useState(0);
 
   const [titolo, setTitolo] = useState('');
   const [testo, setTesto] = useState('');
@@ -17,32 +19,25 @@ const CreaTicket = () => {
 
   const gestisciCreazioneTicket = () => {
 
-    // Verifica dei vincoli in base al ruolo dell'utente
-    debugger
+    let ticket = {
+      Titolo: titolo,
+      Testo: testo,
+      Categoria: categoria !== "Altro" ? categoria : categoriaManuale,
+      Assegnatario: assegnaA,
+    }
+    
+
     if (user.Ruolo === 'SEMPLICE') {
-      if (ticketApertiInLavorazione > 2) {
+      if (mieiTicketApertiInLavorazione > 2) {
         alert('Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.');
         return;
       }
+      ticket = { ...ticket, Utente: user.Username, Stato: "APERTO" }
+    } else {
+      ticket = { ...ticket, Operatore: user.Username, Stato: "INTERNO" }
     }
 
-    // Altri controlli e logica specifica del ticket
-
-    // Simulazione del salvataggio a DB
-    let ticket = {
-      Titolo:titolo,
-      Testo: testo,
-      Categoria: categoria!=="Altro"?categoria:categoriaManuale,
-      Assegnatario: assegnaA,
-    }
-
-    if(user.Ruolo === "SEMPLICE" ){
-      ticket={...ticket, Utente:user.Username}
-    }else{
-      ticket={...ticket, Operatore:user.Username}
-    }
-
-    const request= {
+    const request = {
       documentId: "",
       data: ticket,
       permissions: ['read("any")'],
@@ -53,13 +48,13 @@ const CreaTicket = () => {
       headers: headers,
       body: JSON.stringify(request),
     })
-    .then(
-      ()=>alert('Ticket creato con successo!')
-    )
-    
+      .then(
+        () => alert('Ticket creato con successo!')
+      )
+      .then(()=>{navigate('../miei_ticket') })
   };
 
-  const ottieniListaAssegnatari = useCallback(()=>{
+  const ottieniListaAssegnatari = useCallback(() => {
     let listaAssegnatari = [];
     fetch(urlbase("USER") + `?queries[0]=search("Ruolo",+["OPERATORE"])&queries[1]=search("Permesso",+["SENIOR"])`
       , {
@@ -67,42 +62,50 @@ const CreaTicket = () => {
         headers: headers,
       })
       .then(res => res.json())
-      .then(r => {
-        listaAssegnatari = r.documents
-        listaAssegnatari.filter(
-          (operatore) => {
-            fetch(urlbase("TICKET") + `?queries[0]=search("Assegnatario",+["${operatore}"])`
-              , {
-                method: "GET",
-                headers: headers,
-              }).then(res => res.json())
-              .then(res => {
-                if (res.total < 5) {
-                  return true;
-                }
-              })
-          }
+      .then(res => {
+        const list = res.documents
+        const fetchPromises = list.map((operatore) => {
+          return fetch(urlbase("TICKET") + `?queries[0]=search("Assegnatario",+["${operatore.Username}"])`, {
+            method: "GET",
+            headers: headers,
+          })
+            .then(res => res.json())
+            .then(res => {
+              if (res.total < 5) {
+                listaAssegnatari.push({ username: operatore.Username, ticketAssegnati: res.total });
+              }
+            });
+        });
 
-        )
-
-        setListaAssegnatari(listaAssegnatari);
+        // Attendo che tutte le Promise siano risolte prima di aggiornare lo stato
+        Promise.all(fetchPromises).then(() => {
+          setListaAssegnatari(listaAssegnatari);
+        });
       })
-  },[]);
+  }, []);
 
-  const contoTicketApertiInLavorazione= useCallback(()=>{
-    fetch(urlbase("TICKET") + `?queries[0]=search("Assegnatario",+["${user.Username}"]&queries[0]=search("Stato",+["APERTO"])|queries[1]=search("Stato",+["IN_LAVORAZIONE"]))`
+  const contoMieiTicketApertiInLavorazione = useCallback(() => {
+    fetch(urlbase("TICKET") + `?queries[0]=search("Assegnatario",+["${user.Username}"]&queries[1]=search("Stato",+["APERTO"])|queries[2]=search("Stato",+["IN_LAVORAZIONE"]))`
       , {
         method: "GET",
         headers: headers,
       })
-      .then(res=>res.json())
-      .then(res=>setTicketApertiLavorazione(res.total))
-  }, []);
+      .then(res => res.json())
+      .then(res => setMieiTicketApertiLavorazione(res.total))
+  }, [user.Username]);
+
+
 
   useEffect(() => {
-    ottieniListaAssegnatari();
-    contoTicketApertiInLavorazione();
-  }, [])
+    contoMieiTicketApertiInLavorazione();
+    if(user.Ruolo ==="OPERATORE" && user.Permesso === "JUNIOR"){
+      setTitolo(ticketDaLavorare.Titolo);
+      setTesto("Ciao, ti contatto per il ticket {ticketDaLavorare.Titolo} per chiederti di prenderlo in carico");
+      setCategoria("INTERNO");
+      setCategoriaManuale(ticketDaLavorare.Id);
+      ottieniListaAssegnatari();
+    }
+  }, [contoMieiTicketApertiInLavorazione, ottieniListaAssegnatari, ticketDaLavorare.Id, ticketDaLavorare.Titolo, user.Permesso, user.Ruolo])
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -145,9 +148,8 @@ const CreaTicket = () => {
           <label>Assegna a:</label>
           <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
             {listaAssegnatari.length > 0 && (
-              listaAssegnatari.map((elem) => {
-                console.log("elem: ", elem);
-                return (<option key={elem.Username} value={elem}>{elem.Username}</option>)
+              listaAssegnatari.map((elem, index) => {
+                return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
               })
             )}
           </select>

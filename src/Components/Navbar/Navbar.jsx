@@ -61,7 +61,7 @@ const Navbar = () => {
                 <Link className={`Link ${location === "/" ? "active" : ""}`} to="/">
                     <span>Home</span>
                 </Link>
-                {/* permits.add &&  */(
+                {user.Ruolo==="SEMPLICE" &&(
                     <Link
                         className={`Link ${location.includes("crea_ticket") ? "active" : ""}`}
                         to="/crea_ticket"
