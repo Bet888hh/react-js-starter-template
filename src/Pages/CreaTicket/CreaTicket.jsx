@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { SelectUserSlice } from '../../store/Reducer/Slices/UserSlice/UserSlice';
 import { headers, urlbase } from '../../Utility/urls';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-const CreaTicket = ({ ticketDaLavorare }) => {
+const CreaTicket = () => {
   //const per testare il junior fino a che manca dettaglio
   /* const ticketDaLavorare =
   {
@@ -28,6 +28,11 @@ const CreaTicket = ({ ticketDaLavorare }) => {
         "read(\"any\")"
     ],
 } */
+
+  debugger
+  const location = useLocation();
+  const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
+  console.log("State: ", location.state);
 
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
@@ -102,9 +107,9 @@ const CreaTicket = ({ ticketDaLavorare }) => {
                 }
               ),
             })
-          }
-        })
-        .then(() => { navigate(pathNavigazione) })
+        }
+      })
+      .then(() => { navigate(pathNavigazione) })
   };
 
   const ottieniListaAssegnatari = useCallback(() => {
@@ -156,17 +161,21 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       setCategoriaManuale(ticketDaLavorare.$id);
     }
     ottieniListaAssegnatari();
-  }, [ottieniListaAssegnatari, ticketDaLavorare.$id, ticketDaLavorare.Titolo, user.Permesso, user.Ruolo]);
+  }, [ottieniListaAssegnatari, ticketDaLavorare, user.Permesso, user.Ruolo]);
 
   useEffect(() => {
     contoMieiTicketApertiInLavorazione();
   }, [contoMieiTicketApertiInLavorazione])
 
+  useEffect(()=>{
+    setTicketDaLavorare(location.state);
+  },[location.state])
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <h2>Creazione Ticket</h2>
       <label>Titolo:</label>
-      <input type="text" value={titolo} onChange={e => setTitolo(e.target.value)} />
+      <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
 
       <label>Testo:</label>
       <textarea value={testo} onChange={e => setTesto(e.target.value)} />

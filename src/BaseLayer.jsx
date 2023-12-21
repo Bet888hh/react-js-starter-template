@@ -21,7 +21,7 @@ const dispatch = useDispatch()
 const permits = useMemo(() => {
   return {
     home: user.Ruolo!=="NOLOG" && user.Ruolo ==="SEMPLICE",
-    creaTicket:user.Ruolo!=="NOLOG" && user.Ruolo==="SEMPLICE",
+    creaTicket:user.Ruolo!=="NOLOG" && (user.Ruolo==="SEMPLICE" || user.Permesso === "JUNIOR"),
     mieiTicket:user.Ruolo!=="NOLOG",
     gestioneTicket:user.Ruolo==="OPERATORE",
     interni:user.Ruolo==="OPERATORE",
@@ -72,7 +72,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
           path="/crea_ticket"
           element={
             <ProtectedRoute condition={permits.creaTicket} redirectTo={"/login"}>
-              <CreaTicket ticketDaLavorare={{}} />
+              <CreaTicket />
             </ProtectedRoute>
           }
         />

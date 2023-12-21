@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
@@ -21,13 +21,6 @@ useParams
   const { id } = useParams();
   const refCat = useRef("");
 
-  const handleOnChangeCategoria = useCallback(
-    (e) => {
-      setTicket({ ...ticket, Categoria: e.target.value });
-    },
-    [ticket]
-  );
-
   const init = useCallback(async () => {
     if (id) {
       const response = await fetch(urlbase("TICKET") + `/${id}`, {
@@ -44,7 +37,30 @@ useParams
       }
     }
   }, [id, navigate]);
-  
+
+  useEffect(() => {
+    setLoading(true);
+    init();
+    setLoading(false);
+  }, [id, init, navigate]);
+  const getTicketLavorazione = useCallback(async () => {
+    return fetch(
+      urlbase("TICKET") + `?queries[0]=search("Stato", ["IN_LAVORAZIONE"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, []);
+
+  const handleOnChangeCategoria = useCallback(
+    (e) => {
+      setTicket({ ...ticket, Categoria: e.target.value });
+    },
+    [ticket]
+  );
+
+
   const handleSalva = useCallback(() => {
     setLoading(true)
     fetch(
@@ -63,8 +79,9 @@ useParams
     ).then((r) => {
       return r.json()
     }).then((r) => {
-      if(!r.message){
-      init();}else{
+      if (!r.message) {
+        init();
+      } else {
         //erroroni
       }
       setLoading(false);
@@ -90,28 +107,21 @@ useParams
     ).then((r) => {
       return r.json()
     }).then((r) => {
-      if(!r.message){
-      init();}else{
+      if (!r.message) {
+        init();
+      } else {
         //erroroni
       }
       setLoading(false);
     });
   }, [id, init, ticket]);
   
-  useEffect(() => {
-    setLoading(true);
-    init();
-    setLoading(false);
-  }, [id, init, navigate]);
-  const getTicketLavorazione = useCallback(async () => {
-    return fetch(
-      urlbase("TICKET") + `?queries[0]=search("Stato", ["IN_LAVORAZIONE"])`,
-      {
-        method: "GET",
-        headers: headers,
-      }
-    );
-  }, []);
+  
+  const handleAssegnaASenior = useCallback(() => {
+    navigate("/crea_ticket", {state: ticket})
+  }, [navigate, ticket]);
+
+
 
   const prendiInCarico = useCallback(
     async (id) => {
@@ -158,6 +168,10 @@ useParams
     },
     [getTicketLavorazione, init, user.Permesso, user.Username]
   );
+
+
+ 
+
 
   return (
     <>
@@ -219,10 +233,10 @@ useParams
               ticket.stato !== "INTERNO" &&
               (user.Username === ticket.Utente ||
                 user.Username === ticket.Operatore) && (
-                <button id="btnChiudi"> Chiudi</button>
+                <button onClick={handleChiudi} id="btnChiudi"> Chiudi</button>
               )}
 
-            {user.Ruolo === "OPERATORE" && ticket.Operatore === "" && (
+            {user.Ruolo === "OPERATORE" && ticket.Operatore === null && (
               <button onClick={prendiInCarico} id={ticket.$id}>
                 Prendi in Carico
               </button>
@@ -235,9 +249,12 @@ useParams
               )}
 
             {user.Permesso === "JUNIOR" &&
-              ticket.Assegnatario === "" &&
+              ticket.Assegnatario === null &&
               ticket.Stato !== "INTERNO" && (
-                <button id="btnAssegnaASenior">Assegna a Senior</button>
+                <div>
+                  {/* <button id="btnAssegnaASenior" onClick={handleAssegnaASenior}>Assegna a Senior</button> */}
+                  <Link to="/crea_ticket" state={ticket}><button id="btnAssegnaASenior">Assegna a Senior</button></Link>
+                </div>
               )}
           </div>
         }
