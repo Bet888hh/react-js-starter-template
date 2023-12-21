@@ -46,9 +46,9 @@ const PulsantieraTable = ({
               rimuovi
             </button>
           )}
-          <button onClick={action} id={"riapri-" + id}>
+         {stato==="CHIUSO"&& <button onClick={action} id={"riapri-" + id}>
             riapri
-          </button>
+          </button>}
         </>
       )}
     </div>

@@ -44,8 +44,7 @@ const LoginRegistrazione = () => {
 
 
   const handleLogin = useCallback(async (e) => {
-    debugger
-    
+  
     e.preventDefault();
     const formData1 = new FormData(e.target);
     const username = formData1.get("username");
