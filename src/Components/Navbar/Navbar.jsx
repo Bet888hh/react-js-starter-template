@@ -36,7 +36,7 @@ const Navbar = () => {
 
     return (
         <>
-            <div className="Navbar" style={{ display: "flex" }}>
+            <div className="Navbar" style={{ display: "flex", justifyContent: "center" }}>
                 {permits.home &&(<Link className={`Link ${location === "/" ? "active" : ""}`} to="/">
                     <span>Home</span>
                 </Link>)}
