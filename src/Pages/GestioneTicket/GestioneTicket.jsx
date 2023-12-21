@@ -16,7 +16,7 @@ import { useSelector } from "react-redux";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 const GestioneTicket = () => {
   const [elementi, setElementi] = useState([]);
-  const sortConfig = useRef({ campo: "", ordine: "desc" });
+  const sortConfig = useRef({ campo: "niente", ordine: "desc" });
   const [filter, setFilter] = useState("");
   const [totali, setTotali] = useState({
     aperti: -1,
@@ -27,15 +27,6 @@ const GestioneTicket = () => {
   const [isloading, setIsLoading] = useState(false);
   //cose da mettere in un hook personalizzato
   const user = useSelector(SelectUserSlice);
-  const handleTableAction = useCallback((e) => {
-    const [action, id] = e.split("-");
-    switch (action) {
-      case "prendi":
-        console.log("lol");
-        break;
-    }
-  }, []);
-
   const getTicketAperti = useCallback(() => {
     return fetch(
       urlbase("TICKET") + `?queries[0]=search("Stato", ["APERTO"])`,
@@ -73,6 +64,34 @@ const GestioneTicket = () => {
       }
     );
   }, []);
+  
+const prendiInCarico= useCallback(async () => {
+  debugger
+  const response = await getTicketLavorazione()
+  const rs = await response.json();
+  const limite = user.Permesso==="SENIOR"?10:5
+  if (!rs.message){
+    const ticketUtente = rs.documents.filter(e=>e.Operatore===user.Username).length
+    if(ticketUtente<limite){
+      console.log("loprendooo");
+    }else{
+      //non può prenderlo in carico errore 
+    }
+  }else{
+    //errori
+  }
+},[getTicketLavorazione, user.Permesso, user.Username])
+
+  const handleTableAction = useCallback((e) => {
+    const [action, id] = e.split("-");
+    switch (action) {
+      case "prendi":
+        prendiInCarico()
+        break;
+    }
+  }, []);
+
+  
   const sortElementi = useCallback(() => {
     const datiClone = [...elementi];
 
@@ -301,6 +320,7 @@ const GestioneTicket = () => {
             excludeFromSorting={excludeFromSorting}
             intestazioni={intestazioni}
             onSort={onSort}
+            sort={sortConfig.current}
           />
           <tbody>
             <Paginator elemPerPagina={5}>
