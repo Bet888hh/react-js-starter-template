@@ -102,9 +102,9 @@ const CreaTicket = ({ ticketDaLavorare }) => {
                 }
               ),
             })
-            .then(() => { navigate(pathNavigazione) })
-        }
-      })
+          }
+        })
+        .then(() => { navigate(pathNavigazione) })
   };
 
   const ottieniListaAssegnatari = useCallback(() => {
@@ -176,9 +176,10 @@ const CreaTicket = ({ ticketDaLavorare }) => {
         ?
         (
           <select value={categoria} onChange={e => setCategoria(e.target.value)}>
+            <option value="">Selziona una categoria</option>
             <option value="Articolo_non_funzionante">Articolo non funzionante</option>
             <option value="Articolo_danneggiato">Articolo dannegiato</option>
-            <option value="Articolo_non_conforme">Articolo non conforme</option>
+            <option value="Articono_non_conforme">Articolo non conforme</option>
             <option value="Altro">Altro</option>
           </select>
         )
