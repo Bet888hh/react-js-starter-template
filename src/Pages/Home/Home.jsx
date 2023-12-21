@@ -38,6 +38,7 @@ const Home = () => {
             });
           }
         }
+        tickets.reverse();//per ordinarli per data in modo discendente
         setTickets(tickets);
         testoAvvisi.current = tickets > 0 ? "Caricamento..." : "Nessun ticket trovato"
       })
