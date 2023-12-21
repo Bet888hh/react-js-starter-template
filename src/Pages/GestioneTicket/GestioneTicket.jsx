@@ -16,7 +16,7 @@ import { useSelector } from "react-redux";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 const GestioneTicket = () => {
   const [elementi, setElementi] = useState([]);
-  const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
+  const sortConfig = useRef({ campo: "", ordine: "desc" });
   const [filter, setFilter] = useState("");
   const [totali, setTotali] = useState({
     aperti: -1,
