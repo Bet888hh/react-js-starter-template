@@ -1,8 +1,10 @@
+/* eslint-disable react/prop-types */
 import React, { useCallback } from 'react'
 import Paginator from '../Paginator/Paginator';
 import { useNavigate } from 'react-router-dom';
 
 const TabellaHome = ({ticketsAperti}) => {
+  
   
   const navigate = useNavigate();
 

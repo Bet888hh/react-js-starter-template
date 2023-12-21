@@ -95,7 +95,8 @@ const prendiInCarico= useCallback(async (id) => {
       }).then((r)=>{
        return r.json()
       }).then((r)=>{
-
+        
+        navigate("/dettaglio",{state:r})
       })
     }else{
       //non può prenderlo in carico errore 
@@ -103,12 +104,15 @@ const prendiInCarico= useCallback(async (id) => {
   }else{
     //errori
   }
-},[getTicketLavorazione, user.Permesso, user.Username])
+},[getTicketLavorazione, navigate, user.Permesso, user.Username])
 
   const handleTableAction = useCallback((e) => {
     const [action, id] = e.split("-");
     switch (action) {
       case "prendi":
+        prendiInCarico(id)
+        break;
+      case "accetta":
         prendiInCarico(id)
         break;
     }
