@@ -15,7 +15,7 @@ const Home = () => {
   }, [tickets]);
 
   useEffect(() => {
-    fetch(urlbase("TICKET")
+    fetch(urlbase("TICKET" + `?queries[0]=search("Stato",+["APERTO"])`)
       , {
         method: "GET",
         headers: headers,
@@ -29,7 +29,6 @@ const Home = () => {
 
   return (
     <div>
-      Home
 
       {tickets.length > 0 && (
         <div>
@@ -37,8 +36,6 @@ const Home = () => {
         </div>
       )
       }
-
-
 
     </div>
   )
