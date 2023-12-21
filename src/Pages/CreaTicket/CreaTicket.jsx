@@ -7,6 +7,30 @@ import { headers, urlbase } from '../../Utility/urls';
 import { useNavigate } from 'react-router-dom';
 
 const CreaTicket = ({ ticketDaLavorare }) => {
+  //const per testare il junior fino a che manca dettaglio
+  /* const ticketDaLavorare =
+  {
+    Titolo: "nav 2",
+    Testo: "nav 2",
+    Operatore: null,
+    Utente: "Yee123",
+    Stato: "APERTO",
+    Messaggi: [],
+    Assegnatario: "",
+    Categoria: "",
+    Categoria_manuale: null,
+    Ultima_visita: null,
+    Riaperto: false,
+    $id: "6582a8943406e2533158",
+    $createdAt: "2023-12-20T08:40:52.212+00:00",
+    $updatedAt: "2023-12-20T08:40:52.212+00:00",
+    $permissions: [
+      "read(\"any\")"
+    ],
+    $databaseId: "65774a629b8a62a99b27",
+    $collectionId: "65774cf8a679baa1c202"
+  } */
+
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
   const [mieiTicketApertiInLavorazione, setMieiTicketApertiLavorazione] = useState(0);
@@ -20,24 +44,30 @@ const CreaTicket = ({ ticketDaLavorare }) => {
 
   const gestisciCreazioneTicket = () => {
 
+    let pathNavigazione;//per essere reindirizzati alla fine della creazione in base all'utente
     let ticket = {
       Titolo: titolo,
       Testo: testo,
+      Utente: user.Username,
       Categoria: categoria !== "Altro" ? categoria : categoriaManuale,
-      Assegnatario: assegnaA,
     }
-    let navigazione;
 
     if (user.Ruolo === 'SEMPLICE') {
       if (mieiTicketApertiInLavorazione > 2) {
         alert('Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.');
         return;
       }
-      ticket = { ...ticket, Utente: user.Username, Stato: "APERTO" }
-      navigazione = '../miei_ticket'
+      ticket = { ...ticket, Stato: "APERTO" }
+      pathNavigazione = '../miei_ticket'
     } else {
-      ticket = { ...ticket, Operatore: user.Username, Stato: "INTERNO" }
-      navigazione = '../gestione_ticket'
+      ticket = { ...ticket, Operatore: assegnaA, Stato: "IN_LAVORAZIONE" }
+      pathNavigazione = '../gestione_ticket'
+    }
+
+    const tuttiICampiValidi = Object.values(ticket).every(valore => typeof valore === 'string' && valore.trim() !== '');
+    if (!tuttiICampiValidi) {
+      alert("Compilare tutti i campi");
+      return
     }
 
     const request = {
@@ -54,7 +84,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       .then(
         () => alert('Ticket creato con successo!')
       )
-      .then(()=>{navigate(navigazione)})
+      .then(() => { navigate(pathNavigazione) })
   };
 
   const ottieniListaAssegnatari = useCallback(() => {
@@ -68,7 +98,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       .then(res => {
         const list = res.documents
         const fetchPromises = list.map((operatore) => {
-          return fetch(urlbase("TICKET") + `?queries[0]=search("Assegnatario",+["${operatore.Username}"])`, {
+          return fetch(urlbase("TICKET") + `?queries[0]=search("Operatore",+["${operatore.Username}"])`, {
             method: "GET",
             headers: headers,
           })
@@ -95,21 +125,22 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       })
       .then(res => res.json())
       .then(res => {
-        setMieiTicketApertiLavorazione(res.total)})
+        setMieiTicketApertiLavorazione(res.total)
+      })
   }, [user.Username]);
 
-
+  useEffect(() => {
+    if (user.Ruolo === "OPERATORE" && user.Permesso === "JUNIOR") {
+      setTesto(`Ciao, ti contatto per il ticket "${ticketDaLavorare.Titolo}" per chiederti di prenderlo in carico`);
+      setCategoria("INTERNO");
+      setCategoriaManuale(ticketDaLavorare.$id);
+    }
+    ottieniListaAssegnatari();
+  }, [ottieniListaAssegnatari, ticketDaLavorare.$id, ticketDaLavorare.Titolo, user.Permesso, user.Ruolo]);
 
   useEffect(() => {
     contoMieiTicketApertiInLavorazione();
-    if(user.Ruolo ==="OPERATORE" && user.Permesso === "JUNIOR"){
-      setTitolo(ticketDaLavorare.Titolo);
-      setTesto("Ciao, ti contatto per il ticket {ticketDaLavorare.Titolo} per chiederti di prenderlo in carico");
-      setCategoria("INTERNO");
-      setCategoriaManuale(ticketDaLavorare.Id);
-      ottieniListaAssegnatari();
-    }
-  }, [contoMieiTicketApertiInLavorazione, ottieniListaAssegnatari, ticketDaLavorare.Id, ticketDaLavorare.Titolo, user.Permesso, user.Ruolo])
+  }, [contoMieiTicketApertiInLavorazione])
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -151,6 +182,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
         <div>
           <label>Assegna a:</label>
           <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
+            <option value="">Selziona un senior</option>
             {listaAssegnatari.length > 0 && (
               listaAssegnatari.map((elem, index) => {
                 return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
