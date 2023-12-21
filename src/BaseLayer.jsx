@@ -101,7 +101,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
           }
         />
         <Route
-          path="/dettaglio_ticket"
+          path="/dettaglio/:id"
           element={
             <ProtectedRoute condition={true} redirectTo={"/login"}>
               <DettaglioTicket />

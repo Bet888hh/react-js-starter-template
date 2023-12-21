@@ -12,7 +12,7 @@ const TabellaHome = ({ticketsAperti}) => {
     const ticket = ticketsAperti.filter((ticket)=>{
       return ticket.id === e.target.id;
     })
-    navigate('../dettaglio', {state: ticket})
+    navigate('../dettaglio/'+e.target.id, {state: ticket})
   },[navigate, ticketsAperti]);
 
   return (
