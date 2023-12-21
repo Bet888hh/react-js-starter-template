@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
@@ -19,29 +19,119 @@ useParams
   const [loading, setLoading] = useState(true);
   const [ticket, setTicket] = useState([]);
   const { id } = useParams();
+  const refCat = useRef("");
 
+  const handleOnChangeCategoria = useCallback(
+    (e) => {
+      setTicket({ ...ticket, Categoria: e.target.value });
+    },
+    [ticket]
+  );
 
-  
-  useEffect(() => {
-    async function init() {
-      if (id) {
-        setLoading(true);
-        const response = await fetch(urlbase("TICKET") + `/${id}`, {
-          method: "GET",
-          headers: headers,
-        });
-        const rs = await response.json();
+  const init = useCallback(async () => {
+    if (id) {
+      const response = await fetch(urlbase("TICKET") + `/${id}`, {
+        method: "GET",
+        headers: headers,
+      });
+      const rs = await response.json();
 
-        if (!rs.message) {
-          setTicket(rs);
-          setLoading(false);
-        } else {
-          navigate("/");
-        }
+      if (!rs.message) {
+        setTicket(rs);
+        refCat.current = rs.Categoria;
+      } else {
+        navigate("/");
       }
     }
-    init();
   }, [id, navigate]);
+
+  const handleChiudi = useCallback(() => {
+    setLoading(true)
+    fetch(
+      urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+      {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify({
+          documentId: id,
+          data: {
+            ...ticket,
+            Stato: "CHIUSO",
+          },
+          permissions: [`read("any")`],
+        }),
+      }
+    ).then((r) => {
+      return r.json()
+    }).then((r) => {
+      if(!r.message){
+      init();}else{
+        //erroroni
+      }
+      setLoading(false);
+    });
+  }, [id, init, ticket]);
+
+  useEffect(() => {
+    setLoading(true);
+    init();
+    setLoading(false);
+  }, [id, init, navigate]);
+  const getTicketLavorazione = useCallback(async () => {
+    return fetch(
+      urlbase("TICKET") + `?queries[0]=search("Stato", ["IN_LAVORAZIONE"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, []);
+
+  const prendiInCarico = useCallback(
+    async (id) => {
+      setLoading(true);
+      const response = await getTicketLavorazione();
+      const rs = await response.json();
+      const limite = user.Permesso === "SENIOR" ? 10 : 5;
+      if (!rs.message) {
+        const ticketUtente = rs.documents.filter(
+          (e) => e.Operatore === user.Username
+        ).length;
+        if (ticketUtente < limite) {
+          console.log("loprendooo");
+          fetch(
+            urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+            {
+              method: "PATCH",
+              headers: headers,
+              body: JSON.stringify({
+                documentId: id,
+                data: {
+                  Stato: "IN_LAVORAZIONE",
+                  Ultima_visita: user.Permesso,
+                  Operatore: user.Username,
+                  Assegnatario: "",
+                },
+                permissions: [`read("any")`],
+              }),
+            }
+          )
+            .then((r) => {
+              return r.json();
+            })
+            .then((r) => {
+              init();
+              setLoading(false);
+            });
+        } else {
+          setLoading(false);
+        }
+      } else {
+        //errori
+      }
+    },
+    [getTicketLavorazione, init, user.Permesso, user.Username]
+  );
 
   return (
     <>
@@ -60,6 +150,7 @@ useParams
               <select
                 value={ticket.Categoria}
                 disabled={user.Ruolo !== "OPERATORE"}
+                onChange={handleOnChangeCategoria}
               >
                 <option value="Articolo_non_funzionante">
                   Articolo non funzionante
@@ -83,20 +174,45 @@ useParams
               </div>
             )}
             <button id="btnIndietro">Indietro</button>
-  
-            <button id="btnSalva">Salva</button>
-            
-            <button id="btnRiapri"> Riapri</button>
-            
-            <button id="btnChiudi"> Chiudi</button>
-            
-            <button id="btnPrendiInCarico">Prendi in Carico</button>
-            
-            <button id="btnAccetta"  >Accetta</button>
-            
-            <button id="btnAssegnaASenior" >Assegna a Senior</button>
-            </div>
-          
+
+            <button
+              disabled={ticket.Categoria === refCat.current}
+              id="btnSalva"
+            >
+              Salva
+            </button>
+
+            {ticket.Stato === "CHIUSO" &&
+              !ticket.Riaperto &&
+              ticket.stato !== "INTERNO" && (
+                <button id="btnRiapri"> Riapri</button>
+              )}
+
+            {ticket.Stato !== "CHIUSO" &&
+              ticket.stato !== "INTERNO" &&
+              (user.Username === ticket.Utente ||
+                user.Username === ticket.Operatore) && (
+                <button id="btnChiudi"> Chiudi</button>
+              )}
+
+            {user.Ruolo === "OPERATORE" && ticket.Operatore === "" && (
+              <button onClick={prendiInCarico} id={ticket.$id}>
+                Prendi in Carico
+              </button>
+            )}
+
+            {user.Permesso === "SENIOR" &&
+              ticket.Operatore === user.Username &&
+              ticket.Assegnatario !== user.Username && (
+                <button id="btnAccetta">Accetta</button>
+              )}
+
+            {user.Permesso === "JUNIOR" &&
+              ticket.Assegnatario === "" &&
+              ticket.Stato !== "INTERNO" && (
+                <button id="btnAssegnaASenior">Assegna a Senior</button>
+              )}
+          </div>
         }
       </ConditionalRenderer>
     </>
