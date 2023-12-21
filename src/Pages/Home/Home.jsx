@@ -15,8 +15,9 @@ const Home = () => {
   }, [tickets]);
 
   useEffect(() => {
-    fetch(urlbase("TICKET" + `?queries[0]=search("Stato",+["APERTO"])`)
-      , {
+    fetch(
+      urlbase("TICKET") + `?queries[0]=search("Stato",+["APERTO"])`,
+      {
         method: "GET",
         headers: headers,
       })
