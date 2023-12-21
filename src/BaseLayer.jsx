@@ -18,16 +18,16 @@ const BaseLayer = () => {
   const navigate = useNavigate();
 const dispatch = useDispatch()
 
-  const permits = useMemo(() => {
-    return {
-      home: user.Ruolo!=="NOLOG",
-      creaTicket:user.Ruolo!=="NOLOG",
-      mieiTicket:user.Ruolo!=="NOLOG",
-      gestioneTicket:user.Ruolo!=="NOLOG",
-      interni:user.Ruolo!=="NOLOG",
-      loginRegistrazione:user.Ruolo==="NOLOG"
-    };
-  }, [user.Ruolo]);
+const permits = useMemo(() => {
+  return {
+    home: user.Ruolo!=="NOLOG",
+    creaTicket:user.Ruolo!=="NOLOG" && user.Ruolo==="SEMPLICE",
+    mieiTicket:user.Ruolo!=="NOLOG",
+    gestioneTicket:user.Ruolo==="OPERATORE",
+    interni:user.Ruolo==="OPERATORE",
+    loginRegistrazione:user.Ruolo==="NOLOG"
+  };
+}, [user.Ruolo]);
 
 
   
@@ -103,7 +103,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
         <Route
           path="/dettaglio_ticket"
           element={
-            <ProtectedRoute condition={""} redirectTo={"/login"}>
+            <ProtectedRoute condition={true} redirectTo={"/login"}>
               <DettaglioTicket />
             </ProtectedRoute>
           }

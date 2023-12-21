@@ -25,8 +25,8 @@ const Navbar = () => {
           home: user.Ruolo!=="NOLOG",
           creaTicket:user.Ruolo!=="NOLOG" && user.Ruolo==="SEMPLICE",
           mieiTicket:user.Ruolo!=="NOLOG",
-          gestioneTicket:user.Ruolo!=="NOLOG",
-          interni:user.Ruolo!=="NOLOG",
+          gestioneTicket:user.Ruolo==="OPERATORE",
+          interni:user.Ruolo==="OPERATORE",
           loginRegistrazione:user.Ruolo==="NOLOG"
         };
       }, [user.Ruolo]);
@@ -56,7 +56,7 @@ const Navbar = () => {
                         <span>Miei ticket</span>
                     </Link>
                 )}
-                {(
+                {(permits.gestioneTicket&&
                     <Link
                         className={`Link ${location.includes("gestione_ticket") ? "active" : ""}`}
                         to="/gestione_ticket"
@@ -64,7 +64,7 @@ const Navbar = () => {
                         <span>Gestione ticket</span>
                     </Link>
                 )}
-                {(
+                {(permits.interni&&
                     <Link
                         className={`Link ${location.includes("interni") ? "active" : ""}`}
                         to="/interni"

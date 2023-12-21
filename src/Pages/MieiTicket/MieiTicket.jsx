@@ -27,7 +27,7 @@ const MieiTicket = () => {
       stati.map((stato) =>
         fetch(
           urlbase("TICKET") +
-            `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Operatore", ["${user.Username}"])`,
+            `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
           {
             method: "GET",
             headers: headers,
@@ -150,7 +150,7 @@ const MieiTicket = () => {
     async (type) => {
       const response = await fetch(
         urlbase("TICKET") +
-          `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Operatore",+["${user.Username}"])`,
+          `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Utente",+["${user.Username}"])`,
         {
           method: "GET",
           headers: headers,
