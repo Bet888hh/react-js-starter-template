@@ -52,7 +52,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
     }
 
     if (user.Ruolo === 'SEMPLICE') {
-      if (mieiTicketApertiInLavorazione > 2) {
+      if (mieiTicketApertiInLavorazione > 1) {
         alert('Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.');
         return;
       }
