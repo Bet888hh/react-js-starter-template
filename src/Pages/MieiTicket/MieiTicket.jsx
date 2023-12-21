@@ -53,8 +53,8 @@ const MieiTicket = () => {
   },[])
 
   const dettaglioTicket = useCallback((id)=>{
-    navigate("../dettaglio_ticket/"+id)
-  },[])
+    navigate("../dettaglio/"+id)
+  },[navigate])
 
   const deletePost = useCallback(
     async (id) => {
@@ -80,9 +80,7 @@ const MieiTicket = () => {
         case "rimuovi":
           deletePost(id);
           break;
-        case "dettaglio":
-          dettaglioTicket(id);
-          break;
+       
       }
     },
     [deletePost]

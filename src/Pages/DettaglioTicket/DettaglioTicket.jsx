@@ -16,8 +16,8 @@ useParams
   const [assegnaA, setAssegnaA] = useState(''); */
   const user = useSelector(SelectUserSlice);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [ticket, setTicket] = useState(undefined);
+  const [loading, setLoading] = useState(true);
+  const [ticket, setTicket] = useState([]);
   const { id } = useParams();
 
 
@@ -82,7 +82,21 @@ useParams
                 />
               </div>
             )}
-          </div>
+            <button id="btnIndietro">Indietro</button>
+  
+            <button id="btnSalva">Salva</button>
+            
+            <button id="btnRiapri"> Riapri</button>
+            
+            <button id="btnChiudi"> Chiudi</button>
+            
+            <button id="btnPrendiInCarico">Prendi in Carico</button>
+            
+            <button id="btnAccetta"  >Accetta</button>
+            
+            <button id="btnAssegnaASenior" >Assegna a Senior</button>
+            </div>
+          
         }
       </ConditionalRenderer>
     </>

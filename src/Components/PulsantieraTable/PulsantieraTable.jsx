@@ -1,25 +1,29 @@
 /* eslint-disable react/prop-types */
 import React, { memo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
-
 const PulsantieraTable = ({
+  
   id,
   handleTableAction,
   stato,
   operatore = "",
   assegnatario = "",
 }) => {
+  const navigate= useNavigate()
   const location = useLocation();
   const user = useSelector(SelectUserSlice);
   const action = (e) => {
     handleTableAction(e.target.id);
   };
+ const goToDettaglio = (e)=>{
+    navigate("/dettaglio/"+e.target.id)
+  }
   return (
     <div>
-      <button onClick={action} id={"dettaglio-" + id}>
+      <button onClick={goToDettaglio} id={id}>
         dettaglio
       </button>
       {location.pathname == "/gestione_ticket" && (
