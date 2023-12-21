@@ -44,6 +44,32 @@ useParams
       }
     }
   }, [id, navigate]);
+  
+  const handleSalva = useCallback(() => {
+    setLoading(true)
+    fetch(
+      urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+      {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify({
+          documentId: id,
+          data: {
+            Categoria: ticket.Categoria,
+          },
+          permissions: [`read("any")`],
+        }),
+      }
+    ).then((r) => {
+      return r.json()
+    }).then((r) => {
+      if(!r.message){
+      init();}else{
+        //erroroni
+      }
+      setLoading(false);
+    });
+  }, [id, init, ticket]);
 
   const handleChiudi = useCallback(() => {
     setLoading(true)
@@ -71,7 +97,7 @@ useParams
       setLoading(false);
     });
   }, [id, init, ticket]);
-
+  
   useEffect(() => {
     setLoading(true);
     init();
@@ -156,7 +182,7 @@ useParams
                   Articolo non funzionante
                 </option>
                 <option value="Articolo_dannegiato">Articolo dannegiato</option>
-                <option value="Articolo_non_conforme">
+                <option value="Articono_non_conforme">
                   Articolo non conforme
                 </option>
                 <option value="Altro">Altro</option>
@@ -177,6 +203,7 @@ useParams
 
             <button
               disabled={ticket.Categoria === refCat.current}
+              onClick={handleSalva}
               id="btnSalva"
             >
               Salva
