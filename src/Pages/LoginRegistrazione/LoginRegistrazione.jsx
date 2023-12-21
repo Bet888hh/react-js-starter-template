@@ -44,8 +44,8 @@ const LoginRegistrazione = () => {
 
 
   const handleLogin = useCallback(async (e) => {
+    debugger
     
-    setLoading(true)
     e.preventDefault();
     const formData1 = new FormData(e.target);
     const username = formData1.get("username");
@@ -57,6 +57,7 @@ const LoginRegistrazione = () => {
       passwordErrors.length === 0 &&
       usernameErrors.length === 0 
     ) {
+      setLoading(true)
       const response = await fetch(
         urlbase("USER") + `?queries[0]=search("Username",+["${username}"])`
       ,  {
