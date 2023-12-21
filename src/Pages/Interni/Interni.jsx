@@ -108,7 +108,7 @@ function Interni() {
       : null;
   }, [elementi]);
 
-console.log(perTabella);
+
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0]) : [];
   const excludeFromSorting = [""];
   const includeInTableIf = { filter: "", include: "" };
@@ -157,6 +157,8 @@ console.log(perTabella);
             excludeFromSorting={excludeFromSorting}
             intestazioni={intestazioni}
             onSort={onSort}
+            sort={sortConfig.current}
+            
           />
           <tbody>
             <Paginator elemPerPagina={5}>
