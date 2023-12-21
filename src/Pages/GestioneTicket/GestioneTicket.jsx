@@ -14,7 +14,9 @@ import SortableTableRows from "../../Components/SortableTable/SortableTableRows"
 import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
+import { useNavigate } from "react-router-dom";
 const GestioneTicket = () => {
+  const navigate = useNavigate()
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "niente", ordine: "desc" });
   const [filter, setFilter] = useState("");
@@ -65,8 +67,8 @@ const GestioneTicket = () => {
     );
   }, []);
   
-const prendiInCarico= useCallback(async () => {
-  debugger
+const prendiInCarico= useCallback(async (id) => {
+  
   const response = await getTicketLavorazione()
   const rs = await response.json();
   const limite = user.Permesso==="SENIOR"?10:5
@@ -74,6 +76,27 @@ const prendiInCarico= useCallback(async () => {
     const ticketUtente = rs.documents.filter(e=>e.Operatore===user.Username).length
     if(ticketUtente<limite){
       console.log("loprendooo");
+      fetch(urlbase("TICKET") + "/" + id,//categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+      {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify(
+          {
+            documentId: id,
+            data: {
+              Stato: "IN_LAVORAZIONE",
+              Ultima_visita: user.Permesso,
+              Operatore: user.Username,
+              Assegnatario: ""
+            },
+            permissions: [`read("any")`],
+          }
+        ),
+      }).then((r)=>{
+       return r.json()
+      }).then((r)=>{
+
+      })
     }else{
       //non può prenderlo in carico errore 
     }
@@ -86,7 +109,7 @@ const prendiInCarico= useCallback(async () => {
     const [action, id] = e.split("-");
     switch (action) {
       case "prendi":
-        prendiInCarico()
+        prendiInCarico(id)
         break;
     }
   }, []);

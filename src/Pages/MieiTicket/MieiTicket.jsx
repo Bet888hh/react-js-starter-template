@@ -16,7 +16,7 @@ import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice"
 import { useNavigate } from "react-router-dom";
 const MieiTicket = () => {
   const [elementi, setElementi] = useState([]);
-  const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
+  const sortConfig = useRef({ campo: "niente", ordine: "asc" });
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
@@ -27,7 +27,7 @@ const MieiTicket = () => {
       stati.map((stato) =>
         fetch(
           urlbase("TICKET") +
-            `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
+            `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Operatore", ["${user.Username}"])`,
           {
             method: "GET",
             headers: headers,
@@ -150,7 +150,7 @@ const MieiTicket = () => {
     async (type) => {
       const response = await fetch(
         urlbase("TICKET") +
-          `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Utente",+["${user.Username}"])`,
+          `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Operatore",+["${user.Username}"])`,
         {
           method: "GET",
           headers: headers,
@@ -260,6 +260,7 @@ const MieiTicket = () => {
             excludeFromSorting={excludeFromSorting}
             intestazioni={intestazioni}
             onSort={onSort}
+            sort={sortConfig.current}
           />
           <tbody>
             <Paginator elemPerPagina={5}>
