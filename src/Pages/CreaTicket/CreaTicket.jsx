@@ -10,26 +10,24 @@ const CreaTicket = ({ ticketDaLavorare }) => {
   //const per testare il junior fino a che manca dettaglio
   /* const ticketDaLavorare =
   {
-    Titolo: "nav 2",
-    Testo: "nav 2",
+    Titolo: "ticket1",
+    Testo: "ticket1",
     Operatore: null,
-    Utente: "Yee123",
+    Utente: "Vins321",
     Stato: "APERTO",
     Messaggi: [],
-    Assegnatario: "",
-    Categoria: "",
+    Assegnatario: null,
+    Categoria: "Articolo_dannegiato",
     Categoria_manuale: null,
-    Ultima_visita: null,
+    Ultima_visita: "Utente",
     Riaperto: false,
-    $id: "6582a8943406e2533158",
-    $createdAt: "2023-12-20T08:40:52.212+00:00",
-    $updatedAt: "2023-12-20T08:40:52.212+00:00",
+    $id: "658404240f101ade5b29",
+    $createdAt: "2023-12-21T09:23:48.061+00:00",
+    $updatedAt: "2023-12-21T09:23:48.061+00:00",
     $permissions: [
-      "read(\"any\")"
+        "read(\"any\")"
     ],
-    $databaseId: "65774a629b8a62a99b27",
-    $collectionId: "65774cf8a679baa1c202"
-  } */
+} */
 
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
@@ -49,6 +47,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       Titolo: titolo,
       Testo: testo,
       Utente: user.Username,
+      Ultima_visita: user.Permesso ? user.Permesso : "UTENTE",
       Categoria: categoria !== "Altro" ? categoria : categoriaManuale,
     }
 
@@ -60,7 +59,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       ticket = { ...ticket, Stato: "APERTO" }
       pathNavigazione = '../miei_ticket'
     } else {
-      ticket = { ...ticket, Operatore: assegnaA, Stato: "IN_LAVORAZIONE" }
+      ticket = { ...ticket, Operatore: assegnaA, Stato: "INTERNO" }
       pathNavigazione = '../gestione_ticket'
     }
 
@@ -84,7 +83,28 @@ const CreaTicket = ({ ticketDaLavorare }) => {
       .then(
         () => alert('Ticket creato con successo!')
       )
-      .then(() => { navigate(pathNavigazione) })
+      .then(() => {
+        if (user.Ruolo === "OPERATORE") {
+          fetch(urlbase("TICKET") + "/" + categoriaManuale,//categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+            {
+              method: "PATCH",
+              headers: headers,
+              body: JSON.stringify(
+                {
+                  documentId: categoriaManuale,
+                  data: {
+                    Stato: "IN_LAVORAZIONE",
+                    Ultima_visita: "JUNIOR",
+                    Operatore: assegnaA,
+                    Assegnatario: user.Username
+                  },
+                  permissions: [`read("any")`],
+                }
+              ),
+            })
+            .then(() => { navigate(pathNavigazione) })
+        }
+      })
   };
 
   const ottieniListaAssegnatari = useCallback(() => {
@@ -132,7 +152,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
   useEffect(() => {
     if (user.Ruolo === "OPERATORE" && user.Permesso === "JUNIOR") {
       setTesto(`Ciao, ti contatto per il ticket "${ticketDaLavorare.Titolo}" per chiederti di prenderlo in carico`);
-      setCategoria("INTERNO");
+      setCategoria("Interno");
       setCategoriaManuale(ticketDaLavorare.$id);
     }
     ottieniListaAssegnatari();
@@ -157,7 +177,7 @@ const CreaTicket = ({ ticketDaLavorare }) => {
         (
           <select value={categoria} onChange={e => setCategoria(e.target.value)}>
             <option value="Articolo_non_funzionante">Articolo non funzionante</option>
-            <option value="Articolo_dannegiato">Articolo dannegiato</option>
+            <option value="Articolo_danneggiato">Articolo dannegiato</option>
             <option value="Articolo_non_conforme">Articolo non conforme</option>
             <option value="Altro">Altro</option>
           </select>
