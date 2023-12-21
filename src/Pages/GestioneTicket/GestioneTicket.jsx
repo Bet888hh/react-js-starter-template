@@ -150,6 +150,7 @@ const GestioneTicket = () => {
             setFilter(e);
             data = await getTicketAperti();
             data = await data.json();
+            data = data.documents
 
             break;
           case "IN_LAVORAZIONE":
@@ -161,7 +162,7 @@ const GestioneTicket = () => {
               .map((e) => e.Username);
             data = await getTicketLavorazione();
             data = await data.json();
-            data.documents = data.documents.filter((e) =>
+            data = data.documents.filter((e) =>
               operatoriJunior.includes(e.Operatore)
             );
             break;
@@ -169,17 +170,18 @@ const GestioneTicket = () => {
             setFilter(e);
             data = await getTicketChiusi();
             data =await data.json();
+            data= data.documents
             break;
           case "in-carico":
             setFilter(e);
             data = await getTicketLavorazione();
             data = await data.json();
-            data = data.documents.filter((e) => e.Utente === user.Username);
+            data = data.documents.filter((e) => e.Operatore === user.Username);
             break;
         }
   
-       data.total===0? setElementi([]):setElementi(
-          data.documents.map((doc) => ({
+       !data? setElementi([]):setElementi(
+          data.map((doc) => ({
             ...doc,
             ApertoIl: doc.$createdAt,
             UltimaModifica: doc.$updatedAt,
@@ -264,13 +266,14 @@ const GestioneTicket = () => {
       { documents: dchiusiUtente, total: totalChiusiUtente },
     ] = jsonResponses;
 
-    const inLavorazioneUtenteLoggato = dlavorazione.map(
-      (e) => e.Utente === user.Username
-    ).length;
-    const junior = operatori.map((e) => e.Permesso === "JUNIOR" && e.Username);
-    const lavorazioneJunior = dlavorazione.map(
-      (e) => junior.includes(e.Username) && e
+    const inLavorazioneUtenteLoggato = dlavorazione.filter(
+      (e) => e.Operatore === user.Username
     );
+    const junior = operatori.filter((e) => e.Permesso === "JUNIOR").map(e=>e.Username);
+    const lavorazioneJunior = dlavorazione.filter(
+      (e) => junior.includes(e.Operatore) 
+    );
+
     setTotali((prev) => ({
       inCarico:
         inLavorazioneUtenteLoggato.length > 0
@@ -281,7 +284,7 @@ const GestioneTicket = () => {
       inLavorazione:
         lavorazioneJunior.length > 0 ? lavorazioneJunior.length : 0,
     }));
-  }, []);
+  }, [getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
 
   useEffect(() => {
     init();
