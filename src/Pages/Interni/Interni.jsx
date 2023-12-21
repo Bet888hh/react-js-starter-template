@@ -93,9 +93,9 @@ function Interni() {
             Categoria: e.Categoria,
             ApertoIl: e.ApertoIl,
             UltimaModifica: e.UltimaModifica,
-            Operatore: e.operatore,
+            Operatore: e.Operatore,
             Messaggi: e.Messaggi,
-            Assegnatario: "",
+           
             Azioni: (
               <PulsantieraTable
                 id={e.$id}
@@ -108,10 +108,10 @@ function Interni() {
       : null;
   }, [elementi]);
 
-
+console.log(perTabella);
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0]) : [];
   const excludeFromSorting = [""];
-  const includeInTableIf = { filter: "nan", include: "nan" };
+  const includeInTableIf = { filter: "", include: "" };
 
   const formatCell = useCallback((intestazione, valore, riga) => {
     switch (intestazione) {

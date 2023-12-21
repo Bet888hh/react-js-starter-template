@@ -206,7 +206,7 @@ const MieiTicket = () => {
             Categoria: e.Categoria,
             ApertoIl: e.ApertoIl,
             UltimaModifica: e.UltimaModifica,
-            Operatore: e.operatore,
+            Operatore: e.Operatore,
             Messaggi: e.Messaggi,
 
             Azioni: (
