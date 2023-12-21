@@ -3,7 +3,6 @@ import Paginator from '../Paginator/Paginator';
 import { useNavigate } from 'react-router-dom';
 
 const TabellaHome = ({ticketsAperti}) => {
-  debugger
   
   const navigate = useNavigate();
 

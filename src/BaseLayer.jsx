@@ -20,7 +20,7 @@ const dispatch = useDispatch()
 
 const permits = useMemo(() => {
   return {
-    home: user.Ruolo!=="NOLOG",
+    home: user.Ruolo!=="NOLOG" && user.Ruolo ==="SEMPLICE",
     creaTicket:user.Ruolo!=="NOLOG" && user.Ruolo==="SEMPLICE",
     mieiTicket:user.Ruolo!=="NOLOG",
     gestioneTicket:user.Ruolo==="OPERATORE",

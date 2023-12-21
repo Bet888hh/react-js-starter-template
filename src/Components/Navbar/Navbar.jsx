@@ -22,7 +22,7 @@ const Navbar = () => {
 
     const permits = useMemo(() => {
         return {
-          home: user.Ruolo!=="NOLOG",
+          home: user.Ruolo!=="NOLOG" && user.Ruolo === "SEMPLICE",
           creaTicket:user.Ruolo!=="NOLOG" && user.Ruolo==="SEMPLICE",
           mieiTicket:user.Ruolo!=="NOLOG",
           gestioneTicket:user.Ruolo==="OPERATORE",
@@ -37,9 +37,9 @@ const Navbar = () => {
     return (
         <>
             <div className="Navbar" style={{ display: "flex" }}>
-                <Link className={`Link ${location === "/" ? "active" : ""}`} to="/">
+                {permits.home &&(<Link className={`Link ${location === "/" ? "active" : ""}`} to="/">
                     <span>Home</span>
-                </Link>
+                </Link>)}
                 {permits.creaTicket &&(
                     <Link
                         className={`Link ${location.includes("crea_ticket") ? "active" : ""}`}

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router";
 import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer"
 import { useDispatch } from "react-redux";
-import {  setUser } from "../../store/Reducer/Slices/UserSlice/UserSlice";
+import { setUser } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 
 
 function generateRandomId() {
@@ -21,14 +21,14 @@ function generateRandomId() {
 }
 
 const LoginRegistrazione = () => {
-  
 
- 
-  
+
+
+
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate()
-  
+
   const isRegistration = location.pathname === "/registrazione";
   const [errors, setErrors] = useState({
     emailErrors: "",
@@ -36,7 +36,7 @@ const LoginRegistrazione = () => {
     passwordErrors: "",
     afterErrors: "",
   });
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     ruolo: "",
     permesso: "",
@@ -44,8 +44,7 @@ const LoginRegistrazione = () => {
 
 
   const handleLogin = useCallback(async (e) => {
-    debugger
-    
+
     e.preventDefault();
     const formData1 = new FormData(e.target);
     const username = formData1.get("username");
@@ -55,15 +54,15 @@ const LoginRegistrazione = () => {
 
     if (
       passwordErrors.length === 0 &&
-      usernameErrors.length === 0 
+      usernameErrors.length === 0
     ) {
       setLoading(true)
       const response = await fetch(
         urlbase("USER") + `?queries[0]=search("Username",+["${username}"])`
-      ,  {
+        , {
           method: "GET",
           headers: headers,
-        }  );
+        });
 
       const rs = await response.json();
       const { documents } = rs;
@@ -75,15 +74,15 @@ const LoginRegistrazione = () => {
         setLoading(false)
         return;
       } else {
-        
+
         if (documents[0].Password === password) {
-         //pssword corretta posso loggarmi 
-        
+          //pssword corretta posso loggarmi 
+
           dispatch(setUser(documents[0]))
           navigate("/")
 
 
-        }else{
+        } else {
           setLoading(false)
           setErrors((prev) => ({
             ...prev,
@@ -96,7 +95,7 @@ const LoginRegistrazione = () => {
 
 
 
-  const attemptRegistration1 = useCallback( async (
+  const attemptRegistration1 = useCallback(async (
     email,
     username,
     password,
@@ -167,7 +166,7 @@ const LoginRegistrazione = () => {
       }));
       setLoading(false)
     }
-  },[navigate]);
+  }, [navigate]);
 
   const validateEmail = (email) => {
     const errors = [];
@@ -264,7 +263,7 @@ const LoginRegistrazione = () => {
         usernameErrors.length === 0 &&
         formData.ruolo !== ""
       ) {
-        
+
         setLoading(true)
         attemptRegistration1(
           email,
@@ -274,7 +273,7 @@ const LoginRegistrazione = () => {
           formData.permesso
         );
       } else {
-      
+
         return;
       }
     },
@@ -302,72 +301,72 @@ const LoginRegistrazione = () => {
 
   return (
     <div>
-    <ConditionalRenderer showContent={!loading}>
-    <form
-        noValidate
-        onSubmit={isRegistration ? handleRegistration : handleLogin}
-        action=""
-      >
-        {isRegistration && (
-          <>
-            <label>Email:</label>
-            <br />
-            <input type="email" name="email" onBlur={handleValidateEmail} />
-            <ErrorInForm error={errors.emailErrors} />
-          </>
-        )}
-        <br />
-        <label>Username:</label>
-        <br />
-        <input type="text" name="username" onBlur={handleValidateUsername} />
-        <ErrorInForm error={errors.usernameErrors} />
-        <br />
-        <label>Password:</label>
-        <br />
-        <input
-          type="password"
-          name="password"
-          onBlur={handleValidatePassword}
-        />
-        <ErrorInForm error={errors.passwordErrors} />
-        <br />
-        {isRegistration && (
-          <>
-            <label>Ruolo:</label>
-            <br />
-            <select
-              name="ruolo"
-              value={formData.ruolo}
-              onChange={handleInputChange}
-            >
-              <option value="">Seleziona...</option>
-              <option value="OPERATORE">OPERATORE</option>
-              <option value="SEMPLICE">SEMPLICE</option>
-            </select>
-          </>
-        )}
-        <br /> <br />
-        {(formData.ruolo === "OPERATORE"&&isRegistration) && (
-          <>
-            <label>Permesso:</label>
-            <select
-              name="permesso"
-              value={formData.permesso}
-              onChange={handleInputChange}
-            >
-              <option value="">Seleziona...</option>
-              <option value="JUNIOR">JUNIOR</option>
-              <option value="SENIOR">SENIOR</option>
-            </select>
-            <br />
-            <br />
-          </>
-        )}
-        <button type="submit">{isRegistration?"Registrati":"Login"}</button>
-        <ErrorInForm error={errors.afterErrors} />
-      </form>
-    </ConditionalRenderer>
-     
+      <ConditionalRenderer showContent={!loading}>
+        <form
+          noValidate
+          onSubmit={isRegistration ? handleRegistration : handleLogin}
+          action=""
+        >
+          {isRegistration && (
+            <>
+              <label>Email:</label>
+              <br />
+              <input type="email" name="email" onBlur={handleValidateEmail} />
+              <ErrorInForm error={errors.emailErrors} />
+            </>
+          )}
+          <br />
+          <label>Username:</label>
+          <br />
+          <input type="text" name="username" onBlur={handleValidateUsername} />
+          <ErrorInForm error={errors.usernameErrors} />
+          <br />
+          <label>Password:</label>
+          <br />
+          <input
+            type="password"
+            name="password"
+            onBlur={handleValidatePassword}
+          />
+          <ErrorInForm error={errors.passwordErrors} />
+          <br />
+          {isRegistration && (
+            <>
+              <label>Ruolo:</label>
+              <br />
+              <select
+                name="ruolo"
+                value={formData.ruolo}
+                onChange={handleInputChange}
+              >
+                <option value="">Seleziona...</option>
+                <option value="OPERATORE">OPERATORE</option>
+                <option value="SEMPLICE">SEMPLICE</option>
+              </select>
+            </>
+          )}
+          <br /> <br />
+          {(formData.ruolo === "OPERATORE" && isRegistration) && (
+            <>
+              <label>Permesso:</label>
+              <select
+                name="permesso"
+                value={formData.permesso}
+                onChange={handleInputChange}
+              >
+                <option value="">Seleziona...</option>
+                <option value="JUNIOR">JUNIOR</option>
+                <option value="SENIOR">SENIOR</option>
+              </select>
+              <br />
+              <br />
+            </>
+          )}
+          <button type="submit">{isRegistration ? "Registrati" : "Login"}</button>
+          <ErrorInForm error={errors.afterErrors} />
+        </form>
+      </ConditionalRenderer>
+
     </div>
   );
 };
