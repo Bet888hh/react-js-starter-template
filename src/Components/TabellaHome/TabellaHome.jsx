@@ -1,6 +1,19 @@
-import React from 'react'
+import React, { useCallback } from 'react'
+import Paginator from '../Paginator/Paginator';
+import { useNavigate } from 'react-router-dom';
 
-const TabellaHome = () => {
+const TabellaHome = ({ticketsAperti}) => {
+  debugger
+  
+  const navigate = useNavigate();
+
+  const visualizza = useCallback((e)=>{
+    const ticket = ticketsAperti.filter((ticket)=>{
+      return ticket.id === e.target.id;
+    })
+    navigate('../dettaglio', {state: ticket})
+  },[navigate, ticketsAperti]);
+
   return (
     <>
       <table>
@@ -12,22 +25,16 @@ const TabellaHome = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Titolo 1</td>
-            <td>Testo 1</td>
-            <td>
-              <button>Modifica</button>
-              <button>Elimina</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Titolo 2</td>
-            <td>Testo 2</td>
-            <td >
-              <button>Modifica</button>
-              <button>Elimina</button>
-            </td>
-          </tr>
+        {ticketsAperti &&<Paginator elemPerPagina={3}>
+
+        { ticketsAperti.map((elem, index) => (
+            <tr key={index}>
+              <td>{elem.Titolo}</td>
+              <td>{elem.Testo}</td>
+              <td><button id={elem.$id} onClick={visualizza}>Visualizza</button></td>
+            </tr>
+          ))}
+        </Paginator>}
         </tbody>
       </table>
     </>
