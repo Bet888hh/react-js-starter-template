@@ -148,3 +148,29 @@ tr {
 
   margin-bottom: 10px;
 }
+
+
+
+.chat-container {
+  border: 1px solid #ccc;
+  padding: 20px;
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.chat-window {
+  overflow-y: scroll;
+  max-height: 300px;
+}
+
+.sender {
+  color: #3498db;
+}
+
+.receiver {
+  color: #2ecc71;
+}
+
+.input-container {
+  margin-top: 10px;
+}

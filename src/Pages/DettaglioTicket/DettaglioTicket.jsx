@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
+import Messaggi from "../../Components/Messaggi/Messaggi";
 
 const DettaglioTicket = () => {
   /*   const navigate = useNavigate();
@@ -42,6 +43,18 @@ useParams
     setLoading(true);
     init();
     setLoading(false);
+    let id;
+    setTimeout(() => {
+      id= setInterval(() => {
+        init()
+      }, 5000);
+    }, 2000);
+
+    return ()=>{
+      clearInterval(id)
+    }
+
+
   }, [id, init, navigate]);
   const getTicketLavorazione = useCallback(async () => {
     return fetch(
@@ -60,9 +73,8 @@ useParams
     [ticket]
   );
 
-
   const handleSalva = useCallback(() => {
-    setLoading(true)
+    setLoading(true);
     fetch(
       urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
       {
@@ -76,20 +88,22 @@ useParams
           permissions: [`read("any")`],
         }),
       }
-    ).then((r) => {
-      return r.json()
-    }).then((r) => {
-      if (!r.message) {
-        init();
-      } else {
-        //erroroni
-      }
-      setLoading(false);
-    });
+    )
+      .then((r) => {
+        return r.json();
+      })
+      .then((r) => {
+        if (!r.message) {
+          init();
+        } else {
+          //erroroni
+        }
+        setLoading(false);
+      });
   }, [id, init, ticket]);
 
   const handleChiudi = useCallback(() => {
-    setLoading(true)
+    setLoading(true);
     fetch(
       urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
       {
@@ -104,25 +118,21 @@ useParams
           permissions: [`read("any")`],
         }),
       }
-    ).then((r) => {
-      return r.json()
-    }).then((r) => {
-      if (!r.message) {
-        init();
-      } else {
-        //erroroni
-      }
-      setLoading(false);
-    });
+    )
+      .then((r) => {
+        return r.json();
+      })
+      .then((r) => {
+        if (!r.message) {
+          init();
+        } else {
+          //erroroni
+        }
+        setLoading(false);
+      });
   }, [id, init, ticket]);
+
   
-  
-  const handleAssegnaASenior = useCallback(() => {
-    navigate("/crea_ticket", {state: ticket})
-  }, [navigate, ticket]);
-
-
-
   const prendiInCarico = useCallback(
     async (id) => {
       setLoading(true);
@@ -168,11 +178,52 @@ useParams
     },
     [getTicketLavorazione, init, user.Permesso, user.Username]
   );
-
-
  
 
 
+
+  const setMessaggi = useCallback(
+   async (mess) => {
+      //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
+      
+      const response = await fetch(urlbase("TICKET") + `/${id}`, {
+        method: "GET",
+        headers: headers,
+      });
+      const rs = await response.json();
+      
+      fetch(
+        urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+        {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({
+            documentId: id,
+            data: {
+            
+              Messaggi: [...rs.Messaggi, `${user.Username}: ${mess}`],
+            },
+            permissions: [`read("any")`],
+          }),
+        }
+      )
+        .then((r) => {
+          return r.json();
+        })
+        .then((r) => {
+          init();
+         
+        })
+      
+      
+      
+      
+      
+
+     
+    },
+    [id, init, user.Username]
+  );
   return (
     <>
       <ConditionalRenderer showContent={!loading}>
@@ -189,7 +240,10 @@ useParams
             {
               <select
                 value={ticket.Categoria}
-                disabled={user.Ruolo !== "OPERATORE"}
+                disabled={
+                  user.Username == !ticket.Operatore &&
+                  ticket.Stato == !"IN_LAVORAZIONE"
+                }
                 onChange={handleOnChangeCategoria}
               >
                 <option value="Articolo_non_funzionante">
@@ -213,15 +267,25 @@ useParams
                 />
               </div>
             )}
-            <button onClick={()=>{navigate(-1)}} id="btnIndietro">Indietro</button>
-
             <button
-              disabled={ticket.Categoria === refCat.current}
-              onClick={handleSalva}
-              id="btnSalva"
+              onClick={() => {
+                navigate(-1);
+              }}
+              id="btnIndietro"
             >
-              Salva
+              Indietro
             </button>
+
+            {user.Username === ticket.Operatore &&
+              ticket.Stato === "IN_LAVORAZIONE" && (
+                <button
+                  disabled={ticket.Categoria === refCat.current}
+                  onClick={handleSalva}
+                  id="btnSalva"
+                >
+                  Salva
+                </button>
+              )}
 
             {ticket.Stato === "CHIUSO" &&
               !ticket.Riaperto &&
@@ -233,7 +297,10 @@ useParams
               ticket.stato !== "INTERNO" &&
               (user.Username === ticket.Utente ||
                 user.Username === ticket.Operatore) && (
-                <button onClick={handleChiudi} id="btnChiudi"> Chiudi</button>
+                <button onClick={handleChiudi} id="btnChiudi">
+                  {" "}
+                  Chiudi
+                </button>
               )}
 
             {user.Ruolo === "OPERATORE" && ticket.Operatore === null && (
@@ -253,9 +320,17 @@ useParams
               ticket.Stato !== "INTERNO" && (
                 <div>
                   {/* <button id="btnAssegnaASenior" onClick={handleAssegnaASenior}>Assegna a Senior</button> */}
-                  <Link to="/crea_ticket" state={ticket}><button id="btnAssegnaASenior">Assegna a Senior</button></Link>
+                  <Link to="/crea_ticket" state={ticket}>
+                    <button id="btnAssegnaASenior">Assegna a Senior</button>
+                  </Link>
                 </div>
               )}
+
+
+
+                <Messaggi messaggi={ticket.Messaggi} setMessaggi={setMessaggi}/>
+
+
           </div>
         }
       </ConditionalRenderer>
