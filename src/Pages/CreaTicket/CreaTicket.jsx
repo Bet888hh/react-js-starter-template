@@ -29,7 +29,7 @@ const CreaTicket = () => {
     ],
 } */
 
-  debugger
+ 
   const location = useLocation();
   const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
   console.log("State: ", location.state);
