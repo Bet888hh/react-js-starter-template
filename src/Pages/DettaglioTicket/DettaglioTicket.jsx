@@ -18,10 +18,10 @@ useParams
   const user = useSelector(SelectUserSlice);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [ticket, setTicket] = useState([]);
+  const [ticket, setTicket] = useState({});
   const { id } = useParams();
   const refCat = useRef("");
-
+  console.log(ticket)
   const init = useCallback(async () => {
     if (id) {
       const response = await fetch(urlbase("TICKET") + `/${id}`, {
@@ -39,23 +39,44 @@ useParams
     }
   }, [id, navigate]);
 
+  
+  const initMessages = useCallback(async () => {
+    if (id) {
+      const response = await fetch(urlbase("TICKET") + `/${id}`, {
+        method: "GET",
+        headers: headers,
+      });
+      const rs = await response.json();
+
+      if (!rs.message) {
+         //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
+         setTicket(prev=>({...prev,Messaggi:[...rs.Messaggi]}))
+      } else {
+        navigate("/");
+      }
+    }
+  }, [id, navigate]);
+
   useEffect(() => {
     setLoading(true);
     init();
     setLoading(false);
-    let id;
-    setTimeout(() => {
+    let id,id1;
+   id1= setTimeout(() => {
       id= setInterval(() => {
-        init()
+        initMessages()
       }, 5000);
     }, 2000);
 
     return ()=>{
       clearInterval(id)
+      clearTimeout(id1)
     }
 
 
-  }, [id, init, navigate]);
+  }, []);
+
+
   const getTicketLavorazione = useCallback(async () => {
     return fetch(
       urlbase("TICKET") + `?queries[0]=search("Stato", ["IN_LAVORAZIONE"])`,
@@ -211,7 +232,7 @@ useParams
           return r.json();
         })
         .then((r) => {
-          init();
+          initMessages();
          
         })
       
@@ -222,7 +243,7 @@ useParams
 
      
     },
-    [id, init, user.Username]
+    [id, initMessages, user.Username]
   );
   return (
     <>
@@ -326,7 +347,7 @@ useParams
                 </div>
               )}
 
-
+                <br /><br /><br /><br /><br /><br />
 
                 <Messaggi messaggi={ticket.Messaggi} setMessaggi={setMessaggi}/>
 
