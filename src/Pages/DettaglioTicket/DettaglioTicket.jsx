@@ -213,7 +213,7 @@ useParams
                 />
               </div>
             )}
-            <button id="btnIndietro">Indietro</button>
+            <button onClick={()=>{navigate(-1)}} id="btnIndietro">Indietro</button>
 
             <button
               disabled={ticket.Categoria === refCat.current}

@@ -55,7 +55,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
         <Route
           path="/login"
           element={
-            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/"}>
+            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={user.Ruolo==="OPERATORE"?"/gestione_ticket":"/"}>
               <LoginRegistrazione /* forceRender={forceRender} */ />
             </ProtectedRoute>
           }
@@ -63,7 +63,7 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
         <Route
           path="/registrazione"
           element={
-            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/"}>
+            <ProtectedRoute condition={permits.loginRegistrazione} redirectTo={"/login"}>
               <LoginRegistrazione /* forceRender={forceRender} */ />
             </ProtectedRoute>
           }

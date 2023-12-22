@@ -77,7 +77,7 @@ const LoginRegistrazione = () => {
         
         if (documents[0].Password === password) {
          //pssword corretta posso loggarmi 
-        
+    
           dispatch(setUser(documents[0]))
           navigate("/")
 
