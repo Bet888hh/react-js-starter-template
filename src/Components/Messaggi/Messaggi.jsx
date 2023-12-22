@@ -8,7 +8,7 @@ const Messaggi = ({messaggi,setMessaggi}) => {
     
       const [nuovoMessaggio, setNuovoMessaggio] = useState('');
     
-      // Funzione per inviare il messaggio, in modo amichevole,
+      
       const inviaMessaggio = () => {
         if (nuovoMessaggio) {
           setMessaggi(nuovoMessaggio);
@@ -18,7 +18,7 @@ const Messaggi = ({messaggi,setMessaggi}) => {
   return (
     <div className="chat-container">
     <div className="chat-window">
-      {/* Mappa gli elementi, in stile da star, */}
+     
       { messaggi&&messaggi.map((messaggio, index) => {
         const [nome, testo] = messaggio.split(':');
         return (
@@ -29,7 +29,7 @@ const Messaggi = ({messaggi,setMessaggi}) => {
       })}
     </div>
 
-    {/* Input per scrivere, in stile da re, */}
+
     <div className="input-container">
       <input
         type="text"
