@@ -5,6 +5,7 @@ import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer"
 import { useDispatch } from "react-redux";
 import {  setUser } from "../../store/Reducer/Slices/UserSlice/UserSlice";
+import { Link } from "react-router-dom";
 
 
 function generateRandomId() {
@@ -363,6 +364,9 @@ const LoginRegistrazione = () => {
           </>
         )}
         <button type="submit">{isRegistration?"Registrati":"Login"}</button>
+        {!isRegistration && (
+        <Link to="/registrazione"><button type="button">Conferma</button></Link>
+        )}
         <ErrorInForm error={errors.afterErrors} />
       </form>
     </ConditionalRenderer>
