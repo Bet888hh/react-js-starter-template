@@ -76,6 +76,7 @@ const prendiInCarico= useCallback(async (id) => {
     const ticketUtente = rs.documents.filter(e=>e.Operatore===user.Username).length
     if(ticketUtente<limite){
       console.log("loprendooo");
+      console.log(user);
       fetch(urlbase("TICKET") + "/" + id,//categoria manuale per il junior nel ticket interno è l'id del ticket semplice
       {
         method: "PATCH",
@@ -96,17 +97,18 @@ const prendiInCarico= useCallback(async (id) => {
        return r.json()
       }).then((r)=>{
         
-        navigate("/dettaglio",{state:r})
+        navigate("/dettaglio/"+id,{state:r})
       })
     }else{
-      //non può prenderlo in carico errore 
+      console.log("nonpuoi");
     }
   }else{
-    //errori
+    console.log("nonpuoi");
   }
 },[getTicketLavorazione, navigate, user.Permesso, user.Username])
 
   const handleTableAction = useCallback((e) => {
+    
     const [action, id] = e.split("-");
     switch (action) {
       case "prendi":
@@ -183,8 +185,13 @@ const prendiInCarico= useCallback(async (id) => {
     }
   }, []);
 
+
+
+
+
   const handleFiltra = useCallback(
     async (e) => {
+      sortConfig.current = { campo: "niente", ordine: "desc" };
       let data = null;
       let operatoriJunior;
       if (filter === e) {

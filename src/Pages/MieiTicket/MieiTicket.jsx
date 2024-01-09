@@ -184,7 +184,7 @@ const MieiTicket = () => {
             setFilter(e);
             data = await takeData(e);
             break;
-          case "CHIUSI":
+          case "CHIUSO":
             setFilter(e);
             data = await takeData(e);
             break;

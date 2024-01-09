@@ -26,7 +26,7 @@ const PulsantieraFiltri = ({
           In lavorazione{inLavorazione >= 0 && inLavorazione}
         </button>
       )}
-      <button onClick={filtra} id="CHIUSI">
+      <button onClick={filtra} id="CHIUSO">
         Chiusi {chiusi >= 0 && chiusi}
       </button>
       {location.pathname === "/gestione_ticket" && (

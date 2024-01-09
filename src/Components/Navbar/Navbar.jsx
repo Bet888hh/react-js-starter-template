@@ -24,7 +24,7 @@ const Navbar = () => {
         return {
           home: user.Ruolo!=="NOLOG" && user.Ruolo === "SEMPLICE",
           creaTicket:user.Ruolo!=="NOLOG" && user.Ruolo==="SEMPLICE",
-          mieiTicket:user.Ruolo!=="NOLOG",
+          mieiTicket:user.Ruolo==="SEMPLICE",
           gestioneTicket:user.Ruolo==="OPERATORE",
           interni:user.Ruolo==="OPERATORE",
           loginRegistrazione:user.Ruolo==="NOLOG"
@@ -48,7 +48,7 @@ const Navbar = () => {
                         <span>Crea ticket</span>
                     </Link>
                 )}
-                {(
+                {permits.mieiTicket&&(
                     <Link
                         className={`Link ${location.includes("miei_ticket") ? "active" : ""}`}
                         to="/miei_ticket"
