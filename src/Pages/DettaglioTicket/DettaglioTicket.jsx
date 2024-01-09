@@ -155,7 +155,9 @@ useParams
 
   
   const prendiInCarico = useCallback(
-    async (id) => {
+    async (e) => {
+      const id = e.target.id;
+      
       setLoading(true);
       const response = await getTicketLavorazione();
       const rs = await response.json();
@@ -187,8 +189,8 @@ useParams
               return r.json();
             })
             .then((r) => {
-              init();
               setLoading(false);
+              init();
             });
         } else {
           setLoading(false);
@@ -262,8 +264,9 @@ useParams
               <select
                 value={ticket.Categoria}
                 disabled={
-                  user.Username == !ticket.Operatore &&
-                  ticket.Stato == !"IN_LAVORAZIONE"
+                  user.Username !== ticket.Operatore ||
+                  ticket.Stato !== "IN_LAVORAZIONE" 
+                  
                 }
                 onChange={handleOnChangeCategoria}
               >

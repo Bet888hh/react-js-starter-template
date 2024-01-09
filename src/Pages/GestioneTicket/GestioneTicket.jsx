@@ -50,13 +50,13 @@ const GestioneTicket = () => {
   const getTicketChiusi = useCallback(() => {
     return fetch(
       urlbase("TICKET") +
-        `?queries[0]=search("Stato", ["CHIUSO"])&queries[1]=search("Utente", ["${user.Username}"])`,
+        `?queries[0]=search("Stato", ["CHIUSO"])&queries[1]=search("Operatore", ["${user.Username}"])`,
       {
         method: "GET",
         headers: headers,
       }
     );
-  }, []);
+  }, [user.Username]);
   const getOperatori = useCallback(() => {
     return fetch(
       urlbase("USER") + `?queries[0]=search("Ruolo", ["OPERATORE"])`,
@@ -75,8 +75,7 @@ const prendiInCarico= useCallback(async (id) => {
   if (!rs.message){
     const ticketUtente = rs.documents.filter(e=>e.Operatore===user.Username).length
     if(ticketUtente<limite){
-      console.log("loprendooo");
-      console.log(user);
+      
       fetch(urlbase("TICKET") + "/" + id,//categoria manuale per il junior nel ticket interno è l'id del ticket semplice
       {
         method: "PATCH",
@@ -100,6 +99,7 @@ const prendiInCarico= useCallback(async (id) => {
         navigate("/dettaglio/"+id,{state:r})
       })
     }else{
+      //TODO
       console.log("nonpuoi");
     }
   }else{
@@ -171,7 +171,7 @@ const prendiInCarico= useCallback(async (id) => {
     },
     [sortElementi]
   );
-  const takeData = useCallback(async (response) => {
+/*   const takeData = useCallback(async (response) => {
     const rs = await response.json();
 
     if (rs.message) {
@@ -183,7 +183,7 @@ const prendiInCarico= useCallback(async (id) => {
         UltimaModifica: doc.$updatedAt,
       }));
     }
-  }, []);
+  }, []); */
 
 
 
@@ -219,7 +219,7 @@ const prendiInCarico= useCallback(async (id) => {
               operatoriJunior.includes(e.Operatore)
             );
             break;
-          case "CHIUSI":
+          case "CHIUSO":
             setFilter(e);
             data = await getTicketChiusi();
             data =await data.json();
