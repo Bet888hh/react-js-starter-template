@@ -340,7 +340,8 @@ useParams
               )}
 
             {user.Permesso === "JUNIOR" &&
-              ticket.Assegnatario === null &&
+              ticket.Operatore === user.Username &&
+              ticket.Assegnatario === "" &&
               ticket.Stato !== "INTERNO" && (
                 <div>
                   {/* <button id="btnAssegnaASenior" onClick={handleAssegnaASenior}>Assegna a Senior</button> */}
