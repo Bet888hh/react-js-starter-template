@@ -294,8 +294,18 @@ const prendiInCarico= useCallback(async (id) => {
       case "ApertoIl":
       case "UltimaModifica":
         return valore ? new Date(valore).toLocaleString("it-IT") : "-";
-      case "Messaggi":
-        return "dafa";
+      case "Messaggi": {
+        const messaggi = [...valore]
+        return messaggi.length > 0 ?
+          (<button onClick={() => {
+            const listaMessaggi = messaggi.map((messaggio) => { return `${messaggio}\n`})
+            
+            alert(listaMessaggi)
+          }
+          }>Apri</button>)
+          :
+          "-";
+      }
       default:
         return valore || "-";
     }

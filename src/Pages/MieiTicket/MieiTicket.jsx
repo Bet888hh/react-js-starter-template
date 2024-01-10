@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { useNavigate } from "react-router-dom";
+import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
 const MieiTicket = () => {
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "niente", ordine: "asc" });
@@ -214,10 +215,8 @@ const MieiTicket = () => {
             Messaggi: e.Messaggi,
 
             Azioni: (
-              <PulsantieraTable
+              <Pulsantiera
                 id={e.$id}
-                stato={e.Stato}
-                handleTableAction={handleTableAction}
               />
             ),
           }
@@ -241,8 +240,18 @@ const MieiTicket = () => {
       case "ApertoIl":
       case "UltimaModifica":
         return valore ? new Date(valore).toLocaleString("it-IT") : "-";
-      case "Messaggi":
-        return "dafa";
+        case "Messaggi": {
+          const messaggi = [...valore]
+          return messaggi.length > 0 ?
+            (<button onClick={() => {
+              const listaMessaggi = messaggi.map((messaggio) => { return `${messaggio}\n`})
+              
+              alert(listaMessaggi)
+            }
+            }>Apri</button>)
+            :
+            "-";
+        }
       default:
         return valore || "-";
     }

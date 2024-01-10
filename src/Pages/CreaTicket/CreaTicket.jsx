@@ -88,6 +88,7 @@ const CreaTicket = () => {
       permissions: ['read("any")'],
     };
     
+    
     fetch(urlbase("TICKET"), {
       method: "POST",
       headers: headers,
@@ -195,12 +196,13 @@ const CreaTicket = () => {
 
   useEffect(() => {
     if (user.Ruolo === "OPERATORE" && user.Permesso === "JUNIOR") {
+      setTicketDaLavorare(location.state);
       setTesto(`Ciao, ti contatto per il ticket "${ticketDaLavorare.Titolo}" per chiederti di prenderlo in carico`);
-      setCategoria("Interno");
+      setCategoria(ticketDaLavorare.Categoria)
       setCategoriaManuale(ticketDaLavorare.$id);
     }
     ottieniListaAssegnatari();
-  }, [ottieniListaAssegnatari, ticketDaLavorare, user.Permesso, user.Ruolo]);
+  }, [location.state, ottieniListaAssegnatari, ticketDaLavorare, user.Permesso, user.Ruolo]);
 
   useEffect(() => {
     contoMieiTicketApertiInLavorazione();
@@ -244,7 +246,7 @@ const CreaTicket = () => {
                 }
 
 
-                {categoria === 'Altro' && (
+                {categoria === 'Altro' && user.Ruolo !== 'OPERATORE' && (
                   <div>
                     <label>Categoria Manuale:</label>
                     <input type="text" max="25" value={categoriaManuale} onChange={e => setCategoriaManuale(e.target.value)} />

@@ -2,6 +2,7 @@
 import React, { useCallback } from 'react'
 import Paginator from '../Paginator/Paginator';
 import { useNavigate } from 'react-router-dom';
+import { Pulsantiera } from '../PulsantieraTable/Pulsantiera';
 
 const TabellaHome = ({ ticketsAperti }) => {
 
@@ -32,7 +33,8 @@ const TabellaHome = ({ ticketsAperti }) => {
               <tr key={index}>
                 <td>{elem.Titolo}</td>
                 <td>{elem.Testo}</td>
-                <td><button id={elem.$id} onClick={visualizza}>Visualizza</button></td>
+                {/* <td><button id={elem.$id} onClick={visualizza}>Visualizza</button></td> */}
+                <td><Pulsantiera id={elem.$id} /></td>
               </tr>
             ))}
           </Paginator>

@@ -303,7 +303,7 @@ useParams
               </select>
             }
 
-            {ticket.Categoria === "Altro" && (
+            {ticket.Categoria === "Altro" && user.Ruolo !== "OPERATORE" && (
               <div>
                 <label>Categoria Manuale:</label>
                 <input
