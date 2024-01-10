@@ -30,6 +30,7 @@ useParams
       const rs = await response.json();
 
       if (!rs.message) {
+        console.log("rs: ", rs);
         setTicket(rs);
         refCat.current = rs.Categoria;
       } else {
@@ -307,7 +308,7 @@ useParams
                 <label>Categoria Manuale:</label>
                 <input
                   type="text"
-                  value={ticket.CategoriaManuale}
+                  value={ticket.Categoria_manuale}
                   disabled={true}
                 />
               </div>

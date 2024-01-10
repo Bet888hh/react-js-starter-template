@@ -32,7 +32,7 @@ const CreaTicket = () => {
 
   const location = useLocation();
   const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
-
+  console.log("ticketDaLavorare", ticketDaLavorare);
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
   const [mieiTicketApertiInLavorazione, setMieiTicketApertiLavorazione] = useState(0);
@@ -52,15 +52,15 @@ const CreaTicket = () => {
       Testo: testo,
       Utente: user.Username,
       Ultima_visita: user.Permesso ? user.Permesso : "UTENTE",
-      Categoria: categoria !== "Altro" ? categoria : categoriaManuale,
+      Categoria: categoria,
     }
 
     if (user.Ruolo === 'SEMPLICE') {
       if (mieiTicketApertiInLavorazione > 1) {
-        alert('Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.');
+        alert('Hai già aperto troppi ticket. Chiudine alcuni prima di aprirne un altro.');
         return;
       }
-      ticket = { ...ticket, Stato: "APERTO" }
+      ticket = { ...ticket, Stato: "APERTO", Categoria_manuale: categoriaManuale }
       pathNavigazione = '../miei_ticket'
     } else {
       ticket = { ...ticket, Operatore: assegnaA, Stato: "INTERNO" }
@@ -84,31 +84,35 @@ const CreaTicket = () => {
       headers: headers,
       body: JSON.stringify(request),
     })
-    .then(() => {
-      if (user.Ruolo === "OPERATORE") {
-          fetch(urlbase("TICKET") + "/" + categoriaManuale,//categoria manuale per il junior nel ticket interno è l'id del ticket semplice
-          {
+      .then(() => {
+        if (user.Ruolo === "OPERATORE") {
+          return fetch(urlbase("TICKET") + "/" + categoriaManuale, {
             method: "PATCH",
             headers: headers,
-              body: JSON.stringify(
-                {
-                  documentId: categoriaManuale,
-                  data: {
-                    Stato: "IN_LAVORAZIONE",
-                    Ultima_visita: "JUNIOR",
-                    Operatore: assegnaA,
-                    Assegnatario: user.Username
-                  },
-                  permissions: [`read("any")`],
-                }
-                ),
-              })
-            }
+            body: JSON.stringify({
+              documentId: categoriaManuale,
+              data: {
+                Stato: "IN_LAVORAZIONE",
+                Ultima_visita: "JUNIOR",
+                Operatore: assegnaA,
+                Assegnatario: user.Username,
+              },
+              permissions: [`read("any")`],
+            }),
           })
-          .then(
-            () => alert('Ticket creato con successo!')
-          )
-          .then(() => { navigate(pathNavigazione) })
+            .then(() => alert('Ticket creato con successo!'))
+            .then(() => navigate(pathNavigazione))
+            .catch(() => {
+              throw new Error('Qualcosa è andato storto durante la PATCH');
+            });
+        }
+      })
+      .catch((error) => {
+        alert('Qualcosa è andato storto durante la POST');
+        console.error(error);
+      });
+
+
   };
 
   const ottieniListaAssegnatari = useCallback(() => {
@@ -140,7 +144,7 @@ const CreaTicket = () => {
 
                 ticketAssegnatiAOperatore = (tickets.filter((ticket) => {
                   return ticket.Assegnatario === operatore.Username
-                })).length; 
+                })).length;
 
                 if (ticketAssegnatiAOperatore < 5) {
                   return { username: operatore.Username, ticketAssegnati: ticketAssegnatiAOperatore };
@@ -190,63 +194,63 @@ const CreaTicket = () => {
     <div style={{ display: "flex", flexDirection: "column" }}>
       {/* <h2>Creazione Ticket</h2> */}
       {
-      mieiTicketApertiInLavorazione>1
-      ?
-      (<h2>Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.</h2>)
-      :
-      (
-        <>
-        <label>Titolo:</label>
-      <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
+        mieiTicketApertiInLavorazione > 1
+          ?
+          (<h2>Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.</h2>)
+          :
+          (
+            <>
+              <label>Titolo:</label>
+              <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
 
-      <label>Testo:</label>
-      <textarea value={testo} onChange={e => setTesto(e.target.value)} maxLength="500" />
+              <label>Testo:</label>
+              <textarea value={testo} onChange={e => setTesto(e.target.value)} maxLength="500" />
 
-      <label>Categoria:</label>
-      {user.Ruolo === "SEMPLICE"
-        ?
-        (
-          <select value={categoria} onChange={e => setCategoria(e.target.value)}>
-            <option value="">Selziona una categoria</option>
-            <option value="Articolo_non_funzionante">Articolo non funzionante</option>
-            <option value="Articolo_danneggiato">Articolo danneggiato</option>
-            <option value="Articono_non_conforme">Articolo non conforme</option>
-            <option value="Altro">Altro</option>
-          </select>
-        )
-        :
-        (
-          <select defaultValue={"Interno"} disabled={true}>
-            <option value="Interno">Interno</option>
-          </select>
-        )
-      }
+              <label>Categoria:</label>
+              {user.Ruolo === "SEMPLICE"
+                ?
+                (
+                  <select value={categoria} onChange={e => setCategoria(e.target.value)}>
+                    <option value="">Selziona una categoria</option>
+                    <option value="Articolo_non_funzionante">Articolo non funzionante</option>
+                    <option value="Articolo_danneggiato">Articolo danneggiato</option>
+                    <option value="Articono_non_conforme">Articolo non conforme</option>
+                    <option value="Altro">Altro</option>
+                  </select>
+                )
+                :
+                (
+                  <select defaultValue={"Interno"} disabled={true}>
+                    <option value="Interno">Interno</option>
+                  </select>
+                )
+              }
 
 
-      {categoria === 'Altro' && (
-        <div>
-          <label>Categoria Manuale:</label>
-          <input type="text" value={categoriaManuale} onChange={e => setCategoriaManuale(e.target.value)} />
-        </div>
-      )}
+              {categoria === 'Altro' && (
+                <div>
+                  <label>Categoria Manuale:</label>
+                  <input type="text" value={categoriaManuale} onChange={e => setCategoriaManuale(e.target.value)} />
+                </div>
+              )}
 
-      {user.Ruolo === 'OPERATORE' && user.Permesso === 'JUNIOR' && (
-        <div>
-          <label>Assegna a:</label>
-          <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
-            <option value="">Selziona un senior</option>
-            {listaAssegnatari.length > 0 && (
-              listaAssegnatari.map((elem, index) => {
-                return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
-              })
-            )}
-          </select>
-        </div>
-      )}
+              {user.Ruolo === 'OPERATORE' && user.Permesso === 'JUNIOR' && (
+                <div>
+                  <label>Assegna a:</label>
+                  <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
+                    <option value="">Selziona un senior</option>
+                    {listaAssegnatari.length > 0 && (
+                      listaAssegnatari.map((elem, index) => {
+                        return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
+                      })
+                    )}
+                  </select>
+                </div>
+              )}
 
-      <button onClick={gestisciCreazioneTicket}>Crea Ticket</button>
-      </>
-      )}
+              <button onClick={gestisciCreazioneTicket}>Crea Ticket</button>
+            </>
+          )}
     </div>
   );
 };

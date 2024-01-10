@@ -16,7 +16,6 @@ const Home = () => {
     let url = urlbase("TICKET") + `?queries[0]=search("Stato",+["APERTO"])`;
     if (categoriaRef.current !== null) {
       if (categoriaRef.current.value !== "") {
-        console.log("categoriaRef.current.value", categoriaRef.current.value);
         url += `&queries[1]=search("Categoria",+["${categoriaRef.current.value}"])`
       }
     }
