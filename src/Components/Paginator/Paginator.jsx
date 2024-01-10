@@ -34,11 +34,11 @@ const Paginator = ({ elemPerPagina, children }) => {
   return (
     <>
       {elementiPagina}
-      <div style={{ display: "flex" }}>
+      <tr style={{ display: "flex" }}>
         <button onClick={paginaPrecedente}>Prev</button>
         <p>{numeroPaginaCorrente}</p>
         <button onClick={paginaSuccessiva}>Succ</button>
-      </div>
+      </tr>
     </>
   );
 };

@@ -21,7 +21,6 @@ useParams
   const [ticket, setTicket] = useState({});
   const { id } = useParams();
   const refCat = useRef("");
-  console.log(ticket)
   const init = useCallback(async () => {
     if (id) {
       const response = await fetch(urlbase("TICKET") + `/${id}`, {
@@ -167,7 +166,6 @@ useParams
           (e) => e.Operatore === user.Username
         ).length;
         if (ticketUtente < limite) {
-          console.log("loprendooo");
           fetch(
             urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
             {
@@ -276,7 +274,6 @@ useParams
       <ConditionalRenderer showContent={!loading}>
         {
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <h2>Creazione Ticket</h2>
             <label>Titolo:</label>
             <input type="text" value={ticket.Titolo} disabled={true} />
 

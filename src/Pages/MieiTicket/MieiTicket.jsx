@@ -80,6 +80,9 @@ const MieiTicket = () => {
         case "rimuovi":
           deletePost(id);
           break;
+        case "accetta":
+          alert("implementare funzione accetta")
+          break;
        
       }
     },

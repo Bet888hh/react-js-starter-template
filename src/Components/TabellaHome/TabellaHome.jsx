@@ -3,17 +3,17 @@ import React, { useCallback } from 'react'
 import Paginator from '../Paginator/Paginator';
 import { useNavigate } from 'react-router-dom';
 
-const TabellaHome = ({ticketsAperti}) => {
-  
-  
+const TabellaHome = ({ ticketsAperti }) => {
+
+
   const navigate = useNavigate();
 
-  const visualizza = useCallback((e)=>{
-    const ticket = ticketsAperti.filter((ticket)=>{
+  const visualizza = useCallback((e) => {
+    const ticket = ticketsAperti.filter((ticket) => {
       return ticket.id === e.target.id;
     })
-    navigate('../dettaglio/'+e.target.id, {state: ticket})
-  },[navigate, ticketsAperti]);
+    navigate('../dettaglio/' + e.target.id, { state: ticket })
+  }, [navigate, ticketsAperti]);
 
   return (
     <>
@@ -26,16 +26,17 @@ const TabellaHome = ({ticketsAperti}) => {
           </tr>
         </thead>
         <tbody>
-        {ticketsAperti &&<Paginator elemPerPagina={3}>
+          {ticketsAperti && <Paginator elemPerPagina={10}>
 
-        { ticketsAperti.map((elem, index) => (
-            <tr key={index}>
-              <td>{elem.Titolo}</td>
-              <td>{elem.Testo}</td>
-              <td><button id={elem.$id} onClick={visualizza}>Visualizza</button></td>
-            </tr>
-          ))}
-        </Paginator>}
+            {ticketsAperti.map((elem, index) => (
+              <tr key={index}>
+                <td>{elem.Titolo}</td>
+                <td>{elem.Testo}</td>
+                <td><button id={elem.$id} onClick={visualizza}>Visualizza</button></td>
+              </tr>
+            ))}
+          </Paginator>
+          }
         </tbody>
       </table>
     </>

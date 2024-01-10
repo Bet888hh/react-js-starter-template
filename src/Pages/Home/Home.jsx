@@ -69,9 +69,7 @@ const Home = () => {
       {tickets.length > 0
         ?
         (
-          <div>
-            <TabellaHome ticketsAperti={tickets} />
-          </div>
+          <TabellaHome ticketsAperti={tickets} />
         )
         :
         (<p>{testoAvvisi.current}</p>)

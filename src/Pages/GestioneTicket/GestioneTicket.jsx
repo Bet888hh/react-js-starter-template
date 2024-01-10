@@ -87,7 +87,7 @@ const prendiInCarico= useCallback(async (id) => {
               Stato: "IN_LAVORAZIONE",
               Ultima_visita: user.Permesso,
               Operatore: user.Username,
-              Assegnatario: ""
+              //Assegnatario: "" commentato perché non dovrebbe essere necessario
             },
             permissions: [`read("any")`],
           }

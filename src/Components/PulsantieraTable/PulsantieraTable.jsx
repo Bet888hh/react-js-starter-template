@@ -22,7 +22,7 @@ const PulsantieraTable = ({
     navigate("/dettaglio/"+e.target.id)
   }
   return (
-    <div>
+    <>
       <button onClick={goToDettaglio} id={id}>
         dettaglio
       </button>
@@ -55,7 +55,7 @@ const PulsantieraTable = ({
           </button>}
         </>
       )}
-    </div>
+    </>
   );
 };
 
