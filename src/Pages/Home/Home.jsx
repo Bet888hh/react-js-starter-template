@@ -30,7 +30,6 @@ const Home = () => {
         let tickets = res.documents
         if (inputRef.current !== null) {
           if (inputRef.current.value !== "") {
-            console.log(inputRef.current.value);
             tickets = tickets.filter((ticket) => {
               const testo = ticket.Testo
               return testo.includes(inputRef.current.value);

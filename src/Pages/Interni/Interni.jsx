@@ -15,7 +15,7 @@ function Interni() {
     //logica per i pulsanti della tabella
   };
 
- 
+
   const sortElementi = useCallback(() => {
     const datiClone = [...elementi];
 
@@ -61,50 +61,50 @@ function Interni() {
         : "asc";
     sortConfig.current = { campo: campo, ordine: nuovoOrdine };
     sortElementi();
-  },[sortElementi]);
+  }, [sortElementi]);
 
-/*   const takeData = useCallback(async (type) => {
-    const response = await fetch(
-      urlbase("TICKET") + `?queries[0]=search("Stato",+["${type}"])`,
-      {
-        method: "GET",
-        headers: headers ,
+  /*   const takeData = useCallback(async (type) => {
+      const response = await fetch(
+        urlbase("TICKET") + `?queries[0]=search("Stato",+["${type}"])`,
+        {
+          method: "GET",
+          headers: headers ,
+        }
+      );
+      const rs = await response.json();
+  
+      if (rs.message) {
+        //errori cazzo
+      } else {
+        return rs.documents.map((doc) => ({
+          ...doc,
+          ApertoIl: doc.$createdAt,
+          UltimaModifica: doc.$updatedAt,
+        }));
       }
-    );
-    const rs = await response.json();
-
-    if (rs.message) {
-      //errori cazzo
-    } else {
-      return rs.documents.map((doc) => ({
-        ...doc,
-        ApertoIl: doc.$createdAt,
-        UltimaModifica: doc.$updatedAt,
-      }));
-    }
-  },[]); */
+    },[]); */
 
   const perTabella = useMemo(() => {
     return elementi
       ? elementi.map((e) => {
-          return {
-            Titolo: e.Titolo,
-            Testo: e.Testo,
-            Categoria: e.Categoria,
-            ApertoIl: e.ApertoIl,
-            UltimaModifica: e.UltimaModifica,
-            Operatore: e.Operatore,
-            Messaggi: e.Messaggi,
-           
-            Azioni: (
-              <PulsantieraTable
-                id={e.$id}
-                stato={e.Stato}
-                handleTableAction={handleTableAction}
-              />
-            ),
-          };
-        })
+        return {
+          Titolo: e.Titolo,
+          Testo: e.Testo,
+          Categoria: e.Categoria,
+          ApertoIl: e.ApertoIl,
+          UltimaModifica: e.UltimaModifica,
+          Operatore: e.Operatore,
+          Messaggi: e.Messaggi,
+
+          Azioni: (
+            <PulsantieraTable
+              id={e.$id}
+              stato={e.Stato}
+              handleTableAction={handleTableAction}
+            />
+          ),
+        };
+      })
       : null;
   }, [elementi]);
 
@@ -122,24 +122,27 @@ function Interni() {
       case "ApertoIl":
       case "UltimaModifica":
         return valore ? new Date(valore).toLocaleString("it-IT") : "-";
-      case "Messaggi":
-        return "dafa";
+      case "Messaggi": {
+        const messaggi = [...valore]
+        return messaggi.length > 0 ? (<button>Apri</button>) : "-";
+      }
+
       default:
         return valore || "-";
     }
-  },[]);
-  useEffect( ()=>{
-   async  function init (){
+  }, []);
+  useEffect(() => {
+    async function init() {
 
-     const response = await fetch(
-       urlbase("TICKET") + `?queries[0]=search("Stato",+["INTERNO"])`,
-       {
-         method: "GET",
-         headers: headers ,
-       })
-       const rs = await response.json() 
-       
-       setElementi(rs.documents.map((doc) => ({
+      const response = await fetch(
+        urlbase("TICKET") + `?queries[0]=search("Stato",+["INTERNO"])`,
+        {
+          method: "GET",
+          headers: headers,
+        })
+      const rs = await response.json()
+
+      setElementi(rs.documents.map((doc) => ({
         ...doc,
         ApertoIl: doc.$createdAt,
         UltimaModifica: doc.$updatedAt,
@@ -147,10 +150,10 @@ function Interni() {
     }
     init()
 
-  },[])
+  }, [])
   return (
     <div>
-     
+
       {elementi.length > 0 && intestazioni.length > 0 && (
         <>
           <SortableTableHead
@@ -158,7 +161,7 @@ function Interni() {
             intestazioni={intestazioni}
             onSort={onSort}
             sort={sortConfig.current}
-            
+
           />
           <tbody>
             <Paginator elemPerPagina={5}>
@@ -169,10 +172,10 @@ function Interni() {
                       {((intestazione === includeInTableIf.include &&
                         includeInTableIf.filter === filter) ||
                         intestazione !== includeInTableIf.include) && (
-                        <td key={intestazione}>
-                          {formatCell(intestazione, riga[intestazione])}
-                        </td>
-                      )}
+                          <td key={intestazione}>
+                            {formatCell(intestazione, riga[intestazione])}
+                          </td>
+                        )}
                     </>
                   ))}
                 </tr>

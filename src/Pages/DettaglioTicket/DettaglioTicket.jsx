@@ -133,7 +133,7 @@ useParams
         body: JSON.stringify({
           documentId: id,
           data: {
-
+            
             Stato: "CHIUSO",
           },
           permissions: [`read("any")`],

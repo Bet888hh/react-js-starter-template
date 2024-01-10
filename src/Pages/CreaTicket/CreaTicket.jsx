@@ -33,8 +33,10 @@ const CreaTicket = () => {
 
   const location = useLocation();
   const showContent = useRef(false);
+  const creaButtonRef = useRef(null);
 
   const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
+  console.log("location.state: ", location.state);
 
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
@@ -46,9 +48,9 @@ const CreaTicket = () => {
   const [categoriaManuale, setCategoriaManuale] = useState('');
   const [assegnaA, setAssegnaA] = useState('');
   const [listaAssegnatari, setListaAssegnatari] = useState([]);
-
+  
   const gestisciCreazioneTicket = () => {
-
+    creaButtonRef.current.disabled=true;
     let pathNavigazione;//per essere reindirizzati alla fine della creazione in base all'utente
     let ticket = {
       Titolo: titolo,
@@ -57,64 +59,71 @@ const CreaTicket = () => {
       Ultima_visita: user.Permesso ? user.Permesso : "UTENTE",
       Categoria: categoria,
     }
-
+    
     if (user.Ruolo === 'SEMPLICE') {
       if (mieiTicketApertiInLavorazione > 1) {
         alert('Hai già aperto troppi ticket. Chiudine alcuni prima di aprirne un altro.');
         return;
       }
-      ticket = { ...ticket, Stato: "APERTO", Categoria_manuale: categoriaManuale }
+      ticket = { ...ticket, Stato: "APERTO"}
+      if(categoriaManuale!==''){
+        ticket = { ...ticket, Categoria_manuale: categoriaManuale }
+      }
       pathNavigazione = '../miei_ticket'
     } else {
       ticket = { ...ticket, Operatore: assegnaA, Stato: "INTERNO" }
       pathNavigazione = '../gestione_ticket'
     }
-
+    
     const tuttiICampiValidi = Object.values(ticket).every(valore => typeof valore === 'string' && valore.trim() !== '');
     if (!tuttiICampiValidi) {
       alert("Compilare tutti i campi");
+      creaButtonRef.current.disabled=false;
       return
     }
-
+    
     const request = {
       documentId: "",
       data: ticket,
       permissions: ['read("any")'],
     };
-
+    
     fetch(urlbase("TICKET"), {
       method: "POST",
       headers: headers,
       body: JSON.stringify(request),
     })
-      .then(() => {
-        if (user.Ruolo === "OPERATORE") {
-          return fetch(urlbase("TICKET") + "/" + categoriaManuale, {
-            method: "PATCH",
-            headers: headers,
-            body: JSON.stringify({
-              documentId: categoriaManuale,
-              data: {
-                Stato: "IN_LAVORAZIONE",
-                Ultima_visita: "JUNIOR",
-                Operatore: assegnaA,
-                Assegnatario: user.Username,
-              },
-              permissions: [`read("any")`],
-            }),
-          })
-            .then(() => alert('Ticket creato con successo!'))
-            .then(() => navigate(pathNavigazione))
-            .catch(() => {
-              throw new Error('Qualcosa è andato storto durante la PATCH');
-            });
-        }
-      })
-      .catch((error) => {
-        alert(error);
-        console.error(error);
-      });
-
+    .then(() => {
+      if (user.Ruolo === "OPERATORE") {
+        return fetch(urlbase("TICKET") + "/" + categoriaManuale, {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({
+            documentId: categoriaManuale,
+            data: {
+              Stato: "IN_LAVORAZIONE",
+              Ultima_visita: "JUNIOR",
+              Operatore: assegnaA,
+              Assegnatario: user.Username,
+            },
+            permissions: [`read("any")`],
+          }),
+        })
+        .then(() => alert('Ticket creato con successo!'))
+        .then(() => navigate(pathNavigazione))
+        .catch(() => {
+          throw new Error('Qualcosa è andato storto durante la PATCH');
+        });
+      }
+    })
+    .then(() =>{
+        creaButtonRef.current.disabled=false;
+       alert('Ticket creato con successo!')})
+    .then(() => navigate(pathNavigazione))
+    .catch((error) => {
+      alert(error);
+    });
+    
 
   };
 
@@ -158,12 +167,10 @@ const CreaTicket = () => {
             });
             setListaAssegnatari(listaAssegnatari);
           }).catch(error => {
-            console.error('Errore nella seconda fetch:', error);
             throw new Error('Qualcosa è andato storto durante la PATCH');
           });
       })
       .catch(error => {
-        console.error('Errore nella prima fetch:', error);
         alert(error)
       });
 
@@ -197,7 +204,7 @@ const CreaTicket = () => {
 
   useEffect(() => {
     contoMieiTicketApertiInLavorazione();
-  }, [])
+  }, [contoMieiTicketApertiInLavorazione])
 
   return (
     <ConditionalRenderer showContent={showContent.current}>
@@ -230,8 +237,8 @@ const CreaTicket = () => {
                   )
                   :
                   (
-                    <select defaultValue={"Interno"} disabled={true}>
-                      <option value="Interno">Interno</option>
+                    <select defaultValue={ticketDaLavorare.Categoria} disabled={true}>
+                      <option value={ticketDaLavorare.Categoria}>{ticketDaLavorare.Categoria}</option>
                     </select>
                   )
                 }
@@ -258,7 +265,7 @@ const CreaTicket = () => {
                   </div>
                 )}
 
-                <button onClick={gestisciCreazioneTicket}>Crea Ticket</button>
+                <button ref={creaButtonRef} onClick={gestisciCreazioneTicket}>Crea Ticket</button>
               </>
             )}
       </div>
