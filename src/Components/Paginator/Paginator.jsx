@@ -6,10 +6,10 @@ const Paginator = ({ elemPerPagina, children }) => {
 
   const [numeroPaginaCorrente, setNumeroPaginaCorrente] = useState(1);
   const [elementiPagina, setElementiPagina] = useState([]);
-  
+
   const paginaSuccessiva = useCallback(() => {
     const max = Math.ceil((children.length - 1) / elemPerPagina);
-    if ((numeroPaginaCorrente ) < max) {
+    if ((numeroPaginaCorrente) < max) {
       setNumeroPaginaCorrente(p => p + 1);
     }
 
@@ -29,16 +29,20 @@ const Paginator = ({ elemPerPagina, children }) => {
     if (listaElementi.length > 0) {
       setElementiPagina(listaElementi);
     }
+    console.log("elementiPagina", elementiPagina);
   }, [numeroPaginaCorrente, elemPerPagina, children]);
 
   return (
     <>
       {elementiPagina}
-      <tr style={{ display: "flex" }}>
-        <button onClick={paginaPrecedente}>Prev</button>
-        <p>{numeroPaginaCorrente}</p>
-        <button onClick={paginaSuccessiva}>Succ</button>
+      <tr>
+        <td style={{display:"flex", border: "none"}}>
+          <button onClick={paginaPrecedente}>Prev</button>
+          <p>{numeroPaginaCorrente}</p>
+          <button onClick={paginaSuccessiva}>Succ</button>
+        </td>
       </tr>
+
     </>
   );
 };

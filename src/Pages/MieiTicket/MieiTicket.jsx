@@ -254,7 +254,7 @@ const MieiTicket = () => {
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
       {elementi.length > 0 && intestazioni.length > 0 && (
-        <>
+        <table>
           <SortableTableHead
             filter={filter}
             includeInTableIf={includeInTableIf}
@@ -282,7 +282,7 @@ const MieiTicket = () => {
               ))}
             </Paginator>
           </tbody>
-        </>
+        </table>
       )}
     </div>
   );

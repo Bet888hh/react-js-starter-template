@@ -87,7 +87,7 @@ const prendiInCarico= useCallback(async (id) => {
               Stato: "IN_LAVORAZIONE",
               Ultima_visita: user.Permesso,
               Operatore: user.Username,
-              //Assegnatario: "" commentato perché non dovrebbe essere necessario
+              Assegnatario: ""
             },
             permissions: [`read("any")`],
           }
@@ -347,7 +347,7 @@ const prendiInCarico= useCallback(async (id) => {
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
       {elementi.length > 0 && intestazioni.length > 0 && (
-        <>
+        <table>
           <SortableTableHead
             filter={filter}
             includeInTableIf={includeInTableIf}
@@ -375,7 +375,7 @@ const prendiInCarico= useCallback(async (id) => {
               ))}
             </Paginator>
           </tbody>
-        </>
+        </table>
       )}
       {filter&&elementi.length===0&&<>no</>}
     </div>

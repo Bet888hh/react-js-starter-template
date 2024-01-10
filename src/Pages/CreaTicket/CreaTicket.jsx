@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 import { SelectUserSlice } from '../../store/Reducer/Slices/UserSlice/UserSlice';
 import { headers, urlbase } from '../../Utility/urls';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import ConditionalRenderer from '../../Utility/ConditionalRenderer';
+
 
 const CreaTicket = () => {
   //const per testare il junior fino a che manca dettaglio
@@ -29,10 +31,11 @@ const CreaTicket = () => {
     ],
 } */
 
-
   const location = useLocation();
+  const showContent = useRef(false);
+
   const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
-  console.log("ticketDaLavorare", ticketDaLavorare);
+
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
   const [mieiTicketApertiInLavorazione, setMieiTicketApertiLavorazione] = useState(0);
@@ -108,7 +111,7 @@ const CreaTicket = () => {
         }
       })
       .catch((error) => {
-        alert('Qualcosa è andato storto durante la POST');
+        alert(error);
         console.error(error);
       });
 
@@ -154,14 +157,20 @@ const CreaTicket = () => {
 
             });
             setListaAssegnatari(listaAssegnatari);
-          })
-
+          }).catch(error => {
+            console.error('Errore nella seconda fetch:', error);
+            throw new Error('Qualcosa è andato storto durante la PATCH');
+          });
       })
-      ;
+      .catch(error => {
+        console.error('Errore nella prima fetch:', error);
+        alert(error)
+      });
 
   }, []);
 
   const contoMieiTicketApertiInLavorazione = useCallback(() => {
+    showContent.current = false;
     fetch(urlbase("TICKET") + `?queries[0]=search("Utente",+["${user.Username}"])&queries[1]=search("Stato",+["APERTO"])|queries[2]=search("Stato",+["IN_LAVORAZIONE"])`
       , {
         method: "GET",
@@ -170,6 +179,10 @@ const CreaTicket = () => {
       .then(res => res.json())
       .then(res => {
         setMieiTicketApertiLavorazione(res.total)
+        showContent.current = true;
+      })
+      .catch((error)=>{
+        alert('Qualcosa è andato storto durante la GET');
       })
   }, [user.Username]);
 
@@ -184,74 +197,72 @@ const CreaTicket = () => {
 
   useEffect(() => {
     contoMieiTicketApertiInLavorazione();
-  }, [contoMieiTicketApertiInLavorazione])
-
-  useEffect(() => {
-    setTicketDaLavorare(location.state);
-  }, [location.state])
+  }, [])
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      {/* <h2>Creazione Ticket</h2> */}
-      {
-        mieiTicketApertiInLavorazione > 1
-          ?
-          (<h2>Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.</h2>)
-          :
-          (
-            <>
-              <label>Titolo:</label>
-              <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
+    <ConditionalRenderer showContent={showContent.current}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {/* <h2>Creazione Ticket</h2> */}
+        {
+          mieiTicketApertiInLavorazione > 1
+            ?
+            (<h2>Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.</h2>)
+            :
+            (
+              <>
+                <label>Titolo:</label>
+                <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
 
-              <label>Testo:</label>
-              <textarea value={testo} onChange={e => setTesto(e.target.value)} maxLength="500" />
+                <label>Testo:</label>
+                <textarea value={testo} onChange={e => setTesto(e.target.value)} maxLength="500" />
 
-              <label>Categoria:</label>
-              {user.Ruolo === "SEMPLICE"
-                ?
-                (
-                  <select value={categoria} onChange={e => setCategoria(e.target.value)}>
-                    <option value="">Selziona una categoria</option>
-                    <option value="Articolo_non_funzionante">Articolo non funzionante</option>
-                    <option value="Articolo_danneggiato">Articolo danneggiato</option>
-                    <option value="Articono_non_conforme">Articolo non conforme</option>
-                    <option value="Altro">Altro</option>
-                  </select>
-                )
-                :
-                (
-                  <select defaultValue={"Interno"} disabled={true}>
-                    <option value="Interno">Interno</option>
-                  </select>
-                )
-              }
+                <label>Categoria:</label>
+                {user.Ruolo === "SEMPLICE"
+                  ?
+                  (
+                    <select value={categoria} onChange={e => setCategoria(e.target.value)}>
+                      <option value="">Selziona una categoria</option>
+                      <option value="Articolo_non_funzionante">Articolo non funzionante</option>
+                      <option value="Articolo_danneggiato">Articolo danneggiato</option>
+                      <option value="Articono_non_conforme">Articolo non conforme</option>
+                      <option value="Altro">Altro</option>
+                    </select>
+                  )
+                  :
+                  (
+                    <select defaultValue={"Interno"} disabled={true}>
+                      <option value="Interno">Interno</option>
+                    </select>
+                  )
+                }
 
 
-              {categoria === 'Altro' && (
-                <div>
-                  <label>Categoria Manuale:</label>
-                  <input type="text" value={categoriaManuale} onChange={e => setCategoriaManuale(e.target.value)} />
-                </div>
-              )}
+                {categoria === 'Altro' && (
+                  <div>
+                    <label>Categoria Manuale:</label>
+                    <input type="text" max="25" value={categoriaManuale} onChange={e => setCategoriaManuale(e.target.value)} />
+                  </div>
+                )}
 
-              {user.Ruolo === 'OPERATORE' && user.Permesso === 'JUNIOR' && (
-                <div>
-                  <label>Assegna a:</label>
-                  <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
-                    <option value="">Selziona un senior</option>
-                    {listaAssegnatari.length > 0 && (
-                      listaAssegnatari.map((elem, index) => {
-                        return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
-                      })
-                    )}
-                  </select>
-                </div>
-              )}
+                {user.Ruolo === 'OPERATORE' && user.Permesso === 'JUNIOR' && (
+                  <div>
+                    <label>Assegna a:</label>
+                    <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
+                      <option value="">Selziona un senior</option>
+                      {listaAssegnatari.length > 0 && (
+                        listaAssegnatari.map((elem, index) => {
+                          return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
+                        })
+                      )}
+                    </select>
+                  </div>
+                )}
 
-              <button onClick={gestisciCreazioneTicket}>Crea Ticket</button>
-            </>
-          )}
-    </div>
+                <button onClick={gestisciCreazioneTicket}>Crea Ticket</button>
+              </>
+            )}
+      </div>
+    </ConditionalRenderer>
   );
 };
 
