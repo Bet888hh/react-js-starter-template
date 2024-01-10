@@ -95,7 +95,7 @@ const prendiInCarico= useCallback(async (id) => {
       }).then((r)=>{
        return r.json()
       }).then((r)=>{
-        
+        alert("Ticket preso in carico!");
         navigate("/dettaglio/"+id,{state:r})
       })
     }else{
