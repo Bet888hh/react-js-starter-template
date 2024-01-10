@@ -21,13 +21,13 @@ const MieiTicket = () => {
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
   //cose da mettere in un hook personalizzato
-  const init = useCallback(async ()=> {
+  const init = useCallback(async () => {
     const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
     const responses = await Promise.all(
       stati.map((stato) =>
         fetch(
           urlbase("TICKET") +
-            `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
+          `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
           {
             method: "GET",
             headers: headers,
@@ -50,11 +50,11 @@ const MieiTicket = () => {
       chiusi: totalChiusi,
       inLavorazione: totalLavorazione,
     }));
-  },[])
+  }, [])
 
-  const dettaglioTicket = useCallback((id)=>{
-    navigate("../dettaglio/"+id)
-  },[navigate])
+  const dettaglioTicket = useCallback((id) => {
+    navigate("../dettaglio/" + id)
+  }, [navigate])
 
   const deletePost = useCallback(
     async (id) => {
@@ -83,7 +83,7 @@ const MieiTicket = () => {
         case "accetta":
           alert("implementare funzione accetta")
           break;
-       
+
       }
     },
     [deletePost]
@@ -143,7 +143,7 @@ const MieiTicket = () => {
         : "asc";
     sortConfig.current = { campo: campo, ordine: nuovoOrdine };
     sortElementi();
-  },[sortElementi]);
+  }, [sortElementi]);
 
 
 
@@ -151,7 +151,7 @@ const MieiTicket = () => {
     async (type) => {
       const response = await fetch(
         urlbase("TICKET") +
-          `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Utente",+["${user.Username}"])`,
+        `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Utente",+["${user.Username}"])`,
         {
           method: "GET",
           headers: headers,
@@ -162,11 +162,11 @@ const MieiTicket = () => {
       if (rs.message) {
         //errori cazzo
       } else {
-        return rs.total>0? rs.documents.map((doc) => ({
+        return rs.total > 0 ? rs.documents.map((doc) => ({
           ...doc,
           ApertoIl: doc.$createdAt,
           UltimaModifica: doc.$updatedAt,
-        })):[];
+        })) : [];
       }
     },
     [user.Username]
@@ -201,7 +201,10 @@ const MieiTicket = () => {
   const perTabella = useMemo(() => {
     return elementi
       ? elementi.map((e) => {
-          return {
+        console.log(e);
+        return {
+          id: e.$id,
+          content: {
             Titolo: e.Titolo,
             Testo: e.Testo,
             Categoria: e.Categoria,
@@ -217,14 +220,15 @@ const MieiTicket = () => {
                 handleTableAction={handleTableAction}
               />
             ),
-          };
-        })
+          }
+        };
+      })
       : null;
   }, [elementi, handleTableAction]);
 
-  
 
-  const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0]) : [];
+  console.log("pertabella", perTabella);
+  const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];
   const excludeFromSorting = ["Azioni"];
   const includeInTableIf = { filter: "nan", include: "nan" };
 
@@ -242,8 +246,8 @@ const MieiTicket = () => {
       default:
         return valore || "-";
     }
-  },[]);
- 
+  }, []);
+
 
   useEffect(() => {
     init();
@@ -265,21 +269,26 @@ const MieiTicket = () => {
           />
           <tbody>
             <Paginator elemPerPagina={5}>
-              {perTabella.map((riga, index) => (
-                <tr key={index}>
-                  {intestazioni.map((intestazione) => (
-                    <>
-                      {((intestazione === includeInTableIf.include &&
-                        includeInTableIf.filter === filter) ||
-                        intestazione !== includeInTableIf.include) && (
-                        <td key={intestazione}>
-                          {formatCell(intestazione, riga[intestazione])}
-                        </td>
-                      )}
-                    </>
-                  ))}
-                </tr>
-              ))}
+              {perTabella.map((riga) => {
+                console.log("riga: ",riga);
+                return (
+                  <tr key={riga.id}>
+                    {intestazioni.map((intestazione) => {
+                      console.log("intestazione: ", intestazione);
+                      return(
+                      <>
+                        {((intestazione === includeInTableIf.include &&
+                          includeInTableIf.filter === filter) ||
+                          intestazione !== includeInTableIf.include) && (
+                            <td key={intestazione}>
+                              {formatCell(intestazione, riga.content[intestazione])}
+                            </td>
+                          )}
+                      </>
+                    )})}
+                  </tr>
+                )
+              })}
             </Paginator>
           </tbody>
         </table>

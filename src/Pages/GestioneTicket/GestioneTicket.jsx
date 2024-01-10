@@ -256,7 +256,8 @@ const prendiInCarico= useCallback(async (id) => {
     return elementi
       ? elementi.map((e) => {
           return {
-            Titolo: e.Titolo,
+            id: e.$id,
+            content:{Titolo: e.Titolo,
             Testo: e.Testo,
             Categoria: e.Categoria,
             ApertoIl: e.ApertoIl,
@@ -272,7 +273,7 @@ const prendiInCarico= useCallback(async (id) => {
                 stato={e.Stato}
                 handleTableAction={handleTableAction}
               />
-            ),
+            ),}
           };
         })
       : null;
@@ -280,7 +281,7 @@ const prendiInCarico= useCallback(async (id) => {
 
   const tableBody = useMemo(() => {});
 
-  const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0]) : [];
+  const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];
   const excludeFromSorting = ["Azioni"];
   const includeInTableIf = { filter: "in-carico", include: "Assegnatario" };
 
@@ -358,21 +359,23 @@ const prendiInCarico= useCallback(async (id) => {
           />
           <tbody>
             <Paginator elemPerPagina={5}>
-              {perTabella.map((riga, index) => (
-                <tr key={index}>
+              {perTabella.map((riga, index) => {
+                console.log("riga: ", riga);
+                return (
+                <tr key={riga.id}>
                   {intestazioni.map((intestazione) => (
                     <>
                       {((intestazione === includeInTableIf.include &&
                         includeInTableIf.filter === filter) ||
                         intestazione !== includeInTableIf.include) && (
                         <td key={intestazione}>
-                          {formatCell(intestazione, riga[intestazione])}
+                          {formatCell(intestazione, riga.content[intestazione])}
                         </td>
                       )}
                     </>
                   ))}
                 </tr>
-              ))}
+              )})}
             </Paginator>
           </tbody>
         </table>
