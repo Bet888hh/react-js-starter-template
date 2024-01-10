@@ -39,36 +39,36 @@ useParams
     }
   }, [id, navigate]);
 
-  
-  const initMessages = useCallback(async () => {
-    if (id) {
-      const response = await fetch(urlbase("TICKET") + `/${id}`, {
-        method: "GET",
-        headers: headers,
-      });
-      const rs = await response.json();
 
-      if (!rs.message) {
-         //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
-         setTicket(prev=>({...prev,Messaggi:[...rs.Messaggi]}))
-      } else {
-        navigate("/");
-      }
-    }
-  }, [id, navigate]);
+   const initMessages = useCallback(async () => {
+     if (id) {
+       const response = await fetch(urlbase("TICKET") + `/${id}`, {
+         method: "GET",
+         headers: headers,
+       });
+       const rs = await response.json();
+ 
+       if (!rs.message) {
+          //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
+          setTicket(prev=>({...prev,Messaggi:[...rs.Messaggi]}))
+       } else {
+         navigate("/");
+       }
+     }
+   }, [id, navigate]);
 
   useEffect(() => {
     setLoading(true);
     init();
     setLoading(false);
-    let id,id1;
-   id1= setTimeout(() => {
-      id= setInterval(() => {
-        initMessages()
+    let id, id1;
+    id1 = setTimeout(() => {
+      id = setInterval(() => {
+        /* initMessages() */
       }, 5000);
     }, 2000);
 
-    return ()=>{
+    return () => {
       clearInterval(id)
       clearTimeout(id1)
     }
@@ -133,7 +133,7 @@ useParams
         body: JSON.stringify({
           documentId: id,
           data: {
-      
+
             Stato: "CHIUSO",
           },
           permissions: [`read("any")`],
@@ -151,13 +151,13 @@ useParams
         }
         setLoading(false);
       });
-  }, [id, init, ticket]);
+  }, [id, init]);
 
-  
+
   const prendiInCarico = useCallback(
     async (e) => {
       const id = e.target.id;
-      
+
       setLoading(true);
       const response = await getTicketLavorazione();
       const rs = await response.json();
@@ -191,6 +191,7 @@ useParams
             .then((r) => {
               setLoading(false);
               init();
+              alert("Ticket preso in carico!");
             });
         } else {
           setLoading(false);
@@ -201,52 +202,75 @@ useParams
     },
     [getTicketLavorazione, init, user.Permesso, user.Username]
   );
- 
 
-
-
-  const setMessaggi = useCallback(
-   async (mess) => {
-      //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
-      
-      const response = await fetch(urlbase("TICKET") + `/${id}`, {
-        method: "GET",
+  const accetta = useCallback(() => {
+    setLoading(true);
+    
+    fetch(
+      urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+      {
+        method: "PATCH",
         headers: headers,
-      });
-      const rs = await response.json();
-      
-      fetch(
-        urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
-        {
-          method: "PATCH",
-          headers: headers,
-          body: JSON.stringify({
+        body: JSON.stringify(
+          {
             documentId: id,
             data: {
-            
-              Messaggi: [...rs.Messaggi, `${user.Username}: ${mess}`],
+              Operatore: user.Username,
             },
             permissions: [`read("any")`],
-          }),
+          }
+        ),
+      }
+    )
+      .then((r) => {
+        return r.json();
+      })
+      .then((r) => {
+        if (!r.message) {
+          init();
+        } else {
+          //erroroni
         }
-      )
-        .then((r) => {
-          return r.json();
-        })
-        .then((r) => {
-          initMessages();
-         
-        })
-      
-      
-      
-      
-      
+        setLoading(false);
+      });
+  }, [id, init, user.Username])
 
-     
-    },
-    [id, initMessages, user.Username]
-  );
+   const setMessaggi = useCallback(
+    async (mess) => {
+       //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
+       
+       const response = await fetch(urlbase("TICKET") + `/${id}`, {
+         method: "GET",
+         headers: headers,
+       });
+       const rs = await response.json();
+       
+       fetch(
+         urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+         {
+           method: "PATCH",
+           headers: headers,
+           body: JSON.stringify({
+             documentId: id,
+             data: {
+             
+               Messaggi: [...rs.Messaggi, `${user.Username}: ${mess}`],
+             },
+             permissions: [`read("any")`],
+           }),
+         }
+       )
+         .then((r) => {
+           return r.json();
+         })
+         .then((r) => {
+           initMessages();
+          
+         })
+     },
+     [id, initMessages, user.Username]
+   );
+
   return (
     <>
       <ConditionalRenderer showContent={!loading}>
@@ -265,8 +289,8 @@ useParams
                 value={ticket.Categoria}
                 disabled={
                   user.Username !== ticket.Operatore ||
-                  ticket.Stato !== "IN_LAVORAZIONE" 
-                  
+                  ticket.Stato !== "IN_LAVORAZIONE"
+
                 }
                 onChange={handleOnChangeCategoria}
               >
@@ -336,7 +360,7 @@ useParams
             {user.Permesso === "SENIOR" &&
               ticket.Operatore === user.Username &&
               ticket.Assegnatario !== user.Username && (
-                <button id="btnAccetta">Accetta</button>
+                <button id="btnAccetta" onClick={accetta}>Accetta</button>
               )}
 
             {user.Permesso === "JUNIOR" &&
@@ -351,9 +375,9 @@ useParams
                 </div>
               )}
 
-                <br /><br /><br /><br /><br /><br />
+            <br /><br /><br /><br /><br /><br />
 
-                <Messaggi messaggi={ticket.Messaggi} setMessaggi={setMessaggi}/>
+            <Messaggi messaggi={ticket.Messaggi} setMessaggi={setMessaggi} />
 
 
           </div>

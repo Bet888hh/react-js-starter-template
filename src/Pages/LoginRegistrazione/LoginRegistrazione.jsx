@@ -363,10 +363,13 @@ const LoginRegistrazione = () => {
             <br />
           </>
         )}
-        <button type="submit">{isRegistration?"Registrati":"Login"}</button>
-        {!isRegistration && (
-        <Link to="/registrazione"><button type="button">Conferma</button></Link>
-        )}
+        <button type="submit">{isRegistration?"Sottoscrivi Registrazione":"Login"}</button>
+        {!isRegistration ? (
+        <Link to="/registrazione"><button type="button">Registrati</button></Link>
+        )
+        :
+        (<Link to={-1}><button type="button">Torna al login</button></Link>)
+        }
         <ErrorInForm error={errors.afterErrors} />
       </form>
     </ConditionalRenderer>

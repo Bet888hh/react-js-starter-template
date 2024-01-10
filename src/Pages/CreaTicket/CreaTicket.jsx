@@ -29,10 +29,9 @@ const CreaTicket = () => {
     ],
 } */
 
- 
+
   const location = useLocation();
   const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
-  console.log("State: ", location.state);
 
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
@@ -85,15 +84,12 @@ const CreaTicket = () => {
       headers: headers,
       body: JSON.stringify(request),
     })
-      .then(
-        () => alert('Ticket creato con successo!')
-      )
-      .then(() => {
-        if (user.Ruolo === "OPERATORE") {
+    .then(() => {
+      if (user.Ruolo === "OPERATORE") {
           fetch(urlbase("TICKET") + "/" + categoriaManuale,//categoria manuale per il junior nel ticket interno è l'id del ticket semplice
-            {
-              method: "PATCH",
-              headers: headers,
+          {
+            method: "PATCH",
+            headers: headers,
               body: JSON.stringify(
                 {
                   documentId: categoriaManuale,
@@ -105,15 +101,17 @@ const CreaTicket = () => {
                   },
                   permissions: [`read("any")`],
                 }
-              ),
-            })
-        }
-      })
-      .then(() => { navigate(pathNavigazione) })
+                ),
+              })
+            }
+          })
+          .then(
+            () => alert('Ticket creato con successo!')
+          )
+          .then(() => { navigate(pathNavigazione) })
   };
 
   const ottieniListaAssegnatari = useCallback(() => {
-    let listaAssegnatari = [];
     fetch(urlbase("USER") + `?queries[0]=search("Ruolo",+["OPERATORE"])&queries[1]=search("Permesso",+["SENIOR"])`
       , {
         method: "GET",
@@ -121,25 +119,42 @@ const CreaTicket = () => {
       })
       .then(res => res.json())
       .then(res => {
-        const list = res.documents
-        const fetchPromises = list.map((operatore) => {
-          return fetch(urlbase("TICKET") + `?queries[0]=search("Operatore",+["${operatore.Username}"])`, {
+        const operatoriSenior = res.documents;
+        const tickets = [];
+        fetch(urlbase("TICKET") + `?queries[0]=search("Stato",+["IN_LAVORAZIONE"])`, /* isNotNull("Assegnatario")&queries[1] */
+          {
             method: "GET",
             headers: headers,
-          })
-            .then(res => res.json())
-            .then(res => {
-              if (res.total < 5) {
-                listaAssegnatari.push({ username: operatore.Username, ticketAssegnati: res.total });
-              }
-            });
-        });
+          }
+        )
+          .then(r => r.json())
+          .then(r => {
+            tickets.push(...r.documents)
+            const listaAssegnatari = operatoriSenior.map(operatore => {//operatori a cui posso assegnare
+              const totTicketOperatore = (tickets.filter((ticket) => {
+                return ticket.Operatore === operatore.Username
+              })).length;
 
-        // Attendo che tutte le Promise siano risolte prima di aggiornare lo stato
-        Promise.all(fetchPromises).then(() => {
-          setListaAssegnatari(listaAssegnatari);
-        });
+              let ticketAssegnatiAOperatore;
+              if (totTicketOperatore < 10) {
+
+                ticketAssegnatiAOperatore = (tickets.filter((ticket) => {
+                  return ticket.Assegnatario === operatore.Username
+                })).length; 
+
+                if (ticketAssegnatiAOperatore < 5) {
+                  return { username: operatore.Username, ticketAssegnati: ticketAssegnatiAOperatore };
+                }
+
+              }
+
+            });
+            setListaAssegnatari(listaAssegnatari);
+          })
+
       })
+      ;
+
   }, []);
 
   const contoMieiTicketApertiInLavorazione = useCallback(() => {
@@ -167,18 +182,25 @@ const CreaTicket = () => {
     contoMieiTicketApertiInLavorazione();
   }, [contoMieiTicketApertiInLavorazione])
 
-  useEffect(()=>{
+  useEffect(() => {
     setTicketDaLavorare(location.state);
-  },[location.state])
+  }, [location.state])
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <h2>Creazione Ticket</h2>
-      <label>Titolo:</label>
+      {/* <h2>Creazione Ticket</h2> */}
+      {
+      mieiTicketApertiInLavorazione>1
+      ?
+      (<h2>Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.</h2>)
+      :
+      (
+        <>
+        <label>Titolo:</label>
       <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
 
       <label>Testo:</label>
-      <textarea value={testo} onChange={e => setTesto(e.target.value)} />
+      <textarea value={testo} onChange={e => setTesto(e.target.value)} maxLength="500" />
 
       <label>Categoria:</label>
       {user.Ruolo === "SEMPLICE"
@@ -223,6 +245,8 @@ const CreaTicket = () => {
       )}
 
       <button onClick={gestisciCreazioneTicket}>Crea Ticket</button>
+      </>
+      )}
     </div>
   );
 };
