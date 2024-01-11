@@ -164,7 +164,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                     return r.json();
                 })
                 .then((r) => {
-                    //triggerRefresh();
+                    triggerRefresh();
                     init();
                     alert("Ticket riaperto!");
                 });

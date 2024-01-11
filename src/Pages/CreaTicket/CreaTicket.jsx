@@ -73,7 +73,7 @@ const CreaTicket = () => {
       ticket = { ...ticket, Operatore: assegnaA, Stato: "INTERNO" }
       pathNavigazione = '../gestione_ticket'
     }
-
+    
     const tuttiICampiValidi = Object.values(ticket).every(valore => typeof valore === 'string' && valore.trim() !== '');
     if (!tuttiICampiValidi) {
       alert("Compilare tutti i campi");
@@ -126,7 +126,7 @@ const CreaTicket = () => {
       });
 
 
-  }, []);
+  }, [assegnaA, categoria, categoriaManuale, mieiTicketApertiInLavorazione, navigate, testo, titolo, user.Permesso, user.Ruolo, user.Username]);
 
   const ottieniListaAssegnatari = useCallback(() => {
     fetch(urlbase("USER") + `?queries[0]=search("Ruolo",+["OPERATORE"])&queries[1]=search("Permesso",+["SENIOR"])`
