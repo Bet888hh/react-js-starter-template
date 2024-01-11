@@ -29,7 +29,6 @@ const Paginator = ({ elemPerPagina, children }) => {
     if (listaElementi.length > 0) {
       setElementiPagina(listaElementi);
     }
-    console.log("elementiPagina", elementiPagina);
   }, [numeroPaginaCorrente, elemPerPagina, children]);
 
   return (

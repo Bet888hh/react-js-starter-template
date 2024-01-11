@@ -5,6 +5,7 @@ import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice"
 import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 import Messaggi from "../../Components/Messaggi/Messaggi";
+import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
 
 const DettaglioTicket = () => {
   /*   const navigate = useNavigate();
@@ -21,6 +22,7 @@ useParams
   const [ticket, setTicket] = useState({});
   const { id } = useParams();
   const refCat = useRef("");
+
   const init = useCallback(async () => {
     if (id) {
       const response = await fetch(urlbase("TICKET") + `/${id}`, {
@@ -30,7 +32,6 @@ useParams
       const rs = await response.json();
 
       if (!rs.message) {
-        console.log("rs: ", rs);
         setTicket(rs);
         refCat.current = rs.Categoria;
       } else {
@@ -123,7 +124,7 @@ useParams
       });
   }, [id, init, ticket]);
 
-  const handleChiudi = useCallback(() => {
+  /* const handleChiudi = useCallback(() => {
     setLoading(true);
     fetch(
       urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
@@ -151,10 +152,10 @@ useParams
         }
         setLoading(false);
       });
-  }, [id, init]);
+  }, [id, init]); */
 
 
-  const prendiInCarico = useCallback(
+  /* const prendiInCarico = useCallback(
     async (e) => {
       const id = e.target.id;
 
@@ -200,9 +201,9 @@ useParams
       }
     },
     [getTicketLavorazione, init, user.Permesso, user.Username]
-  );
+  ); */
 
-  const accetta = useCallback(() => {
+/*   const accetta = useCallback(() => {
     setLoading(true);
     
     fetch(
@@ -232,7 +233,7 @@ useParams
         }
         setLoading(false);
       });
-  }, [id, init, user.Username])
+  }, [id, init, user.Username]) */
 
    const setMessaggi = useCallback(
     async (mess) => {
@@ -313,14 +314,15 @@ useParams
                 />
               </div>
             )}
-            <button
+            <Pulsantiera id={id} triggerRefresh={init} />
+            {/* <button
               onClick={() => {
                 navigate(-1);
               }}
               id="btnIndietro"
             >
               Indietro
-            </button>
+            </button> */}
 
             {user.Username === ticket.Operatore &&
               ticket.Stato === "IN_LAVORAZIONE" && (
@@ -333,13 +335,13 @@ useParams
                 </button>
               )}
 
-            {ticket.Stato === "CHIUSO" &&
+            {/* {ticket.Stato === "CHIUSO" &&
               !ticket.Riaperto &&
               ticket.stato !== "INTERNO" && (
                 <button id="btnRiapri"> Riapri</button>
-              )}
+              )} */}
 
-            {ticket.Stato !== "CHIUSO" &&
+            {/* {ticket.Stato !== "CHIUSO" &&
               ticket.stato !== "INTERNO" &&
               (user.Username === ticket.Utente ||
                 user.Username === ticket.Operatore) && (
@@ -347,31 +349,19 @@ useParams
                   {" "}
                   Chiudi
                 </button>
-              )}
+              )} */}
 
-            {user.Ruolo === "OPERATORE" && ticket.Operatore === null && (
+            {/* {user.Ruolo === "OPERATORE" && ticket.Operatore === null && (
               <button onClick={prendiInCarico} id={ticket.$id}>
                 Prendi in Carico
               </button>
-            )}
+            )} */}
 
-            {user.Permesso === "SENIOR" &&
+            {/* {user.Permesso === "SENIOR" &&
               ticket.Operatore === user.Username &&
               ticket.Assegnatario !== user.Username && (
                 <button id="btnAccetta" onClick={accetta}>Accetta</button>
-              )}
-
-            {user.Permesso === "JUNIOR" &&
-              ticket.Operatore === user.Username &&
-              ticket.Assegnatario === "" &&
-              ticket.Stato !== "INTERNO" && (
-                <div>
-                  {/* <button id="btnAssegnaASenior" onClick={handleAssegnaASenior}>Assegna a Senior</button> */}
-                  <Link to="/crea_ticket" state={ticket}>
-                    <button id="btnAssegnaASenior">Assegna a Senior</button>
-                  </Link>
-                </div>
-              )}
+              )} */}
 
             <br /><br /><br /><br /><br /><br />
 

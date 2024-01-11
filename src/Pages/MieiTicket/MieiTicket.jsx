@@ -15,14 +15,18 @@ import { useSelector } from "react-redux";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { useNavigate } from "react-router-dom";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
+import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 const MieiTicket = () => {
+  const [showContent, setShowContent] = useState(false);
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "niente", ordine: "asc" });
   const [filter, setFilter] = useState("");
-  const navigate = useNavigate();
+  /* const navigate = useNavigate(); */
   const user = useSelector(SelectUserSlice);
+
   //cose da mettere in un hook personalizzato
   const init = useCallback(async () => {
+    setShowContent(false);
     const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
     const responses = await Promise.all(
       stati.map((stato) =>
@@ -51,13 +55,22 @@ const MieiTicket = () => {
       chiusi: totalChiusi,
       inLavorazione: totalLavorazione,
     }));
-  }, [])
 
-  const dettaglioTicket = useCallback((id) => {
-    navigate("../dettaglio/" + id)
-  }, [navigate])
+    //Aggiunta da me speriamo sia giusta
+    
+    if(filter==="APERTO"){
+      setElementi(dAperti)
+    }
+    if(filter==="CHIUSO"){
+      setElementi(dchiusi)
+    }
+    if(filter==="IN_LAVORAZIONE"){
+      setElementi(dlavorazione)
+    }
+    setShowContent(true);
+  }, [filter, user.Username])
 
-  const deletePost = useCallback(
+  /* const deletePost = useCallback(
     async (id) => {
       const response = await fetch(urlbase("TICKET") + "/" + id, {
         method: "delete",
@@ -70,10 +83,10 @@ const MieiTicket = () => {
       }
     },
     [init]
-  );
+  ); */
 
 
-  const handleTableAction = useCallback(
+ /*  const handleTableAction = useCallback(
     (e) => {
       console.log(e);
       const [action, id] = e.split("-");
@@ -88,7 +101,7 @@ const MieiTicket = () => {
       }
     },
     [deletePost]
-  );
+  ); */
 
   const [totali, setTotali] = useState({
     aperti: -1,
@@ -202,7 +215,6 @@ const MieiTicket = () => {
   const perTabella = useMemo(() => {
     return elementi
       ? elementi.map((e) => {
-        console.log(e);
         return {
           id: e.$id,
           content: {
@@ -217,16 +229,16 @@ const MieiTicket = () => {
             Azioni: (
               <Pulsantiera
                 id={e.$id}
+                triggerRefresh={init}
               />
             ),
           }
         };
       })
       : null;
-  }, [elementi, handleTableAction]);
+  }, [elementi, init]);
 
 
-  console.log("pertabella", perTabella);
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];
   const excludeFromSorting = ["Azioni"];
   const includeInTableIf = { filter: "nan", include: "nan" };
@@ -240,18 +252,18 @@ const MieiTicket = () => {
       case "ApertoIl":
       case "UltimaModifica":
         return valore ? new Date(valore).toLocaleString("it-IT") : "-";
-        case "Messaggi": {
-          const messaggi = [...valore]
-          return messaggi.length > 0 ?
-            (<button onClick={() => {
-              const listaMessaggi = messaggi.map((messaggio) => { return `${messaggio}\n`})
-              
-              alert(listaMessaggi)
-            }
-            }>Apri</button>)
-            :
-            "-";
-        }
+      case "Messaggi": {
+        const messaggi = [...valore]
+        return messaggi.length > 0 ?
+          (<button onClick={() => {
+            const listaMessaggi = messaggi.map((messaggio) => { return `${messaggio}\n` })
+
+            alert(listaMessaggi)
+          }
+          }>Apri</button>)
+          :
+          "-";
+      }
       default:
         return valore || "-";
     }
@@ -266,6 +278,7 @@ const MieiTicket = () => {
   return (
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
+      <ConditionalRenderer showContent={showContent}>
       {elementi.length > 0 && intestazioni.length > 0 && (
         <table>
           <SortableTableHead
@@ -277,31 +290,34 @@ const MieiTicket = () => {
             sort={sortConfig.current}
           />
           <tbody>
-            <Paginator elemPerPagina={5}>
-              {perTabella.map((riga) => {
-                console.log("riga: ",riga);
-                return (
-                  <tr key={riga.id}>
-                    {intestazioni.map((intestazione) => {
-                      console.log("intestazione: ", intestazione);
-                      return(
-                      <>
-                        {((intestazione === includeInTableIf.include &&
-                          includeInTableIf.filter === filter) ||
-                          intestazione !== includeInTableIf.include) && (
-                            <td key={intestazione}>
-                              {formatCell(intestazione, riga.content[intestazione])}
-                            </td>
-                          )}
-                      </>
-                    )})}
-                  </tr>
-                )
-              })}
-            </Paginator>
+            {perTabella.length > 0
+              &&
+              (<Paginator elemPerPagina={5}>
+                {perTabella.map((riga) => {
+                  return (
+                    <tr key={riga.id}>
+                      {intestazioni.map((intestazione) => {
+                        return (
+                          <>
+                            {((intestazione === includeInTableIf.include &&
+                              includeInTableIf.filter === filter) ||
+                              intestazione !== includeInTableIf.include) && (
+                                <td key={intestazione}>
+                                  {formatCell(intestazione, riga.content[intestazione])}
+                                </td>
+                              )}
+                          </>
+                        )
+                      })}
+                    </tr>
+                  )
+                })}
+              </Paginator>)
+            }
           </tbody>
         </table>
       )}
+      </ConditionalRenderer>
     </div>
   );
 };

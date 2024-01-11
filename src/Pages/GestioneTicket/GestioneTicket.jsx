@@ -370,7 +370,6 @@ const prendiInCarico= useCallback(async (id) => {
           <tbody>
             <Paginator elemPerPagina={5}>
               {perTabella.map((riga, index) => {
-                console.log("riga: ", riga);
                 return (
                 <tr key={riga.id}>
                   {intestazioni.map((intestazione) => (

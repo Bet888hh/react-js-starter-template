@@ -36,7 +36,6 @@ const CreaTicket = () => {
   const creaButtonRef = useRef(null);
 
   const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
-  console.log("location.state: ", location.state);
 
   const navigate = useNavigate();
   const user = useSelector(SelectUserSlice);
@@ -110,7 +109,7 @@ const CreaTicket = () => {
             permissions: [`read("any")`],
           }),
         })
-        .then(() => alert('Ticket creato con successo!'))
+        //.then(() => alert('Ticket creato con successo!'))
         .then(() => navigate(pathNavigazione))
         .catch(() => {
           throw new Error('Qualcosa è andato storto durante la PATCH');

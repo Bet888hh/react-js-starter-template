@@ -34,7 +34,7 @@ const TabellaHome = ({ ticketsAperti }) => {
                 <td>{elem.Titolo}</td>
                 <td>{elem.Testo}</td>
                 {/* <td><button id={elem.$id} onClick={visualizza}>Visualizza</button></td> */}
-                <td><Pulsantiera id={elem.$id} /></td>
+                <td><Pulsantiera id={elem.$id} triggerRefresh={null} /></td>
               </tr>
             ))}
           </Paginator>

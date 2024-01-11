@@ -5,8 +5,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { headers, urlbase } from "../../Utility/urls";
 
-export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
+export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }) {
 
+    const idRef = useRef(id);
     const location = useLocation();
 
     const navigate = useNavigate()
@@ -23,28 +24,35 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
             || location.pathname === "/interni"),
 
         prendiInCarico: (location.pathname === "/gestione_ticket"
-            || location.pathname === "/dettaglio" + id)
+            || location.pathname === "/dettaglio/" + id)
             && ticket.stato === "APERTO" && user.Ruolo === "OPERATORE",
 
         accetta: (location.pathname === "/gestione_ticket"
-            || location.pathname === "/dettaglio" + id)
+            || location.pathname === "/dettaglio/" + id)
             && ticket.Stato === "IN_LAVORAZIONE"
             && user.Permesso === "SENIOR"
-            && ticket.Assegnatario === user.Username
-            && ticket.Operatore !== user.Username,
+            && ticket.Assegnatario !== user.Username
+            && ticket.Operatore === user.Username,
 
         rimuovi: location.pathname === "/miei_ticket"
             && ticket.Stato === "APERTO",
 
         riapri: (location.pathname === "/miei_ticket"
-            || location.pathname === "/dettaglio")
+            || location.pathname === "/dettaglio/" + id)
+            && ticket.Riaperto === false
             && ticket.Utente === user.Username
             && ticket.Stato === "CHIUSO",
+
+        chiudi: location.pathname === "/dettaglio/" + id
+            && ticket.Stato !== "CHIUSO"
+            && ticket.stato !== "INTERNO"
+            && (user.Username === ticket.Utente
+                || user.Username === ticket.Operatore),
 
     };
 
     const indietro = useCallback(() => {
-        navigate("..");
+        navigate(-1);
     }, [navigate])
 
     const dettaglio = useCallback((e) => {
@@ -64,7 +72,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
                             Stato: "IN_LAVORAZIONE",
                             Ultima_visita: user.Permesso,
                             Operatore: user.Username,
-                            Assegnatario: "",
+                            Assegnatario: user.Username,
                         },
                         permissions: [`read("any")`],
                     }),
@@ -75,10 +83,12 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
                 })
                 .then((r) => {
                     alert("Ticket preso in carico!");
+                    triggerRefresh();
+                    init();
                 });
         }
     },
-        [id, ticket.Operatore, user.Permesso, user.Username]
+        [id, ticket.Operatore, triggerRefresh, user.Permesso, user.Username]
     );
 
     const accetta = useCallback(() => {
@@ -104,18 +114,25 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
             })
             .then((r) => {
                 alert("Ticket accettato!");
+                triggerRefresh();
+                init();
             });
-    }, [id, user.Permesso, user.Username]);
+    }, [id, triggerRefresh, user.Permesso, user.Username]);
 
 
-    const rimuovi = useCallback(
-        () => {
-            fetch(urlbase("TICKET") + "/" + id, {
-                method: "delete",
-                headers: headers,
-            })
-                .then(() => alert("Elemento rimosso!"));
-        }, [id]);
+    const rimuovi = useCallback(() => {
+        fetch(urlbase("TICKET") + "/" + id, {
+            method: "delete",
+            headers: headers,
+        })
+            .then(() => {
+                idRef.current = "";
+                alert("Elemento rimosso!")
+                triggerRefresh();
+                init();
+            });
+
+    }, [id, triggerRefresh]);
 
     const riapri = useCallback(() => {
         if (!ticket.Riaperto) {
@@ -129,6 +146,8 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
                         data: {
                             Stato: "APERTO",
                             Ultima_visita: "UTENTE",//il ticket può essere riaperto solo dall'utente creatore
+                            Operatore: "",
+                            Assegnatario: "",
                             Riaperto: true,
                         },
                         permissions: [`read("any")`],
@@ -139,31 +158,62 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
                     return r.json();
                 })
                 .then((r) => {
-                    alert("Ticket accettato!");
+                    //triggerRefresh();
+                    init();
+                    alert("Ticket riaperto!");
                 });
         } else {
             alert("Il ticket era già stato riaperto precedentemente!")
         }
+    }, [ticket.Riaperto, triggerRefresh, id]);
 
-    }, [ticket.Riaperto, id, user.Permesso]);
-
-    const recuperaTicket = useCallback(() => {
+    const chiudi = useCallback(() => {
         fetch(
-            urlbase("TICKET") + "/" + id,
+            urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
             {
-                method: "GET",
-                headers: headers
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify({
+                    documentId: id,
+                    data: {
+
+                        Stato: "CHIUSO",
+                    },
+                    permissions: [`read("any")`],
+                }),
             }
         )
-            .then(r => r.json())
             .then((r) => {
-                setTicket(r);
-            })
+                //triggerRefresh();
+                init();
+            });
+    }, [id, triggerRefresh]);
+
+    const assegnaASenior = useCallback(() => {
+        navigate("/crea_ticket", { state: ticket })
+    }, [navigate, ticket]);
+
+    const init = useCallback(() => {
+        if (idRef.current!="") {
+            fetch(
+                urlbase("TICKET") + "/" + id,
+                {
+                    method: "GET",
+                    headers: headers
+                }
+            )
+                .then(r => r.json())
+                .then((r) => {
+                    setTicket(r);
+                })
+                .catch((e) => {
+                    return;
+                })
+        }
     }, [id]);
 
-
     useEffect(() => {
-        recuperaTicket();
+        init();
     }, []);
 
 
@@ -175,7 +225,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
                 </button>)}
 
             {permessi.dettaglio &&
-                (<button onClick={dettaglio} id={ticket.$id}>
+                (<button onClick={dettaglio}>
                     {location.pathname !== "/" ? "Dettaglio" : "Visualizza"}
                 </button>)}
 
@@ -187,22 +237,34 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "" }) {
 
 
             {permessi.accetta &&
-                (<button onClick={accetta} id={id}>
+                (<button onClick={accetta}>
                     Accetta
                 </button>
                 )}
 
             {permessi.rimuovi &&
-                (<button onClick={rimuovi} id={id}>
+                (<button onClick={rimuovi}>
                     Rimuovi
                 </button>
                 )}
 
+            {permessi.chiudi && (
+                <button onClick={chiudi}>
+                    Chiudi
+                </button>
+            )}
 
             {permessi.riapri &&
-                (<button onClick={riapri} id={id}>
+                (<button onClick={riapri}>
                     Riapri
                 </button>)}
+
+            {user.Permesso === "JUNIOR" &&
+                ticket.Operatore === user.Username &&
+                ticket.Assegnatario === "" &&
+                ticket.Stato !== "INTERNO" && (
+                    <button onClick={assegnaASenior}>Assegna a Senior</button>
+                )}
         </>
 
     );
