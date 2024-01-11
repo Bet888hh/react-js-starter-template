@@ -47,9 +47,9 @@ const CreaTicket = () => {
   const [categoriaManuale, setCategoriaManuale] = useState('');
   const [assegnaA, setAssegnaA] = useState('');
   const [listaAssegnatari, setListaAssegnatari] = useState([]);
-  
-  const gestisciCreazioneTicket = () => {
-    creaButtonRef.current.disabled=true;
+
+  const gestisciCreazioneTicket = useCallback(() => {
+    creaButtonRef.current.disabled = true;
     let pathNavigazione;//per essere reindirizzati alla fine della creazione in base all'utente
     let ticket = {
       Titolo: titolo,
@@ -58,14 +58,14 @@ const CreaTicket = () => {
       Ultima_visita: user.Permesso ? user.Permesso : "UTENTE",
       Categoria: categoria,
     }
-    
+
     if (user.Ruolo === 'SEMPLICE') {
       if (mieiTicketApertiInLavorazione > 1) {
         alert('Hai già aperto troppi ticket. Chiudine alcuni prima di aprirne un altro.');
         return;
       }
-      ticket = { ...ticket, Stato: "APERTO"}
-      if(categoriaManuale!==''){
+      ticket = { ...ticket, Stato: "APERTO" }
+      if (categoriaManuale !== '') {
         ticket = { ...ticket, Categoria_manuale: categoriaManuale }
       }
       pathNavigazione = '../miei_ticket'
@@ -73,59 +73,60 @@ const CreaTicket = () => {
       ticket = { ...ticket, Operatore: assegnaA, Stato: "INTERNO" }
       pathNavigazione = '../gestione_ticket'
     }
-    
+
     const tuttiICampiValidi = Object.values(ticket).every(valore => typeof valore === 'string' && valore.trim() !== '');
     if (!tuttiICampiValidi) {
       alert("Compilare tutti i campi");
-      creaButtonRef.current.disabled=false;
+      creaButtonRef.current.disabled = false;
       return
     }
-    
+
     const request = {
       documentId: "",
       data: ticket,
       permissions: ['read("any")'],
     };
-    
-    
+
+
     fetch(urlbase("TICKET"), {
       method: "POST",
       headers: headers,
       body: JSON.stringify(request),
     })
-    .then(() => {
-      if (user.Ruolo === "OPERATORE") {
-        return fetch(urlbase("TICKET") + "/" + categoriaManuale, {
-          method: "PATCH",
-          headers: headers,
-          body: JSON.stringify({
-            documentId: categoriaManuale,
-            data: {
-              Stato: "IN_LAVORAZIONE",
-              Ultima_visita: "JUNIOR",
-              Operatore: assegnaA,
-              Assegnatario: user.Username,
-            },
-            permissions: [`read("any")`],
-          }),
-        })
-        //.then(() => alert('Ticket creato con successo!'))
-        .then(() => navigate(pathNavigazione))
-        .catch(() => {
-          throw new Error('Qualcosa è andato storto durante la PATCH');
-        });
-      }
-    })
-    .then(() =>{
-        creaButtonRef.current.disabled=false;
-       alert('Ticket creato con successo!')})
-    .then(() => navigate(pathNavigazione))
-    .catch((error) => {
-      alert(error);
-    });
-    
+      .then(() => {
+        if (user.Ruolo === "OPERATORE") {
+          return fetch(urlbase("TICKET") + "/" + categoriaManuale, {
+            method: "PATCH",
+            headers: headers,
+            body: JSON.stringify({
+              documentId: categoriaManuale,
+              data: {
+                Stato: "IN_LAVORAZIONE",
+                Ultima_visita: "JUNIOR",
+                Operatore: assegnaA,
+                Assegnatario: user.Username,
+              },
+              permissions: [`read("any")`],
+            }),
+          })
+            //.then(() => alert('Ticket creato con successo!'))
+            .then(() => navigate(pathNavigazione))
+            .catch(() => {
+              throw new Error('Qualcosa è andato storto durante la PATCH');
+            });
+        }
+      })
+      .then(() => {
+        creaButtonRef.current.disabled = false;
+        alert('Ticket creato con successo!')
+      })
+      .then(() => navigate(pathNavigazione))
+      .catch((error) => {
+        alert(error);
+      });
 
-  };
+
+  }, []);
 
   const ottieniListaAssegnatari = useCallback(() => {
     fetch(urlbase("USER") + `?queries[0]=search("Ruolo",+["OPERATORE"])&queries[1]=search("Permesso",+["SENIOR"])`
@@ -146,7 +147,8 @@ const CreaTicket = () => {
           .then(r => r.json())
           .then(r => {
             tickets.push(...r.documents)
-            const listaAssegnatari = operatoriSenior.map(operatore => {//operatori a cui posso assegnare
+            const listaAssegnatari = [];
+            operatoriSenior.forEach(operatore => {//operatori a cui posso assegnare
               const totTicketOperatore = (tickets.filter((ticket) => {
                 return ticket.Operatore === operatore.Username
               })).length;
@@ -159,9 +161,8 @@ const CreaTicket = () => {
                 })).length;
 
                 if (ticketAssegnatiAOperatore < 5) {
-                  return { username: operatore.Username, ticketAssegnati: ticketAssegnatiAOperatore };
+                  listaAssegnatari.push({ username: operatore.Username, ticketAssegnati: ticketAssegnatiAOperatore });
                 }
-
               }
 
             });
@@ -188,89 +189,91 @@ const CreaTicket = () => {
         setMieiTicketApertiLavorazione(res.total)
         showContent.current = true;
       })
-      .catch((error)=>{
+      .catch((error) => {
         alert('Qualcosa è andato storto durante la GET');
       })
-  }, [user.Username]);
+  }, []);
 
   useEffect(() => {
     if (user.Ruolo === "OPERATORE" && user.Permesso === "JUNIOR") {
-      setTicketDaLavorare(location.state);
+      setTicketDaLavorare(location.state)
       setTesto(`Ciao, ti contatto per il ticket "${ticketDaLavorare.Titolo}" per chiederti di prenderlo in carico`);
       setCategoria(ticketDaLavorare.Categoria)
       setCategoriaManuale(ticketDaLavorare.$id);
+
+    } else {
+      contoMieiTicketApertiInLavorazione();
     }
     ottieniListaAssegnatari();
-  }, [location.state, ottieniListaAssegnatari, ticketDaLavorare, user.Permesso, user.Ruolo]);
+    console.log("listaAssegnatari", listaAssegnatari);
+  }, []);
 
-  useEffect(() => {
-    contoMieiTicketApertiInLavorazione();
-  }, [contoMieiTicketApertiInLavorazione])
+
 
   return (
-    <ConditionalRenderer showContent={showContent.current}>
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {/* <h2>Creazione Ticket</h2> */}
-        {
-          mieiTicketApertiInLavorazione > 1
-            ?
-            (<h2>Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.</h2>)
-            :
-            (
-              <>
-                <label>Titolo:</label>
-                <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
 
-                <label>Testo:</label>
-                <textarea value={testo} onChange={e => setTesto(e.target.value)} maxLength="500" />
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {/* <h2>Creazione Ticket</h2> */}
+      {
+        mieiTicketApertiInLavorazione > 1
+          ?
+          (<h2>Hai già aperto troppi ticket. Chiudi alcuni prima di aprirne un altro.</h2>)
+          :
+          (
+            <>
+              <label>Titolo:</label>
+              <input type="text" placeholder='Inserisci un titolo' value={titolo} onChange={e => setTitolo(e.target.value)} />
 
-                <label>Categoria:</label>
-                {user.Ruolo === "SEMPLICE"
-                  ?
-                  (
-                    <select value={categoria} onChange={e => setCategoria(e.target.value)}>
-                      <option value="">Selziona una categoria</option>
-                      <option value="Articolo_non_funzionante">Articolo non funzionante</option>
-                      <option value="Articolo_danneggiato">Articolo danneggiato</option>
-                      <option value="Articono_non_conforme">Articolo non conforme</option>
-                      <option value="Altro">Altro</option>
-                    </select>
-                  )
-                  :
-                  (
-                    <select defaultValue={ticketDaLavorare.Categoria} disabled={true}>
-                      <option value={ticketDaLavorare.Categoria}>{ticketDaLavorare.Categoria}</option>
-                    </select>
-                  )
-                }
+              <label>Testo:</label>
+              <textarea value={testo} onChange={e => setTesto(e.target.value)} maxLength="500" />
+
+              <label>Categoria:</label>
+              {user.Ruolo === "SEMPLICE"
+                ?
+                (
+                  <select value={categoria} onChange={e => setCategoria(e.target.value)}>
+                    <option value="">Selziona una categoria</option>
+                    <option value="Articolo_non_funzionante">Articolo non funzionante</option>
+                    <option value="Articolo_danneggiato">Articolo danneggiato</option>
+                    <option value="Articono_non_conforme">Articolo non conforme</option>
+                    <option value="Altro">Altro</option>
+                  </select>
+                )
+                :
+                (
+                  <select defaultValue={ticketDaLavorare.Categoria} disabled={true}>
+                    <option value={ticketDaLavorare.Categoria}>{ticketDaLavorare.Categoria}</option>
+                  </select>
+                )
+              }
 
 
-                {categoria === 'Altro' && user.Ruolo !== 'OPERATORE' && (
-                  <div>
-                    <label>Categoria Manuale:</label>
-                    <input type="text" max="25" value={categoriaManuale} onChange={e => setCategoriaManuale(e.target.value)} />
-                  </div>
-                )}
+              {categoria === 'Altro' && user.Ruolo !== 'OPERATORE' && (
+                <div>
+                  <label>Categoria Manuale:</label>
+                  <input type="text" max="25" value={categoriaManuale} onChange={e => setCategoriaManuale(e.target.value)} />
+                </div>
+              )}
 
-                {user.Ruolo === 'OPERATORE' && user.Permesso === 'JUNIOR' && (
-                  <div>
-                    <label>Assegna a:</label>
-                    <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
-                      <option value="">Selziona un senior</option>
-                      {listaAssegnatari.length > 0 && (
-                        listaAssegnatari.map((elem, index) => {
-                          return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
-                        })
-                      )}
-                    </select>
-                  </div>
-                )}
+              {user.Ruolo === 'OPERATORE' && user.Permesso === 'JUNIOR' && (
+                <div>
+                  <label>Assegna a:</label>
+                  <select value={assegnaA} onChange={e => setAssegnaA(e.target.value)}>
+                    <option value="">Selziona un senior</option>
+                    {listaAssegnatari.length > 0 && (
+                      listaAssegnatari.map((elem, index) => {
+                        console.log("elem", elem);
+                        return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
+                      })
+                    )}
+                  </select>
+                </div>
+              )}
 
-                <button ref={creaButtonRef} onClick={gestisciCreazioneTicket}>Crea Ticket</button>
-              </>
-            )}
-      </div>
-    </ConditionalRenderer>
+              <button ref={creaButtonRef} onClick={gestisciCreazioneTicket}>Crea Ticket</button>
+            </>
+          )}
+    </div>
   );
 };
 

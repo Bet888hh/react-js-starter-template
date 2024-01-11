@@ -13,6 +13,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
     const navigate = useNavigate()
     const user = useSelector(SelectUserSlice);
     const [ticket, setTicket] = useState({});
+    const [ticketInCarico, setTicketInCarico] = useState(0);
 
     const permessi = {
         indietro: location.pathname === "/dettaglio/" + id,
@@ -60,7 +61,45 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
     }, [navigate, ticket.$id])
 
     const prendiInCarico = useCallback(() => {
-        if (ticket.Operatore === "") {
+        const limite = user.Permesso === "SENIOR" ? 10 : 5;
+
+        if (ticketInCarico < limite) {
+            if (ticket.Operatore === "") {
+                fetch(
+                    urlbase("TICKET") + "/" + id,
+                    {
+                        method: "PATCH",
+                        headers: headers,
+                        body: JSON.stringify({
+                            documentId: id,
+                            data: {
+                                Stato: "IN_LAVORAZIONE",
+                                Ultima_visita: user.Permesso,
+                                Operatore: user.Username,
+                                Assegnatario: user.Username,
+                            },
+                            permissions: [`read("any")`],
+                        }),
+                    }
+                )
+                    .then((r) => {
+                        return r.json();
+                    })
+                    .then((r) => {
+                        alert("Ticket preso in carico!");
+                        triggerRefresh();
+                        init();
+                    });
+            }
+        }
+    },
+        [id, ticket.Operatore, user.Permesso, user.Username]
+    );
+
+    const accetta = useCallback(() => {
+        const limite = user.Permesso === "SENIOR" ? 10 : 5;
+
+        if (ticketInCarico < limite) {
             fetch(
                 urlbase("TICKET") + "/" + id,
                 {
@@ -69,9 +108,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                     body: JSON.stringify({
                         documentId: id,
                         data: {
-                            Stato: "IN_LAVORAZIONE",
                             Ultima_visita: user.Permesso,
-                            Operatore: user.Username,
                             Assegnatario: user.Username,
                         },
                         permissions: [`read("any")`],
@@ -82,42 +119,12 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                     return r.json();
                 })
                 .then((r) => {
-                    alert("Ticket preso in carico!");
+                    alert("Ticket accettato!");
                     triggerRefresh();
                     init();
                 });
         }
-    },
-        [id, ticket.Operatore, triggerRefresh, user.Permesso, user.Username]
-    );
-
-    const accetta = useCallback(() => {
-        const limite = user.Permesso === "SENIOR" ? 10 : 5;
-
-        fetch(
-            urlbase("TICKET") + "/" + id,
-            {
-                method: "PATCH",
-                headers: headers,
-                body: JSON.stringify({
-                    documentId: id,
-                    data: {
-                        Ultima_visita: user.Permesso,
-                        Assegnatario: user.Username,
-                    },
-                    permissions: [`read("any")`],
-                }),
-            }
-        )
-            .then((r) => {
-                return r.json();
-            })
-            .then((r) => {
-                alert("Ticket accettato!");
-                triggerRefresh();
-                init();
-            });
-    }, [id, triggerRefresh, user.Permesso, user.Username]);
+    }, [id, user.Permesso, user.Username]);
 
 
     const rimuovi = useCallback(() => {
@@ -132,7 +139,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                 init();
             });
 
-    }, [id, triggerRefresh]);
+    }, [id]);
 
     const riapri = useCallback(() => {
         if (!ticket.Riaperto) {
@@ -165,7 +172,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
         } else {
             alert("Il ticket era già stato riaperto precedentemente!")
         }
-    }, [ticket.Riaperto, triggerRefresh, id]);
+    }, [ticket.Riaperto, id]);
 
     const chiudi = useCallback(() => {
         fetch(
@@ -187,14 +194,29 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                 //triggerRefresh();
                 init();
             });
-    }, [id, triggerRefresh]);
+    }, [id]);
 
     const assegnaASenior = useCallback(() => {
         navigate("/crea_ticket", { state: ticket })
     }, [navigate, ticket]);
 
-    const init = useCallback(() => {
-        if (idRef.current!="") {
+    const contoTicketInCarico = useCallback(() => {
+        fetch(urlbase("TICKET") + `?queries[0]=search("Utente",+["${user.Username}"])&queries[1]=search("Stato",+["APERTO"])|queries[2]=search("Stato",+["IN_LAVORAZIONE"])`
+            , {
+                method: "GET",
+                headers: headers,
+            })
+            .then(res => res.json())
+            .then(res => {
+                setTicketInCarico(res.total);
+            })
+            .catch((error) => {
+                alert('Qualcosa è andato storto durante la GET');
+            })
+    }, [user.Username]);
+
+    const ricaricaTicket = useCallback(() => {
+        if (idRef.current != "") {
             fetch(
                 urlbase("TICKET") + "/" + id,
                 {
@@ -210,7 +232,12 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                     return;
                 })
         }
-    }, [id]);
+    }, [id])
+
+    const init = useCallback(() => {
+        ricaricaTicket();
+        contoTicketInCarico();
+    }, []);
 
     useEffect(() => {
         init();
