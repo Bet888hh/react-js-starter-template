@@ -15,7 +15,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
     const [ticket, setTicket] = useState({});
     const [ticketInCarico, setTicketInCarico] = useState(0);
 
-    const permessi = {
+    const permessi = useMemo(()=>({
         indietro: location.pathname === "/dettaglio/" + id,
 
         dettaglio: (location.pathname === "/"
@@ -45,12 +45,11 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
             && ticket.Stato === "CHIUSO",
 
         chiudi: location.pathname === "/dettaglio/" + id
-            && ticket.Stato !== "CHIUSO"
-            && ticket.stato !== "INTERNO"
+            && ticket.Stato === "APERTO"
             && (user.Username === ticket.Utente
                 || user.Username === ticket.Operatore),
 
-    };
+    }),[id, location.pathname, ticket.Assegnatario, ticket.Operatore, ticket.Riaperto, ticket.Stato, ticket.Utente, ticket.stato, user.Permesso, user.Ruolo, user.Username]);
 
     const indietro = useCallback(() => {
         navigate(-1);
@@ -275,7 +274,8 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                 </button>
                 )}
 
-            {permessi.chiudi && (
+            {
+            permessi.chiudi && (
                 <button onClick={chiudi}>
                     Chiudi
                 </button>
