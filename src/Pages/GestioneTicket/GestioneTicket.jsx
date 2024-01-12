@@ -14,7 +14,7 @@ import SortableTableRows from "../../Components/SortableTable/SortableTableRows"
 import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const GestioneTicket = () => {
   const navigate = useNavigate()
   const [elementi, setElementi] = useState([]);
@@ -26,6 +26,8 @@ const GestioneTicket = () => {
     inLavorazione: -1,
     inCarico: -1,
   });
+  const location = useLocation();
+  console.log(location.state)
   const [isloading, setIsLoading] = useState(false);
   const backFromDetails = false
   //cose da mettere in un hook personalizzato
@@ -111,7 +113,7 @@ const prendiInCarico= useCallback(async (id) => {
 
 const goToDettaglio = useCallback((id)=>{
 
-  navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket/"+id,previousState:{sortConfig:sortConfig.current,filter:filter}}})
+  navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sortConfig:sortConfig.current,filter:filter}}})
 },[filter, navigate])
 
 
