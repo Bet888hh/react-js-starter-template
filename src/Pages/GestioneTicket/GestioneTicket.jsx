@@ -453,7 +453,7 @@ const accetta = useCallback((id) => {
           </tbody>
         </table>
       )}
-      {filter&&elementi.length===0&&<>no</>}
+      {(elementi.length===0&&filter!=="")?<>no</>:<>seleziona un</>}
     </div>
   );
 };
