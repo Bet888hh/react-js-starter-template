@@ -119,8 +119,7 @@ useParams
       })
       .then((r) => {
         if (!r.message) {
-          setLoading(false);
-          init();
+         
           console.log(location.state);
         navigate(location.state.previousPath,{state:{prevstate:location.state}});
         } else {
@@ -128,7 +127,7 @@ useParams
         }
         
       });
-  }, [id, init, location.state, navigate, ticket.Categoria]);
+  }, [id, location.state, navigate, ticket.Categoria]);
 
   /* const handleChiudi = useCallback(() => {
     setLoading(true);

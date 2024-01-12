@@ -70,6 +70,13 @@ const GestioneTicket = () => {
     );
   }, []);
   
+
+  const goToDettaglio = useCallback((id)=>{
+
+    navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sortConfig:sortConfig.current,filter:filter}}})
+  },[filter, navigate])
+  
+
 const prendiInCarico= useCallback(async (id) => {
   
   const response = await getTicketLavorazione()
@@ -99,7 +106,7 @@ const prendiInCarico= useCallback(async (id) => {
        return r.json()
       }).then((r)=>{
         alert("Ticket preso in carico!");
-        navigate("/dettaglio/"+id,{state:r})
+      goToDettaglio(id)
       })
     }else{
       //TODO
@@ -108,13 +115,9 @@ const prendiInCarico= useCallback(async (id) => {
   }else{
     console.log("nonpuoi");
   }
-},[getTicketLavorazione, navigate, user.Permesso, user.Username])
+},[getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
 
 
-const goToDettaglio = useCallback((id)=>{
-
-  navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sortConfig:sortConfig.current,filter:filter}}})
-},[filter, navigate])
 
 
   const handleTableAction = useCallback((e) => {
@@ -368,7 +371,16 @@ const goToDettaglio = useCallback((id)=>{
    
    
     init()
-
+    // altro se entriamo dal dettaglio 
+    console.log(location.state);
+    if(location.state){
+      const {filter,sortConfig}= location.state.prevstate.previousState
+      handleFiltra(filter)
+      sortConfig.current=sortConfig
+      setFilter(filter)
+     
+     
+    }
 
 
 
@@ -377,7 +389,7 @@ const goToDettaglio = useCallback((id)=>{
   return (
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
-      {elementi.length > 0 && intestazioni.length > 0 ? (
+      {elementi.length > 0 && intestazioni.length > 0 && (
         <table>
           <SortableTableHead
             filter={filter}
@@ -389,36 +401,27 @@ const goToDettaglio = useCallback((id)=>{
           />
           <tbody>
             <Paginator elemPerPagina={5}>
-              {perTabella.length > 0 ? (
-                perTabella.map((riga, index) => {
-                  return (
-                    <tr key={riga.id}>
-                      {intestazioni.map((intestazione) => (
-                        <>
-                          {((intestazione === includeInTableIf.include &&
-                            includeInTableIf.filter === filter) ||
-                            intestazione !== includeInTableIf.include) && (
-                            <td key={intestazione}>
-                              {formatCell(intestazione, riga.content[intestazione])}
-                            </td>
-                          )}
-                        </>
-                      ))}
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={intestazioni.length}>No results1</td>
+              {perTabella.map((riga, index) => {
+                return (
+                <tr key={riga.id}>
+                  {intestazioni.map((intestazione) => (
+                    <>
+                      {((intestazione === includeInTableIf.include &&
+                        includeInTableIf.filter === filter) ||
+                        intestazione !== includeInTableIf.include) && (
+                        <td key={intestazione}>
+                          {formatCell(intestazione, riga.content[intestazione])}
+                        </td>
+                      )}
+                    </>
+                  ))}
                 </tr>
-              )}
+              )})}
             </Paginator>
           </tbody>
         </table>
-      ) : (
-        <div>No results2</div>
       )}
-      {/* here */}
+      {filter&&elementi.length===0&&<>no</>}
     </div>
   );
 };
