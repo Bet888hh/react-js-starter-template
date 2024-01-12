@@ -117,9 +117,46 @@ const prendiInCarico= useCallback(async (id) => {
   }
 },[getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
 
+const init = useCallback(async () => {
+  const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+  const responses = await Promise.all([
+    getTicketAperti(),
+    getTicketLavorazione(),
+    getOperatori(),
+    getTicketChiusi(),
+  ]);
+  const jsonResponses = await Promise.all(
+    responses.map((response) => response.json())
+  );
 
-<<<<<<< HEAD
-=======
+  const [
+    { documents: dAperti, total: totalAperti },
+    { documents: dlavorazione, total: totalLavorazione },
+    { documents: operatori, total: tootalOperatori },
+    { documents: dchiusiUtente, total: totalChiusiUtente },
+  ] = jsonResponses;
+
+  const inLavorazioneUtenteLoggato = dlavorazione.filter(
+    (e) => e.Operatore === user.Username
+  );
+  const junior = operatori.filter((e) => e.Permesso === "JUNIOR").map(e=>e.Username);
+  const lavorazioneJunior = dlavorazione.filter(
+    (e) => junior.includes(e.Operatore) 
+  );
+
+  setTotali((prev) => ({
+    inCarico:
+      inLavorazioneUtenteLoggato.length > 0
+        ? inLavorazioneUtenteLoggato.length
+        : 0,
+    aperti: totalAperti,
+    chiusi: totalChiusiUtente,
+    inLavorazione:
+      lavorazioneJunior.length > 0 ? lavorazioneJunior.length : 0,
+  }));
+}, [getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
+
+
 const accetta = useCallback((id) => {
   const limite = user.Permesso === "SENIOR" ? 10 : 5;
 
@@ -147,13 +184,9 @@ const accetta = useCallback((id) => {
               init();
           });
   }
-}, [totali.inLavorazione, user.Permesso, user.Username]);
+}, [init, totali.inLavorazione, user.Permesso, user.Username]);
 
-const goToDettaglio = useCallback((id)=>{
 
-  navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket/"+id,previousState:{sortConfig:sortConfig.current,filter:filter}}})
-},[filter, navigate])
->>>>>>> 59b787c99f2eec24996d5ccfe90b99360077e80b
 
 
   const handleTableAction = useCallback((e) => {
@@ -170,7 +203,7 @@ const goToDettaglio = useCallback((id)=>{
         goToDettaglio(id)
         break;
     }
-  }, [goToDettaglio, prendiInCarico]);
+  }, [accetta, goToDettaglio, prendiInCarico]);
 
   
   const sortElementi = useCallback(() => {
@@ -363,44 +396,7 @@ const goToDettaglio = useCallback((id)=>{
     }
   };
 
-  const init = useCallback(async () => {
-    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
-    const responses = await Promise.all([
-      getTicketAperti(),
-      getTicketLavorazione(),
-      getOperatori(),
-      getTicketChiusi(),
-    ]);
-    const jsonResponses = await Promise.all(
-      responses.map((response) => response.json())
-    );
-
-    const [
-      { documents: dAperti, total: totalAperti },
-      { documents: dlavorazione, total: totalLavorazione },
-      { documents: operatori, total: tootalOperatori },
-      { documents: dchiusiUtente, total: totalChiusiUtente },
-    ] = jsonResponses;
-
-    const inLavorazioneUtenteLoggato = dlavorazione.filter(
-      (e) => e.Operatore === user.Username
-    );
-    const junior = operatori.filter((e) => e.Permesso === "JUNIOR").map(e=>e.Username);
-    const lavorazioneJunior = dlavorazione.filter(
-      (e) => junior.includes(e.Operatore) 
-    );
-
-    setTotali((prev) => ({
-      inCarico:
-        inLavorazioneUtenteLoggato.length > 0
-          ? inLavorazioneUtenteLoggato.length
-          : 0,
-      aperti: totalAperti,
-      chiusi: totalChiusiUtente,
-      inLavorazione:
-        lavorazioneJunior.length > 0 ? lavorazioneJunior.length : 0,
-    }));
-  }, [getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
+ 
 
   useEffect(() => {
    
