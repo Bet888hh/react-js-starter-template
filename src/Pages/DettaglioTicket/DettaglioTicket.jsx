@@ -68,7 +68,7 @@ useParams
     let id, id1;
     id1 = setTimeout(() => {
       id = setInterval(() => {
-        /* initMessages() */
+         initMessages() 
       }, 5000);
     }, 2000);
 
@@ -99,7 +99,7 @@ useParams
   );
 
   const indietro = useCallback(() => {
-    debugger
+  
     navigate(location.state.previousPath,{state:{prevstate:location.state}});
   }, [location.state, navigate])
 

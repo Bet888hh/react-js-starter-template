@@ -17,11 +17,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 const MieiTicket = () => {
+  const firstRender = useRef(true);
   const navigate = useNavigate();
   const location = useLocation();
   const [showContent, setShowContent] = useState(false);
   const [elementi, setElementi] = useState([]);
-  const sortConfig = useRef({ campo: "niente", ordine: "asc" });
+  const sortConfig = useRef({ campo: "niente", ordine: "" });
   const [filter, setFilter] = useState("");
   /* const navigate = useNavigate(); */
   const user = useSelector(SelectUserSlice);
@@ -81,8 +82,10 @@ const MieiTicket = () => {
 
 
 
-  const sortElementi = useCallback(() => {
-    const datiClone = [...elementi];
+  
+  const sortElementi = useCallback((datiStraordinari=null) => {
+    const datiClone=
+          datiStraordinari? [...datiStraordinari]: [...elementi];
 
     if (sortConfig.current.campo) {
       datiClone.sort((a, b) => {
@@ -119,8 +122,10 @@ const MieiTicket = () => {
     setElementi(datiClone);
   }, [elementi, sortConfig]);
 
+  
+  
   const onSort = useCallback((campo) => {
-    debugger
+  
     const nuovoOrdine =
       sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
         ? "desc"
@@ -177,13 +182,14 @@ const MieiTicket = () => {
             break;
         }
         setElementi(data);
+        return data
       }
     },
     [filter, takeData]
   );
 
   const goToDettaglio = useCallback((e) => {
-    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sortConfig: sortConfig.current, filter: filter } } })
+    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sort: sortConfig.current, filter: filter } } })
   }, [filter, navigate]);
 
   const perTabella = useMemo(() => {
@@ -214,7 +220,7 @@ const MieiTicket = () => {
         };
       })
       : null;
-  }, [elementi, init]);
+  }, [elementi, goToDettaglio]);
 
 
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];
@@ -249,13 +255,19 @@ const MieiTicket = () => {
 
 
   useEffect(() => {
+    
     init();
-    if (location.state) {
-      const { filter, sortConfig } = location.state.prevstate.previousState
-      handleFiltra(filter)
-      sortConfig.current = sortConfig
-      setFilter(filter)
-      onSort(sortConfig.current.campo);
+    if (location.state ) {
+      (async()=>{
+     
+        const { filter, sort} = location.state.prevstate.previousState
+       const dati= await handleFiltra(filter)
+        sortConfig.current.campo= sort.campo 
+        sortConfig.current.ordine= sort.ordine
+        setFilter(filter)
+        sortElementi(dati)
+
+      })()
     }
   }, []);
 

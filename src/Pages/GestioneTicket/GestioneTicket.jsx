@@ -73,7 +73,7 @@ const GestioneTicket = () => {
 
   const goToDettaglio = useCallback((id)=>{
 
-    navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sortConfig:sortConfig.current,filter:filter}}})
+    navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sort:sortConfig.current,filter:filter}}})
   },[filter, navigate])
   
 
@@ -206,8 +206,9 @@ const accetta = useCallback((id) => {
   }, [accetta, goToDettaglio, prendiInCarico]);
 
   
-  const sortElementi = useCallback(() => {
-    const datiClone = [...elementi];
+  const sortElementi = useCallback((datiStraordinari=null) => {
+    const datiClone=
+          datiStraordinari? [...datiStraordinari]: [...elementi];
 
     if (sortConfig.current.campo) {
       datiClone.sort((a, b) => {
@@ -317,15 +318,16 @@ const accetta = useCallback((id) => {
             data = data.documents.filter((e) => e.Operatore === user.Username);
             break;
         }
-  
+  data=data.map((doc) => ({
+    ...doc,
+    ApertoIl: doc.$createdAt,
+    UltimaModifica: doc.$updatedAt,
+  }))
        !data? setElementi([]):setElementi(
-          data.map((doc) => ({
-            ...doc,
-            ApertoIl: doc.$createdAt,
-            UltimaModifica: doc.$updatedAt,
-          }))
+          data
         );
       }
+      return data
     },
     [
       filter,
@@ -404,19 +406,22 @@ const accetta = useCallback((id) => {
    
     init()
     // altro se entriamo dal dettaglio 
-    console.log(location.state);
-    if(location.state){
-      const {filter,sortConfig}= location.state.prevstate.previousState
-      handleFiltra(filter)
-      sortConfig.current=sortConfig
-      setFilter(filter)
-     
-     
+    if (location.state ) {
+      (async()=>{
+        debugger
+        const { filter, sort} = location.state.prevstate.previousState
+       const dati= await handleFiltra(filter)
+        sortConfig.current.campo= sort.campo 
+        sortConfig.current.ordine= sort.ordine
+        setFilter(filter)
+        sortElementi(dati)
+
+      })()
     }
 
 
 
-  }, [handleFiltra, init, location.state]);
+  }, []);
 
   return (
     <div>
@@ -453,7 +458,7 @@ const accetta = useCallback((id) => {
           </tbody>
         </table>
       )}
-      {(elementi.length===0&&filter!=="")?<>no</>:<>seleziona un</>}
+    
     </div>
   );
 };
