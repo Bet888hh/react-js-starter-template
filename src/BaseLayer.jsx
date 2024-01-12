@@ -12,6 +12,7 @@ import Home from "./Pages/Home/Home";
 import ProtectedRoute from "./Utility/ProtectedRoute";
 import { useDispatch } from "react-redux";
 import DettaglioTicket from "./Pages/DettaglioTicket/DettaglioTicket";
+import { ErrorModal } from "./Components/ErrorModal/ErrorModal";
 const BaseLayer = () => {
 
   const user = useSelector(SelectUserSlice);
@@ -43,7 +44,10 @@ if(user.Ruolo==="NOLOG"&&loggedUser){
   return (
     <fieldset className="rutto">
       {user.Ruolo !== "NOLOG" && (
+        <>
         <Navbar /* render={render} forceRender={forceRender}  */ />
+        <ErrorModal />
+        </>
       )}
       <br />
       <Routes>
