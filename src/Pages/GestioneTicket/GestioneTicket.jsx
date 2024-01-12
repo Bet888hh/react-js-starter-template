@@ -107,6 +107,35 @@ const prendiInCarico= useCallback(async (id) => {
   }
 },[getTicketLavorazione, navigate, user.Permesso, user.Username])
 
+const accetta = useCallback((id) => {
+  const limite = user.Permesso === "SENIOR" ? 10 : 5;
+
+  if (totali.inLavorazione < limite) {
+      fetch(
+          urlbase("TICKET") + "/" + id,
+          {
+              method: "PATCH",
+              headers: headers,
+              body: JSON.stringify({
+                  documentId: id,
+                  data: {
+                      Ultima_visita: user.Permesso,
+                      Assegnatario: user.Username,
+                  },
+                  permissions: [`read("any")`],
+              }),
+          }
+      )
+          .then((r) => {
+              return r.json();
+          })
+          .then((r) => {
+              alert("Ticket accettato!");
+              init();
+          });
+  }
+}, [totali.inLavorazione, user.Permesso, user.Username]);
+
   const handleTableAction = useCallback((e) => {
     
     const [action, id] = e.split("-");
@@ -115,7 +144,7 @@ const prendiInCarico= useCallback(async (id) => {
         prendiInCarico(id)
         break;
       case "accetta":
-        prendiInCarico(id)
+        accetta(id)
         break;
     }
   }, []);
