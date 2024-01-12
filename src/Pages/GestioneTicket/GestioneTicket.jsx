@@ -14,7 +14,7 @@ import SortableTableRows from "../../Components/SortableTable/SortableTableRows"
 import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const GestioneTicket = () => {
   const navigate = useNavigate()
   const [elementi, setElementi] = useState([]);
@@ -26,6 +26,8 @@ const GestioneTicket = () => {
     inLavorazione: -1,
     inCarico: -1,
   });
+  const location = useLocation();
+  console.log(location.state)
   const [isloading, setIsLoading] = useState(false);
   const backFromDetails = false
   //cose da mettere in un hook personalizzato
@@ -68,6 +70,13 @@ const GestioneTicket = () => {
     );
   }, []);
   
+
+  const goToDettaglio = useCallback((id)=>{
+
+    navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sortConfig:sortConfig.current,filter:filter}}})
+  },[filter, navigate])
+  
+
 const prendiInCarico= useCallback(async (id) => {
   
   const response = await getTicketLavorazione()
@@ -97,7 +106,7 @@ const prendiInCarico= useCallback(async (id) => {
        return r.json()
       }).then((r)=>{
         alert("Ticket preso in carico!");
-        navigate("/dettaglio/"+id,{state:r})
+      goToDettaglio(id)
       })
     }else{
       //TODO
@@ -106,7 +115,46 @@ const prendiInCarico= useCallback(async (id) => {
   }else{
     console.log("nonpuoi");
   }
-},[getTicketLavorazione, navigate, user.Permesso, user.Username])
+},[getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
+
+const init = useCallback(async () => {
+  const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+  const responses = await Promise.all([
+    getTicketAperti(),
+    getTicketLavorazione(),
+    getOperatori(),
+    getTicketChiusi(),
+  ]);
+  const jsonResponses = await Promise.all(
+    responses.map((response) => response.json())
+  );
+
+  const [
+    { documents: dAperti, total: totalAperti },
+    { documents: dlavorazione, total: totalLavorazione },
+    { documents: operatori, total: tootalOperatori },
+    { documents: dchiusiUtente, total: totalChiusiUtente },
+  ] = jsonResponses;
+
+  const inLavorazioneUtenteLoggato = dlavorazione.filter(
+    (e) => e.Operatore === user.Username
+  );
+  const junior = operatori.filter((e) => e.Permesso === "JUNIOR").map(e=>e.Username);
+  const lavorazioneJunior = dlavorazione.filter(
+    (e) => junior.includes(e.Operatore) 
+  );
+
+  setTotali((prev) => ({
+    inCarico:
+      inLavorazioneUtenteLoggato.length > 0
+        ? inLavorazioneUtenteLoggato.length
+        : 0,
+    aperti: totalAperti,
+    chiusi: totalChiusiUtente,
+    inLavorazione:
+      lavorazioneJunior.length > 0 ? lavorazioneJunior.length : 0,
+  }));
+}, [getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
 
 
 const accetta = useCallback((id) => {
@@ -136,12 +184,9 @@ const accetta = useCallback((id) => {
               init();
           });
   }
-}, [totali.inLavorazione, user.Permesso, user.Username]);
+}, [init, totali.inLavorazione, user.Permesso, user.Username]);
 
-const goToDettaglio = useCallback((id)=>{
 
-  navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket/"+id,previousState:{sortConfig:sortConfig.current,filter:filter}}})
-},[filter, navigate])
 
 
   const handleTableAction = useCallback((e) => {
@@ -351,51 +396,23 @@ const goToDettaglio = useCallback((id)=>{
     }
   };
 
-  const init = useCallback(async () => {
-    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
-    const responses = await Promise.all([
-      getTicketAperti(),
-      getTicketLavorazione(),
-      getOperatori(),
-      getTicketChiusi(),
-    ]);
-    const jsonResponses = await Promise.all(
-      responses.map((response) => response.json())
-    );
-
-    const [
-      { documents: dAperti, total: totalAperti },
-      { documents: dlavorazione, total: totalLavorazione },
-      { documents: operatori, total: tootalOperatori },
-      { documents: dchiusiUtente, total: totalChiusiUtente },
-    ] = jsonResponses;
-
-    const inLavorazioneUtenteLoggato = dlavorazione.filter(
-      (e) => e.Operatore === user.Username
-    );
-    const junior = operatori.filter((e) => e.Permesso === "JUNIOR").map(e=>e.Username);
-    const lavorazioneJunior = dlavorazione.filter(
-      (e) => junior.includes(e.Operatore) 
-    );
-
-    setTotali((prev) => ({
-      inCarico:
-        inLavorazioneUtenteLoggato.length > 0
-          ? inLavorazioneUtenteLoggato.length
-          : 0,
-      aperti: totalAperti,
-      chiusi: totalChiusiUtente,
-      inLavorazione:
-        lavorazioneJunior.length > 0 ? lavorazioneJunior.length : 0,
-    }));
-  }, [getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
+ 
 
   useEffect(() => {
    
    
    
     init()
-
+    // altro se entriamo dal dettaglio 
+    console.log(location.state);
+    if(location.state){
+      const {filter,sortConfig}= location.state.prevstate.previousState
+      handleFiltra(filter)
+      sortConfig.current=sortConfig
+      setFilter(filter)
+     
+     
+    }
 
 
 
@@ -404,7 +421,7 @@ const goToDettaglio = useCallback((id)=>{
   return (
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
-      {elementi.length > 0 && intestazioni.length > 0 ? (
+      {elementi.length > 0 && intestazioni.length > 0 && (
         <table>
           <SortableTableHead
             filter={filter}
@@ -416,36 +433,27 @@ const goToDettaglio = useCallback((id)=>{
           />
           <tbody>
             <Paginator elemPerPagina={5}>
-              {perTabella.length > 0 ? (
-                perTabella.map((riga, index) => {
-                  return (
-                    <tr key={riga.id}>
-                      {intestazioni.map((intestazione) => (
-                        <>
-                          {((intestazione === includeInTableIf.include &&
-                            includeInTableIf.filter === filter) ||
-                            intestazione !== includeInTableIf.include) && (
-                            <td key={intestazione}>
-                              {formatCell(intestazione, riga.content[intestazione])}
-                            </td>
-                          )}
-                        </>
-                      ))}
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={intestazioni.length}>No results1</td>
+              {perTabella.map((riga, index) => {
+                return (
+                <tr key={riga.id}>
+                  {intestazioni.map((intestazione) => (
+                    <>
+                      {((intestazione === includeInTableIf.include &&
+                        includeInTableIf.filter === filter) ||
+                        intestazione !== includeInTableIf.include) && (
+                        <td key={intestazione}>
+                          {formatCell(intestazione, riga.content[intestazione])}
+                        </td>
+                      )}
+                    </>
+                  ))}
                 </tr>
-              )}
+              )})}
             </Paginator>
           </tbody>
         </table>
-      ) : (
-        <div>No results2</div>
       )}
-      {/* here */}
+      {filter&&elementi.length===0&&<>no</>}
     </div>
   );
 };

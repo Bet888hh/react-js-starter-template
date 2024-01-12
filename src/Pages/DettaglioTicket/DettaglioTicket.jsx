@@ -123,13 +123,15 @@ useParams
       })
       .then((r) => {
         if (!r.message) {
-          init();
+         
+          console.log(location.state);
+        navigate(location.state.previousPath,{state:{prevstate:location.state}});
         } else {
           //erroroni
         }
-        setLoading(false);
+        
       });
-  }, [id, init, ticket]);
+  }, [id, location.state, navigate, ticket.Categoria]);
 
   /* const handleChiudi = useCallback(() => {
     setLoading(true);
