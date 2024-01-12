@@ -52,8 +52,9 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
     }),[id, location.pathname, ticket.Assegnatario, ticket.Operatore, ticket.Riaperto, ticket.Stato, ticket.Utente, ticket.stato, user.Permesso, user.Ruolo, user.Username]);
 
     const indietro = useCallback(() => {
-        navigate(-1);
-    }, [navigate])
+        console.log("location.state:",location);
+        navigate(location.state.previousPath,{state:{previousPath:"/dettaglio/"+id,previousState:{...location.state}}});
+    }, [id, location.state, navigate])
 
     const dettaglio = useCallback((e) => {
         navigate("/dettaglio/" + ticket.$id)

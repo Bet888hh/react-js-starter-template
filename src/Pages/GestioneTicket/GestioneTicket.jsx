@@ -158,7 +158,7 @@ const goToDettaglio = useCallback((id)=>{
         goToDettaglio(id)
         break;
     }
-  }, [goToDettaglio, prendiInCarico]);
+  }, [accetta, goToDettaglio, prendiInCarico]);
 
   
   const sortElementi = useCallback(() => {

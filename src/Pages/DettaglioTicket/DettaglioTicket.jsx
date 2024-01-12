@@ -98,6 +98,10 @@ useParams
     [ticket]
   );
 
+  const indietro = useCallback(() => {
+    navigate(location.state.previousPath,{state:{previousPath:"/dettaglio/"+id,previousState:{...location.state}}});
+}, [id, location.state, navigate])
+
   const handleSalva = useCallback(() => {
     setLoading(true);
     fetch(
