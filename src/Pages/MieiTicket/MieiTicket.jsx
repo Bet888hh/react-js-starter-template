@@ -20,6 +20,7 @@ const MieiTicket = () => {
   const firstRender = useRef(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const numeroPagina = useRef();
   const [showContent, setShowContent] = useState(false);
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "niente", ordine: "" });
@@ -188,7 +189,13 @@ const MieiTicket = () => {
     [filter, takeData]
   );
 
+  const getNumeroPagina= useCallback((numeroPagina)=>{
+    return numeroPagina.current=numeroPagina;
+  },[])
+
+
   const goToDettaglio = useCallback((e) => {
+    console.log("numero pagina: ", numeroPagina);
     navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sort: sortConfig.current, filter: filter } } })
   }, [filter, navigate]);
 

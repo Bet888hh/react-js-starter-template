@@ -2,7 +2,7 @@
 import { current } from '@reduxjs/toolkit';
 import React, { useCallback, useEffect, useState } from 'react';
 
-const Paginator = ({ elemPerPagina, children }) => {
+const Paginator = ({ elemPerPagina, children, setPagina }) => {
 
   const [numeroPaginaCorrente, setNumeroPaginaCorrente] = useState(1);
   const [elementiPagina, setElementiPagina] = useState([]);
@@ -12,15 +12,15 @@ const Paginator = ({ elemPerPagina, children }) => {
     if ((numeroPaginaCorrente) < max) {
       setNumeroPaginaCorrente(p => p + 1);
     }
-
-  }, [children.length, elemPerPagina, numeroPaginaCorrente]);
+    setPagina(numeroPaginaCorrente);
+  }, [children.length, elemPerPagina, numeroPaginaCorrente, setPagina]);
 
   const paginaPrecedente = useCallback(() => {
     if (numeroPaginaCorrente > 1) {
       setNumeroPaginaCorrente(p => p - 1)
     }
-
-  }, [numeroPaginaCorrente]);
+    setPagina(numeroPaginaCorrente);
+  }, [numeroPaginaCorrente, setPagina]);
 
   useEffect(() => {
     const primoElem = (numeroPaginaCorrente - 1) * elemPerPagina;
