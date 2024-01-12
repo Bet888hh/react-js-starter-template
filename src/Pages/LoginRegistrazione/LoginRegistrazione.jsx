@@ -45,7 +45,7 @@ const LoginRegistrazione = () => {
 
 
   const handleLogin = useCallback(async (e) => {
-  
+  debugger
     e.preventDefault();
     const formData1 = new FormData(e.target);
     const username = formData1.get("username");
@@ -75,7 +75,13 @@ const LoginRegistrazione = () => {
         setLoading(false)
         return;
       } else {
-        
+        if(rs.total===0){
+          setLoading(false)
+          setErrors((prev) => ({
+            ...prev,
+            afterErrors: ["no user found"],
+          }));
+        }
         if (documents[0].Password === password) {
          //pssword corretta posso loggarmi 
     
