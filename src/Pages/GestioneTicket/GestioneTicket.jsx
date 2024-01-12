@@ -27,6 +27,7 @@ const GestioneTicket = () => {
     inCarico: -1,
   });
   const [isloading, setIsLoading] = useState(false);
+  const backFromDetails = false
   //cose da mettere in un hook personalizzato
   const user = useSelector(SelectUserSlice);
   const getTicketAperti = useCallback(() => {
@@ -107,6 +108,13 @@ const prendiInCarico= useCallback(async (id) => {
   }
 },[getTicketLavorazione, navigate, user.Permesso, user.Username])
 
+
+const goToDettaglio = useCallback((id)=>{
+
+  navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket/"+id,previousState:{sortConfig:sortConfig.current,filter:filter}}})
+},[filter, navigate])
+
+
   const handleTableAction = useCallback((e) => {
     
     const [action, id] = e.split("-");
@@ -117,8 +125,11 @@ const prendiInCarico= useCallback(async (id) => {
       case "accetta":
         prendiInCarico(id)
         break;
+      case "dettaglio":
+        goToDettaglio(id)
+        break;
     }
-  }, []);
+  }, [goToDettaglio, prendiInCarico]);
 
   
   const sortElementi = useCallback(() => {
@@ -351,7 +362,14 @@ const prendiInCarico= useCallback(async (id) => {
   }, [getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
 
   useEffect(() => {
-    init();
+   
+   
+   
+    init()
+
+
+
+
   }, [init]);
 
   return (

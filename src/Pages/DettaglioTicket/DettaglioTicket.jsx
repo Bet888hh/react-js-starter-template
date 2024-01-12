@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 import Messaggi from "../../Components/Messaggi/Messaggi";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
+
 
 const DettaglioTicket = () => {
   /*   const navigate = useNavigate();
@@ -16,6 +17,8 @@ useParams
   const [categoria, setCategoria] = useState(''); // Categoria di default
   const [categoriaManuale, setCategoriaManuale] = useState('');
   const [assegnaA, setAssegnaA] = useState(''); */
+  const location = useLocation();
+  console.log(location.state);
   const user = useSelector(SelectUserSlice);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
