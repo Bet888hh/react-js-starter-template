@@ -41,11 +41,11 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
         riapri: (location.pathname === "/miei_ticket"
             || location.pathname === "/dettaglio/" + id)
             && ticket.Riaperto === false
-            && ticket.Utente === user.Username
+            && ticket.Operatore === user.Username
             && ticket.Stato === "CHIUSO",
 
         chiudi: location.pathname === "/dettaglio/" + id
-            && ticket.Stato === "APERTO"
+            && ticket.Stato === "IN_LAVORAZIONE"
             && (user.Username === ticket.Utente
                 || user.Username === ticket.Operatore),
 

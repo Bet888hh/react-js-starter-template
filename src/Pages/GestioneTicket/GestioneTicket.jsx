@@ -357,7 +357,7 @@ const prendiInCarico= useCallback(async (id) => {
   return (
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
-      {elementi.length > 0 && intestazioni.length > 0 && (
+      {elementi.length > 0 && intestazioni.length > 0 ? (
         <table>
           <SortableTableHead
             filter={filter}
@@ -369,27 +369,36 @@ const prendiInCarico= useCallback(async (id) => {
           />
           <tbody>
             <Paginator elemPerPagina={5}>
-              {perTabella.map((riga, index) => {
-                return (
-                <tr key={riga.id}>
-                  {intestazioni.map((intestazione) => (
-                    <>
-                      {((intestazione === includeInTableIf.include &&
-                        includeInTableIf.filter === filter) ||
-                        intestazione !== includeInTableIf.include) && (
-                        <td key={intestazione}>
-                          {formatCell(intestazione, riga.content[intestazione])}
-                        </td>
-                      )}
-                    </>
-                  ))}
+              {perTabella.length > 0 ? (
+                perTabella.map((riga, index) => {
+                  return (
+                    <tr key={riga.id}>
+                      {intestazioni.map((intestazione) => (
+                        <>
+                          {((intestazione === includeInTableIf.include &&
+                            includeInTableIf.filter === filter) ||
+                            intestazione !== includeInTableIf.include) && (
+                            <td key={intestazione}>
+                              {formatCell(intestazione, riga.content[intestazione])}
+                            </td>
+                          )}
+                        </>
+                      ))}
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={intestazioni.length}>No results1</td>
                 </tr>
-              )})}
+              )}
             </Paginator>
           </tbody>
         </table>
+      ) : (
+        <div>No results2</div>
       )}
-      {filter&&elementi.length===0&&<>no</>}
+      {/* here */}
     </div>
   );
 };
