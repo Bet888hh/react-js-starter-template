@@ -13,10 +13,12 @@ import { headers, urlbase } from "../../Utility/urls";
 import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 const MieiTicket = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showContent, setShowContent] = useState(false);
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "niente", ordine: "asc" });
@@ -57,51 +59,18 @@ const MieiTicket = () => {
     }));
 
     //Aggiunta da me speriamo sia giusta
-    
-    if(filter==="APERTO"){
+
+    if (filter === "APERTO") {
       setElementi(dAperti)
     }
-    if(filter==="CHIUSO"){
+    if (filter === "CHIUSO") {
       setElementi(dchiusi)
     }
-    if(filter==="IN_LAVORAZIONE"){
+    if (filter === "IN_LAVORAZIONE") {
       setElementi(dlavorazione)
     }
     setShowContent(true);
   }, [filter, user.Username])
-
-  /* const deletePost = useCallback(
-    async (id) => {
-      const response = await fetch(urlbase("TICKET") + "/" + id, {
-        method: "delete",
-        headers: headers,
-      });
-      if (response.status === 204) {
-        console.log("olè");
-        setElementi((prev) => prev.filter((el) => el.$id !== id));
-        init();
-      }
-    },
-    [init]
-  ); */
-
-
- /*  const handleTableAction = useCallback(
-    (e) => {
-      console.log(e);
-      const [action, id] = e.split("-");
-      switch (action) {
-        case "rimuovi":
-          deletePost(id);
-          break;
-        case "accetta":
-          alert("implementare funzione accetta")
-          break;
-
-      }
-    },
-    [deletePost]
-  ); */
 
   const [totali, setTotali] = useState({
     aperti: -1,
@@ -151,6 +120,7 @@ const MieiTicket = () => {
   }, [elementi, sortConfig]);
 
   const onSort = useCallback((campo) => {
+    debugger
     const nuovoOrdine =
       sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
         ? "desc"
@@ -212,6 +182,10 @@ const MieiTicket = () => {
     [filter, takeData]
   );
 
+  const goToDettaglio = useCallback((e) => {
+    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sortConfig: sortConfig.current, filter: filter } } })
+  }, [filter, navigate]);
+
   const perTabella = useMemo(() => {
     return elementi
       ? elementi.map((e) => {
@@ -227,10 +201,14 @@ const MieiTicket = () => {
             Messaggi: e.Messaggi,
 
             Azioni: (
-              <Pulsantiera
-                id={e.$id}
-                triggerRefresh={init}
-              />
+              <>
+                <button onClick={goToDettaglio} id={e.$id}>
+                  Dettaglio
+                </button>
+                <Pulsantiera
+                  id={e.$id}
+                />
+              </>
             ),
           }
         };
@@ -272,6 +250,13 @@ const MieiTicket = () => {
 
   useEffect(() => {
     init();
+    if (location.state) {
+      const { filter, sortConfig } = location.state.prevstate.previousState
+      handleFiltra(filter)
+      sortConfig.current = sortConfig
+      setFilter(filter)
+      onSort(sortConfig.current.campo);
+    }
   }, []);
 
 
@@ -279,44 +264,44 @@ const MieiTicket = () => {
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
       <ConditionalRenderer showContent={showContent}>
-      {elementi.length > 0 && intestazioni.length > 0 && (
-        <table>
-          <SortableTableHead
-            filter={filter}
-            includeInTableIf={includeInTableIf}
-            excludeFromSorting={excludeFromSorting}
-            intestazioni={intestazioni}
-            onSort={onSort}
-            sort={sortConfig.current}
-          />
-          <tbody>
-            {perTabella.length > 0
-              &&
-              (<Paginator elemPerPagina={5}>
-                {perTabella.map((riga) => {
-                  return (
-                    <tr key={riga.id}>
-                      {intestazioni.map((intestazione) => {
-                        return (
-                          <>
-                            {((intestazione === includeInTableIf.include &&
-                              includeInTableIf.filter === filter) ||
-                              intestazione !== includeInTableIf.include) && (
-                                <td key={intestazione}>
-                                  {formatCell(intestazione, riga.content[intestazione])}
-                                </td>
-                              )}
-                          </>
-                        )
-                      })}
-                    </tr>
-                  )
-                })}
-              </Paginator>)
-            }
-          </tbody>
-        </table>
-      )}
+        {elementi.length > 0 && intestazioni.length > 0 && (
+          <table>
+            <SortableTableHead
+              filter={filter}
+              includeInTableIf={includeInTableIf}
+              excludeFromSorting={excludeFromSorting}
+              intestazioni={intestazioni}
+              onSort={onSort}
+              sort={sortConfig.current}
+            />
+            <tbody>
+              {perTabella.length > 0
+                &&
+                (<Paginator elemPerPagina={5}>
+                  {perTabella.map((riga) => {
+                    return (
+                      <tr key={riga.id}>
+                        {intestazioni.map((intestazione) => {
+                          return (
+                            <>
+                              {((intestazione === includeInTableIf.include &&
+                                includeInTableIf.filter === filter) ||
+                                intestazione !== includeInTableIf.include) && (
+                                  <td key={intestazione}>
+                                    {formatCell(intestazione, riga.content[intestazione])}
+                                  </td>
+                                )}
+                            </>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
+                </Paginator>)
+              }
+            </tbody>
+          </table>
+        )}
       </ConditionalRenderer>
     </div>
   );
