@@ -416,7 +416,7 @@ const accetta = useCallback((id) => {
 
 
 
-  }, [init]);
+  }, [handleFiltra, init, location.state]);
 
   return (
     <div>
