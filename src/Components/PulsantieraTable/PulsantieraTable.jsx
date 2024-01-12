@@ -18,12 +18,12 @@ const PulsantieraTable = ({
   const action = (e) => {
     handleTableAction(e.target.id);
   };
- const goToDettaglio = (e)=>{
+ /* const goToDettaglio = (e)=>{
     navigate("/dettaglio/"+e.target.id)
-  }
+  } */
   return (
     <>
-      <button onClick={goToDettaglio} id={id}>
+      <button onClick={action} id={"dettaglio-"+id}>
         dettaglio
       </button>
       {location.pathname == "/gestione_ticket" && (
