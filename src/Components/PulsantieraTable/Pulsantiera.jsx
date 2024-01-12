@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { headers, urlbase } from "../../Utility/urls";
 
-export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }) {
+export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
 
     const idRef = useRef(id);
     const location = useLocation();
@@ -51,10 +51,6 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
 
     }),[id, location.pathname, ticket.Assegnatario, ticket.Operatore, ticket.Riaperto, ticket.Stato, ticket.Utente, ticket.stato, user.Permesso, user.Ruolo, user.Username]);
 
-    const indietro = useCallback(() => {
-        console.log("location.state:",location);
-        navigate(location.state.previousPath,{state:{previousPath:"/dettaglio/"+id,previousState:{...location.state}}});
-    }, [id, location.state, navigate])
 
     const dettaglio = useCallback((e) => {
         navigate("/dettaglio/" + ticket.$id)
@@ -87,8 +83,6 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                     })
                     .then((r) => {
                         alert("Ticket preso in carico!");
-                        triggerRefresh();
-                        init();
                     });
             }
         }
@@ -120,8 +114,6 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                 })
                 .then((r) => {
                     alert("Ticket accettato!");
-                    triggerRefresh();
-                    init();
                 });
         }
     }, [id, user.Permesso, user.Username]);
@@ -135,8 +127,6 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
             .then(() => {
                 idRef.current = "";
                 alert("Elemento rimosso!")
-                triggerRefresh();
-                init();
             });
 
     }, [id]);
@@ -165,8 +155,6 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                     return r.json();
                 })
                 .then((r) => {
-                    triggerRefresh();
-                    init();
                     alert("Ticket riaperto!");
                 });
         } else {
@@ -190,10 +178,6 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                 }),
             }
         )
-            .then((r) => {
-                //triggerRefresh();
-                init();
-            });
     }, [id]);
 
     const assegnaASenior = useCallback(() => {
@@ -251,10 +235,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", triggerRefresh }
                     Indietro
                 </button>)}
 
-            {permessi.dettaglio &&
-                (<button onClick={dettaglio}>
-                    {location.pathname !== "/" ? "Dettaglio" : "Visualizza"}
-                </button>)}
+            
 
             {permessi.prendiInCarico &&
                 (<button onClick={prendiInCarico}>

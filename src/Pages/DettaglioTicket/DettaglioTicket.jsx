@@ -99,8 +99,9 @@ useParams
   );
 
   const indietro = useCallback(() => {
-    navigate(location.state.previousPath,{state:{previousPath:"/dettaglio/"+id,previousState:{...location.state}}});
-}, [id, location.state, navigate])
+    debugger
+    navigate(location.state.previousPath,{state:{prevstate:location.state}});
+  }, [location.state, navigate])
 
   const handleSalva = useCallback(() => {
     setLoading(true);
@@ -125,13 +126,13 @@ useParams
         if (!r.message) {
          
           console.log(location.state);
-        navigate(location.state.previousPath,{state:{prevstate:location.state}});
+        indietro();
         } else {
           //erroroni
         }
         
       });
-  }, [id, location.state, navigate, ticket.Categoria]);
+  }, [id, indietro, location.state, ticket.Categoria]);
 
   /* const handleChiudi = useCallback(() => {
     setLoading(true);
@@ -323,15 +324,7 @@ useParams
                 />
               </div>
             )}
-            <Pulsantiera id={id} triggerRefresh={init} />
-            {/* <button
-              onClick={() => {
-                navigate(-1);
-              }}
-              id="btnIndietro"
-            >
-              Indietro
-            </button> */}
+            <Pulsantiera id={id} indietro={indietro} />
 
             {user.Username === ticket.Operatore &&
               ticket.Stato === "IN_LAVORAZIONE" && (
@@ -343,34 +336,6 @@ useParams
                   Salva
                 </button>
               )}
-
-            {/* {ticket.Stato === "CHIUSO" &&
-              !ticket.Riaperto &&
-              ticket.stato !== "INTERNO" && (
-                <button id="btnRiapri"> Riapri</button>
-              )} */}
-
-            {/* {ticket.Stato !== "CHIUSO" &&
-              ticket.stato !== "INTERNO" &&
-              (user.Username === ticket.Utente ||
-                user.Username === ticket.Operatore) && (
-                <button onClick={handleChiudi} id="btnChiudi">
-                  {" "}
-                  Chiudi
-                </button>
-              )} */}
-
-            {/* {user.Ruolo === "OPERATORE" && ticket.Operatore === null && (
-              <button onClick={prendiInCarico} id={ticket.$id}>
-                Prendi in Carico
-              </button>
-            )} */}
-
-            {/* {user.Permesso === "SENIOR" &&
-              ticket.Operatore === user.Username &&
-              ticket.Assegnatario !== user.Username && (
-                <button id="btnAccetta" onClick={accetta}>Accetta</button>
-              )} */}
 
             <br /><br /><br /><br /><br /><br />
 
