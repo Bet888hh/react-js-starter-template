@@ -5,7 +5,7 @@ import PulsantieraFiltri from '../../Components/PulsantieraFiltri/PulsantieraFil
 import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable';
 import { headers, urlbase } from '../../Utility/urls';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { setegid } from 'process';
+
 
 function Interni() {
   const [elementi, setElementi] = useState([]);
