@@ -49,3 +49,6 @@ const Paginator = ({ elemPerPagina, children, paginaCorrente, getNumeroPagina })
 };
 
 export default Paginator;
+
+
+

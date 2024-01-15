@@ -190,15 +190,19 @@ const MieiTicket = () => {
     [filter, takeData]
   );
 
+
   const getNumeroPagina= useCallback((pagina)=>{
     numeroPagina.current = pagina;
   },[])
+
 
 
   const goToDettaglio = useCallback((e) => {
     console.log("numero pagina: ", numeroPagina.current);
     navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sort: sortConfig.current, filter: filter, page: numeroPagina.current } } })
   }, [filter, navigate]);
+
+
 
   const perTabella = useMemo(() => {
     return elementi
