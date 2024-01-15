@@ -103,8 +103,7 @@ const CreaTicket = () => {
               data: {
                 Stato: "IN_LAVORAZIONE",
                 Ultima_visita: "JUNIOR",
-                Operatore: assegnaA,
-                Assegnatario: user.Username,
+                Assegnatario: assegnaA,
               },
               permissions: [`read("any")`],
             }),
