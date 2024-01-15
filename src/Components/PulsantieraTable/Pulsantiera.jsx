@@ -32,8 +32,8 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
             || location.pathname === "/dettaglio/" + id)
             && ticket.Stato === "IN_LAVORAZIONE"
             && user.Permesso === "SENIOR"
-            && ticket.Assegnatario !== user.Username
-            && ticket.Operatore === user.Username,
+            && ticket.Assegnatario === user.Username
+            && ticket.Operatore !== user.Username,
 
         rimuovi: location.pathname === "/miei_ticket"
             && ticket.Stato === "APERTO",

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TabellaHome from '../../Components/TabellaHome/TabellaHome';
 import '../../Utility/urls';
 import { headers, urlbase } from '../../Utility/urls';
-import TabellaComponent from '../../Components/Tabella/Tabella';
+
 
 const Home = () => {
 
@@ -30,7 +30,6 @@ const Home = () => {
         let tickets = res.documents
         if (inputRef.current !== null) {
           if (inputRef.current.value !== "") {
-            debugger
             tickets = tickets.filter((ticket) => {
               const testo = ticket.Testo
               return testo.includes(inputRef.current.value);
@@ -68,7 +67,7 @@ const Home = () => {
       {tickets.length > 0
         ?
         (
-          <TabellaComponent dati={tickets} colonne={["Titolo", "Testo"]} />
+          <TabellaHome ticketsAperti={tickets} parolaRicerc={inputRef.current.value} />
         )
         :
         (<p>{testoAvvisi.current}</p>)
