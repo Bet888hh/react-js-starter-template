@@ -1,8 +1,9 @@
+/* eslint-disable react/prop-types */
 import React, { memo, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
-const Navbar = () => {
+const Navbar = ({mieiTicketNotifNumber}) => {
     const location = useLocation().pathname;
     const user = useSelector(SelectUserSlice);
 
@@ -53,7 +54,7 @@ const Navbar = () => {
                         className={`Link ${location.includes("miei_ticket") ? "active" : ""}`}
                         to="/miei_ticket"
                     >
-                        <span>Miei ticket</span>
+                        <span>Miei ticket {mieiTicketNotifNumber}</span>
                     </Link>
                 )}
                 {(permits.gestioneTicket&&
