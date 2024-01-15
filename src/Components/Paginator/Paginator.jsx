@@ -2,7 +2,7 @@
 import { current } from '@reduxjs/toolkit';
 import React, { useCallback, useEffect, useState } from 'react';
 
-const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagina=null, backFromDetails }) => {
+const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagina=null }) => {
 
   const [numeroPaginaCorrente, setNumeroPaginaCorrente] = useState(paginaCorrente!=null ? paginaCorrente : 1);
   const [elementiPagina, setElementiPagina] = useState([]);
@@ -33,10 +33,7 @@ const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagi
     getNumeroPagina(numeroPaginaCorrente);
   }, [numeroPaginaCorrente, elemPerPagina, children, getNumeroPagina]);
 
-  useEffect(()=>{
-    console.log(backFromDetails);
-   !backFromDetails&& setNumeroPaginaCorrente(1)
-  },[backFromDetails, children])
+  
   
   return (
     <>

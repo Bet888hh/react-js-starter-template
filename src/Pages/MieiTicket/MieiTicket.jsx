@@ -18,6 +18,7 @@ import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/ErrorSlice";
 const MieiTicket = () => {
+ 
   const firstRender = useRef(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,8 +32,10 @@ const MieiTicket = () => {
   const [filter, setFilter] = useState("");
   /* const navigate = useNavigate(); */
   const user = useSelector(SelectUserSlice);
-  const backFromDetails =useRef( location.state?.previousPath === "/dettaglio" ? true : false);
+  const [backFromDetails,setBackfromDetails] = useState(location.state?.prevstate.previousPath == "/dettaglio" );
   //cose da mettere in un hook personalizzato
+
+
   const init = useCallback(async () => {
     setShowContent(false);
     try {
@@ -171,11 +174,11 @@ const MieiTicket = () => {
         dispatch(setError(error.message))
       }
     },
-    [user.Username]);
+    [dispatch, user.Username]);
 
   const handleFiltra = useCallback(
     async (e) => {
-    backFromDetails.current=false;
+   
       try{
       let data = null;
       if (filter === e) {
@@ -249,7 +252,7 @@ const MieiTicket = () => {
       : null;
   }, [elementi, goToDettaglio]);
 
-  console.log(perTabella);
+ 
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];
   const excludeFromSorting = ["Azioni"];
   const includeInTableIf = { filter: "nan", include: "nan" };
@@ -316,7 +319,7 @@ const MieiTicket = () => {
             <tbody>
               {perTabella.length > 0
                 &&
-                (<Paginator backFromDetails={backFromDetails.current} elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
+                (<Paginator  elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
                   {perTabella.map((riga) => {
                     return (
                       <tr key={riga.id}>
