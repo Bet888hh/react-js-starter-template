@@ -52,6 +52,8 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
     }),[id, location.pathname, ticket.Assegnatario, ticket.Operatore, ticket.Riaperto, ticket.Stato, ticket.Utente, ticket.stato, user.Permesso, user.Ruolo, user.Username]);
 
 
+    
+
     const dettaglio = useCallback((e) => {
         navigate("/dettaglio/" + ticket.$id)
     }, [navigate, ticket.$id])
@@ -83,11 +85,14 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
                     })
                     .then((r) => {
                         alert("Ticket preso in carico!");
-                    });
+                    })
+                    .then(()=>{
+                        indietro();
+                    })
             }
         }
     },
-        [id, ticket.Operatore, user.Permesso, user.Username]
+        [id, indietro, ticket.Operatore, ticketInCarico, user.Permesso, user.Username]
     );
 
     const accetta = useCallback(() => {
@@ -114,9 +119,12 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
                 })
                 .then((r) => {
                     alert("Ticket accettato!");
-                });
+                })
+                .then(()=>{
+                    indietro();
+                })
         }
-    }, [id, ticketInCarico, user.Permesso, user.Username]);
+    }, [id, indietro, ticketInCarico, user.Permesso, user.Username]);
 
 
     const rimuovi = useCallback(() => {
@@ -127,9 +135,12 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
             .then(() => {
                 idRef.current = "";
                 alert("Elemento rimosso!")
+            })
+            .then(()=>{
+                indietro();
             });
 
-    }, [id]);
+    }, [id, indietro]);
 
     const riapri = useCallback(() => {
         if (!ticket.Riaperto) {
@@ -156,11 +167,14 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
                 })
                 .then((r) => {
                     alert("Ticket riaperto!");
+                })
+                .then(()=>{
+                    indietro();
                 });
         } else {
             alert("Il ticket era già stato riaperto precedentemente!")
         }
-    }, [ticket.Riaperto, id]);
+    }, [ticket.Riaperto, id, indietro]);
 
     const chiudi = useCallback(() => {
         fetch(
@@ -178,7 +192,10 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
                 }),
             }
         )
-    }, [id]);
+        .then(()=>{
+            indietro();
+        })
+    }, [id, indietro]);
 
     const assegnaASenior = useCallback(() => {
         navigate("/crea_ticket", { state: ticket })
