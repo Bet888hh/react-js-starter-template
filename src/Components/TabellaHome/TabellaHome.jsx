@@ -4,7 +4,7 @@ import Paginator from '../Paginator/Paginator';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Pulsantiera } from '../PulsantieraTable/Pulsantiera';
 
-const TabellaHome = ({ ticketsAperti }) => {
+const TabellaHome = ({ ticketsAperti,parolaRicerc }) => {
 
 
   const navigate = useNavigate();
@@ -18,8 +18,8 @@ const TabellaHome = ({ ticketsAperti }) => {
   
   const goToDettaglio = useCallback((e) => {
     console.log("numero pagina: ", numeroPagina.current);
-    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/", previousState: {page: numeroPagina.current } } })
-  }, [navigate]);
+    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/", previousState: {page: numeroPagina.current,parolaRicerca:parolaRicerc&&parolaRicerc } } })
+  }, [navigate, parolaRicerc]);
 
   /* const visualizza = useCallback((e) => {
     const ticket = ticketsAperti.filter((ticket) => {

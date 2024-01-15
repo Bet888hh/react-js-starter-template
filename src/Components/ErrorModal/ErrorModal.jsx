@@ -14,18 +14,18 @@ export const ErrorModal = memo(function ErrorModal() {
         <>
             {error.error != null
                 && (
-                    <fieldset style={{width:"20%", marginLeft:"40%", marginTop:"4%"}}>
+                    <fieldset style={{width:"40%", marginLeft:"35%", marginTop:"4%",height:"10%"}}>
                         <div className="modal-overlay">
-                            <div className="error-modal">
-                                <div className="modal-header">
-                                    <h2>Error</h2>
-                                </div>
-                                <div className="modal-body">
-                                    <p>{JSON.stringify(error.error)}</p>
-                                </div>
-                                <div className="modal-footer">
+                            <div >
+                             
+                                    
+                               
+                                
+                                    <span style={{marginRight:"10px"}}>{JSON.stringify(error.error)}</span>
+                               
+                              
                                     <button onClick={onClose}>Close</button>
-                                </div>
+                                
                             </div>
                         </div>
                     </fieldset>

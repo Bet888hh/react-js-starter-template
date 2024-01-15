@@ -67,7 +67,7 @@ const Home = () => {
       {tickets.length > 0
         ?
         (
-          <TabellaHome ticketsAperti={tickets} />
+          <TabellaHome ticketsAperti={tickets} parolaRicerc={inputRef.current.value} />
         )
         :
         (<p>{testoAvvisi.current}</p>)
