@@ -1,20 +1,32 @@
 /* eslint-disable react/prop-types */
-import React, { useCallback } from 'react'
+import React, { useCallback, useRef } from 'react'
 import Paginator from '../Paginator/Paginator';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Pulsantiera } from '../PulsantieraTable/Pulsantiera';
 
 const TabellaHome = ({ ticketsAperti }) => {
 
 
   const navigate = useNavigate();
+  const location = useLocation();
+  console.log("location: ", location);
+  const numeroPagina = useRef()
 
-  const visualizza = useCallback((e) => {
+  const getNumeroPagina= useCallback((pagina)=>{
+    numeroPagina.current = pagina;
+  },[]);
+  
+  const goToDettaglio = useCallback((e) => {
+    console.log("numero pagina: ", numeroPagina.current);
+    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/", previousState: {page: numeroPagina.current } } })
+  }, [navigate]);
+
+  /* const visualizza = useCallback((e) => {
     const ticket = ticketsAperti.filter((ticket) => {
       return ticket.id === e.target.id;
     })
     navigate('../dettaglio/' + e.target.id, { state: ticket })
-  }, [navigate, ticketsAperti]);
+  }, [navigate, ticketsAperti]); */
 
   return (
     <>
@@ -27,14 +39,14 @@ const TabellaHome = ({ ticketsAperti }) => {
           </tr>
         </thead>
         <tbody>
-          {ticketsAperti && <Paginator elemPerPagina={10}>
+          {ticketsAperti && <Paginator elemPerPagina={10} getNumeroPagina={getNumeroPagina}>
 
             {ticketsAperti.map((elem, index) => (
               <tr key={index}>
                 <td>{elem.Titolo}</td>
                 <td>{elem.Testo}</td>
-                {/* <td><button id={elem.$id} onClick={visualizza}>Visualizza</button></td> */}
-                <td><Pulsantiera id={elem.$id} triggerRefresh={null} /></td>
+                <td><button id={elem.$id} onClick={goToDettaglio}>Visualizza</button></td>
+                {/* <td><Pulsantiera id={elem.$id}  /></td> */}
               </tr>
             ))}
           </Paginator>
