@@ -189,7 +189,7 @@ function Interni() {
 
     init()
 
-  }, [sortElementi])
+  }, [])
   return (
     <div>
 
