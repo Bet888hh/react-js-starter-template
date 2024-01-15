@@ -3,7 +3,7 @@ import React, { memo, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
-const Navbar = ({mieiTicketNotifNumber}) => {
+const Navbar = ({mieiTicketNotifNumber,gestioneTicketNotifNumber}) => {
     const location = useLocation().pathname;
     const user = useSelector(SelectUserSlice);
 
@@ -54,7 +54,7 @@ const Navbar = ({mieiTicketNotifNumber}) => {
                         className={`Link ${location.includes("miei_ticket") ? "active" : ""}`}
                         to="/miei_ticket"
                     >
-                        <span>Miei ticket {mieiTicketNotifNumber}</span>
+                        <span>Miei ticket {mieiTicketNotifNumber>0&&mieiTicketNotifNumber}</span>
                     </Link>
                 )}
                 {(permits.gestioneTicket&&
@@ -62,7 +62,7 @@ const Navbar = ({mieiTicketNotifNumber}) => {
                         className={`Link ${location.includes("gestione_ticket") ? "active" : ""}`}
                         to="/gestione_ticket"
                     >
-                        <span>Gestione ticket</span>
+                        <span>Gestione ticket {gestioneTicketNotifNumber>0&&gestioneTicketNotifNumber}</span>
                     </Link>
                 )}
                 {(permits.interni&&

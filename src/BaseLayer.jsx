@@ -27,9 +27,9 @@ const BaseLayer = () => {
     ticketInCarico: [],
     ticketLavorazione: [],
   });
-  console.log(state);
- const [mieiTicketNotifNumber, setMieiTicketNotifNumber] = useState([])
 
+ const [mieiTicketNotifNumber, setMieiTicketNotifNumber] = useState([])
+const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState([])
   const permits = useMemo(() => {
     return {
       home: user.Ruolo !== "NOLOG" && user.Ruolo === "SEMPLICE",
@@ -41,7 +41,7 @@ const BaseLayer = () => {
       interni: user.Ruolo === "OPERATORE",
       loginRegistrazione: user.Ruolo === "NOLOG",
     };
-  }, [user.Ruolo]);
+  }, [user.Permesso, user.Ruolo]);
 
   const getTicketLavorazione = useCallback(async () => {
     return fetch(
@@ -55,7 +55,7 @@ const BaseLayer = () => {
   const getTicketMieiInLavorazione = useCallback(async () => {
     return fetch(
       urlbase("TICKET") +
-        `?queries[0]=search("Stato", ["IN_LAVORAZIONE"])&queries[1]=search("Operatore", [${user.Username}])`,
+        `?queries[0]=search("Operatore", [${user.Username}])`,
       {
         method: "GET",
         headers: headers,
@@ -84,7 +84,7 @@ const BaseLayer = () => {
 
   
 
-  const takeDataForSeniorr = useCallback(async () => {
+  /* const takeDataForSeniorr = useCallback(async () => {
     let ticketInCarico = await getTicketMieiInLavorazione();
     ticketInCarico = await ticketInCarico.json();
     let ticketLavorazione = await getTicketLavorazione();
@@ -115,9 +115,9 @@ const BaseLayer = () => {
     getOperatori,
     getTicketLavorazione,
     getTicketMieiInLavorazione,
-  ]);
+  ]); */
 
-  const takeDataForJunior = useCallback(async () => {
+  const takeDataForOperatore = useCallback(async () => {
     
     let ticketInCarico = await getTicketMieiInLavorazione();
     ticketInCarico = await ticketInCarico.json();
@@ -176,19 +176,52 @@ const BaseLayer = () => {
   }, []);
 
 
+  const compareDataForOperatore = useCallback(({ ticketInCarico }) => {
+    let newTicketInCarico =ticketInCarico;
+    let oldMieiTicketInCarico = state.current.ticketInCarico;
+    let notifiche = [];
+   
+   
+   newTicketInCarico.forEach((newTicket) => {
+     let notif = false;
+     const oldTicket = oldMieiTicketInCarico.find((ticket) => ticket.$id === newTicket.$id);
+    
+     console.log(newTicket.Messaggi[newTicket.Messaggi.length]);
+      if (oldTicket) {
+        if ((newTicket.Messaggi.length > oldTicket.Messaggi.length )&&(!newTicket.Messaggi[newTicket.Messaggi.length-1].includes(user.Username)) ) {
+          notif = true;
+          
+         
+        }else if(newTicket.Stato==="IN_LAVORAZIONE" &&  oldTicket.Stato ==="CHIUSO"){
+          console.log("apertooo");
+          notif = true;
+        }
+        notifiche= notif? [...notifiche, newTicket.$id]: notifiche;
+    }  });
+    setGestioneTicketNotifNumber(prev=>{
+  
+      return [...new Set([...prev, ...notifiche])]
+
+    })
+    state.current ={ticketInCarico:newTicketInCarico}
+  }, [user.Username]);
+
+
 
   const poll = useCallback(() => {
   
+ 
     if (user.Ruolo === "SEMPLICE") {
       takeDataForUser().then((value) => {
         compareDataForUser(value);
       });
-    } else if (user.Ruolo === "OPERATORE" && user.Permesso == "JUNIOR") {
-      takeDataForJunior()
-    } else if (user.Ruolo === "OPERATORE" && user.Permesso == "SENIOR") {
-      takeDataForSeniorr()
+    } else if (user.Ruolo === "OPERATORE") {
+      takeDataForOperatore().then((value) => {
+        console.log("lol");
+        compareDataForOperatore(value);
+      });
     }
-  }, [compareDataForUser, takeDataForJunior, takeDataForSeniorr, takeDataForUser, user.Permesso, user.Ruolo]);
+  }, [compareDataForOperatore, compareDataForUser, takeDataForOperatore, takeDataForUser, user.Ruolo]);
 
 
   useEffect(() => {
@@ -199,20 +232,18 @@ const BaseLayer = () => {
 
     if (user.Ruolo === "SEMPLICE") {
       takeDataForUser().then(r=>{state.current= r})
-    } else if (user.Ruolo === "OPERATORE" && user.Permesso == "JUNIOR") {
-      takeDataForJunior().then(r=>{state.current= r})
-    } else if (user.Ruolo === "OPERATORE" && user.Permesso == "SENIOR") {
-      takeDataForSeniorr().then(r=>{state.current= r})
+    } else if (user.Ruolo === "OPERATORE" ) {
+      takeDataForOperatore().then(r=>{state.current= r})
     }
     
    
-  }, [dispatch, takeDataForJunior, takeDataForSeniorr, takeDataForUser, user.Permesso, user.Ruolo]);
+  }, [dispatch, takeDataForOperatore,  takeDataForUser, user.Permesso, user.Ruolo]);
 
 
 useEffect(()=>{
  
  
-  const id = setInterval(poll, 1000);
+  const id = setInterval(poll, 5000);
   return () => {
    clearInterval(id);
   };
@@ -223,7 +254,7 @@ useEffect(()=>{
     <fieldset className="rutto">
       {user.Ruolo !== "NOLOG" && (
         <>
-          <Navbar mieiTicketNotifNumber= {mieiTicketNotifNumber.length} /* render={render} forceRender={forceRender}  */ />
+          <Navbar gestioneTicketNotifNumber={gestioneTicketNotifNumber.length} mieiTicketNotifNumber= {mieiTicketNotifNumber.length} /* render={render} forceRender={forceRender}  */ />
           <ErrorModal />
         </>
       )}

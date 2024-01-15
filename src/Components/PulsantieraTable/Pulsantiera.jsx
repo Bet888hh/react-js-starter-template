@@ -41,7 +41,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
         riapri: (location.pathname === "/miei_ticket"
             || location.pathname === "/dettaglio/" + id)
             && ticket.Riaperto === false
-            && ticket.Operatore === user.Username
+            &&(user.Ruolo === "SEMPLICE" || user.Ruolo === "OPERATORE")// da rivedere
             && ticket.Stato === "CHIUSO",
 
         chiudi: location.pathname === "/dettaglio/" + id
@@ -152,10 +152,8 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
                     body: JSON.stringify({
                         documentId: id,
                         data: {
-                            Stato: "APERTO",
-                            Ultima_visita: "UTENTE",//il ticket può essere riaperto solo dall'utente creatore
-                            Operatore: "",
-                            Assegnatario: "",
+                            Stato: "IN_LAVORAZIONE",
+                            Ultima_visita:user.ruolo==="OPERATORE" ?user.Permesso:"UTENTE",
                             Riaperto: true,
                         },
                         permissions: [`read("any")`],
