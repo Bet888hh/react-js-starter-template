@@ -117,10 +117,10 @@ const prendiInCarico= useCallback(async (id) => {
       })
     }else{
       //TODO
-      console.log("nonpuoi");
+      alert("Non puoi prendere in carico il ticket!")
     }
   }else{
-    console.log("nonpuoi");
+    alert("Errore di sistema!")
   }
 },[getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
 
