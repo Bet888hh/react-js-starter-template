@@ -119,7 +119,6 @@ const prendiInCarico= useCallback(async (id) => {
       goToDettaglio(id)
       })
     }else{
-      //TODO
       dispatch(setError("Non puoi prendere in carico altri ticket!"));
     }
   }else{
