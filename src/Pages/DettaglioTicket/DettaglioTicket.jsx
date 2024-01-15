@@ -100,7 +100,7 @@ useParams
 
   const indietro = useCallback(() => {
   
-    navigate(location.state.previousPath,{state:{prevstate:location.state}});
+    navigate(location.state.previousPath,{state:{prevstate:{...location.state ,previousPath:"/dettaglio"}}});
   }, [location.state, navigate])
 
   const handleSalva = useCallback(() => {

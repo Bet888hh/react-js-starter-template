@@ -31,8 +31,10 @@ const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagi
     }
     if(getNumeroPagina!== null)//da togliere una volta aggiunta la funzione in tutti i componenti
     getNumeroPagina(numeroPaginaCorrente);
-  }, [numeroPaginaCorrente, elemPerPagina, children]);
+  }, [numeroPaginaCorrente, elemPerPagina, children, getNumeroPagina]);
 
+  
+  
   return (
     <>
       {elementiPagina}
