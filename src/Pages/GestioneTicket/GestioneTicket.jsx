@@ -11,14 +11,17 @@ import { headers, urlbase } from "../../Utility/urls";
 import Paginator from "../../Components/Paginator/Paginator";
 import SortableTableHead from "../../Components/SortableTable/SortableTableHead";
 import SortableTableRows from "../../Components/SortableTable/SortableTableRows";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
+import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/ErrorSlice";
 const GestioneTicket = () => {
   const [showContent, setShowContent] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const error = useSelector(SelectErrorSlice);
   const numeroPagina = useRef();
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "niente", ordine: "desc" });
@@ -117,12 +120,12 @@ const prendiInCarico= useCallback(async (id) => {
       })
     }else{
       //TODO
-      console.log("nonpuoi");
+      dispatch(setError("Non puoi prendere in carico altri ticket!"));
     }
   }else{
-    console.log("nonpuoi");
+    alert("Errore di sistema!")
   }
-},[getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
+},[dispatch, getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
 
 const init = useCallback(async () => {
   setShowContent(false);
