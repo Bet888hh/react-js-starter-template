@@ -116,7 +116,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
                     alert("Ticket accettato!");
                 });
         }
-    }, [id, user.Permesso, user.Username]);
+    }, [id, ticketInCarico, user.Permesso, user.Username]);
 
 
     const rimuovi = useCallback(() => {

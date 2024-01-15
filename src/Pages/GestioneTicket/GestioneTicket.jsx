@@ -179,7 +179,7 @@ const accetta = useCallback((id) => {
                   documentId: id,
                   data: {
                       Ultima_visita: user.Permesso,
-                      Assegnatario: user.Username,
+                      Operatore: user.Username,
                   },
                   permissions: [`read("any")`],
               }),
