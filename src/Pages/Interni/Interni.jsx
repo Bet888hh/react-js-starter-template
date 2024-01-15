@@ -16,11 +16,15 @@ function Interni() {
   const location = useLocation()
   const navigate = useNavigate()
   const [showContent, setShowContent] = useState(false);
+  const numeroPagina = useRef();
 
+  const getNumeroPagina= useCallback((pagina)=>{
+    numeroPagina.current = pagina;
+  },[])
 
   const goToDettaglio = useCallback((id)=>{
 
-    navigate("/dettaglio/"+id,{state:{previousPath:"/interni",previousState:{sort:sortConfig.current,filter:filter}}})
+    navigate("/dettaglio/"+id,{state:{previousPath:"/interni",previousState:{sort:sortConfig.current,filter:filter, page: numeroPagina.current}}})
   },[filter, navigate])
   
 
@@ -229,7 +233,7 @@ function Interni() {
           <tbody>
             {perTabella.length > 0
               &&
-              (<Paginator elemPerPagina={5}>
+              (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
                 {perTabella.map((riga) => {
                   return (
                     <tr key={riga.id}>
