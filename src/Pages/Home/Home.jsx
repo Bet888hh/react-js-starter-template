@@ -2,12 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TabellaHome from '../../Components/TabellaHome/TabellaHome';
 import '../../Utility/urls';
 import { headers, urlbase } from '../../Utility/urls';
+import { useLocation } from 'react-router-dom';
 
 
 const Home = () => {
 
+  const location = useLocation();
   const [tickets, setTickets] = useState([]);
-  const inputRef = useRef(null);
+  const [testoRicerca, setTestoRicerca] = useState(location.state!== null ? location.state.prevstate.previousState.parolaRicerca : "");
   const categoriaRef = useRef(null);
   const testoAvvisi = useRef("Caricamento...")
 
@@ -28,19 +30,21 @@ const Home = () => {
       .then((res) => res.json())
       .then((res) => {
         let tickets = res.documents
-        if (inputRef.current !== null) {
-          if (inputRef.current.value !== "") {
-            tickets = tickets.filter((ticket) => {
-              const testo = ticket.Testo
-              return testo.includes(inputRef.current.value);
-            });
-          }
+        if (testoRicerca !== "") {
+          tickets = tickets.filter((ticket) => {
+            const testo = ticket.Testo
+            return testo.includes(testoRicerca);
+          });
         }
         tickets.reverse();//per ordinarli per data in modo discendente
         setTickets(tickets);
         testoAvvisi.current = tickets > 0 ? "Caricamento..." : "Nessun ticket trovato"
       })
-  }, [])
+  }, [testoRicerca])
+
+  const handleChangeTestoRicerca = useCallback((e)=>{
+    setTestoRicerca(e.target.value);
+  },[])
 
   useEffect(() => {
     caricaTicket()
@@ -52,7 +56,7 @@ const Home = () => {
 
       <div className='row'>
         <label>Ricerca:</label>
-        <input type="text" ref={inputRef} max="50" />
+        <input type="text" value={testoRicerca} onChange={handleChangeTestoRicerca} max="50" />
         <label>Categoria:</label>
         <select ref={categoriaRef}>
           <option value="">Selziona una categoria</option>
@@ -67,7 +71,7 @@ const Home = () => {
       {tickets.length > 0
         ?
         (
-          <TabellaHome ticketsAperti={tickets} parolaRicerc={inputRef.current.value} />
+          <TabellaHome ticketsAperti={tickets} parolaRicerc={testoRicerca} />
         )
         :
         (<p>{testoAvvisi.current}</p>)
