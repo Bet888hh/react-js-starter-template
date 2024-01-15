@@ -28,6 +28,7 @@ const GestioneTicket = () => {
     inCarico: -1,
   });
   const location = useLocation();
+  debugger
   console.log(location.state)
   const [isloading, setIsLoading] = useState(false);
   const backFromDetails = false
@@ -442,7 +443,7 @@ const accetta = useCallback((id) => {
           />
           <tbody>
             {/* TODO: aggiungere la funzione getNumeroPagina */}
-            <Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state.prevstate.previousState.page!== null ? location.state.prevstate.previousState.page : 1}>
+            <Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
               {perTabella.map((riga, index) => {
                 return (
                 <tr key={riga.id}>
