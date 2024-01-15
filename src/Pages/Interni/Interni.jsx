@@ -7,6 +7,7 @@ import { headers, urlbase } from '../../Utility/urls';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 
+
 function Interni() {
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
@@ -184,10 +185,27 @@ function Interni() {
         ApertoIl: doc.$createdAt,
         UltimaModifica: doc.$updatedAt,
       })))
-     
+     return rs
     }
 
-    init()
+    init().then((rs)=>{
+      if (location.state ) {
+     
+  
+          const { filter, sort} = location.state.prevstate.previousState
+        
+          sortConfig.current.campo= sort.campo 
+          sortConfig.current.ordine= sort.ordine 
+          
+          sortElementi(rs.documents.map((doc) => ({
+            ...doc,
+            ApertoIl: doc.$createdAt,
+            UltimaModifica: doc.$updatedAt,
+          })))
+  
+       
+      }
+    })
 
   }, [])
   return (
