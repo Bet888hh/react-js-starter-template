@@ -15,7 +15,9 @@ import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { useLocation, useNavigate } from "react-router-dom";
+import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 const GestioneTicket = () => {
+  const [showContent, setShowContent] = useState(false);
   const navigate = useNavigate()
   const numeroPagina = useRef();
   const [elementi, setElementi] = useState([]);
@@ -123,6 +125,7 @@ const prendiInCarico= useCallback(async (id) => {
 },[getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
 
 const init = useCallback(async () => {
+  setShowContent(false);
   const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
   const responses = await Promise.all([
     getTicketAperti(),
@@ -159,6 +162,7 @@ const init = useCallback(async () => {
     inLavorazione:
       lavorazioneJunior.length > 0 ? lavorazioneJunior.length : 0,
   }));
+  setShowContent(true);
 }, [getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
 
 
@@ -431,8 +435,9 @@ const accetta = useCallback((id) => {
   return (
     <div>
       <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
+      <ConditionalRenderer showContent={showContent}>
       {elementi.length > 0 && intestazioni.length > 0 && (
-        <table>
+      <table>
           <SortableTableHead
             filter={filter}
             includeInTableIf={includeInTableIf}
@@ -466,7 +471,8 @@ const accetta = useCallback((id) => {
       )}
       {filter===""&&  <p>Seleziona un filtro per visualizzare i ticket</p>}
       {filter!==""&& elementi.length===0&& <p>Non ci sono ticket con questo filtro</p>}
-    
+     
+      </ConditionalRenderer>
     </div>
   );
 };

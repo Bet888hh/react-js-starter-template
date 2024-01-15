@@ -5,6 +5,7 @@ import PulsantieraFiltri from '../../Components/PulsantieraFiltri/PulsantieraFil
 import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable';
 import { headers, urlbase } from '../../Utility/urls';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ConditionalRenderer from '../../Utility/ConditionalRenderer';
 
 
 
@@ -14,6 +15,8 @@ function Interni() {
   const [filter, setFilter] = useState("");
   const location = useLocation()
   const navigate = useNavigate()
+  const [showContent, setShowContent] = useState(false);
+
 
   const goToDettaglio = useCallback((id)=>{
 
@@ -171,7 +174,7 @@ function Interni() {
 
    
     async function init() {
-
+      setShowContent(false)
       const response = await fetch(
         urlbase("TICKET") + `?queries[0]=search("Stato",+["INTERNO"])`,
         {
@@ -185,6 +188,7 @@ function Interni() {
         ApertoIl: doc.$createdAt,
         UltimaModifica: doc.$updatedAt,
       })))
+      setShowContent(true)
      return rs
     }
 
@@ -210,39 +214,52 @@ function Interni() {
   }, [])
   return (
     <div>
-
+   
+    <ConditionalRenderer showContent={showContent}>
       {elementi.length > 0 && intestazioni.length > 0 && (
-        <>
+        <table>
           <SortableTableHead
+            filter={filter}
+            includeInTableIf={includeInTableIf}
             excludeFromSorting={excludeFromSorting}
             intestazioni={intestazioni}
             onSort={onSort}
             sort={sortConfig.current}
-
           />
           <tbody>
-            <Paginator elemPerPagina={5}>
-              {perTabella.map((riga, index) => (
-                <tr key={index}>
-                  {intestazioni.map((intestazione) => (
-                    <>
-                      {((intestazione === includeInTableIf.include &&
-                        includeInTableIf.filter === filter) ||
-                        intestazione !== includeInTableIf.include) && (
-                          <td key={intestazione}>
-                            {formatCell(intestazione, riga[intestazione])}
-                          </td>
-                        )}
-                    </>
-                  ))}
-                </tr>
-              ))}
-            </Paginator>
+            {perTabella.length > 0
+              &&
+              (<Paginator elemPerPagina={5}>
+                {perTabella.map((riga) => {
+                  return (
+                    <tr key={riga.id}>
+                      {intestazioni.map((intestazione) => {
+                        return (
+                          <>
+                            {((intestazione === includeInTableIf.include &&
+                              includeInTableIf.filter === filter) ||
+                              intestazione !== includeInTableIf.include) && (
+                                <td key={intestazione}>
+                                  {formatCell(intestazione, riga[intestazione])}
+                                </td>
+                              )}
+                          </>
+                        )
+                      })}
+                    </tr>
+                  )
+                })}
+              </Paginator>)
+            }
           </tbody>
-        </>
+        </table>
       )}
-    </div>
-  );
+      {filter===""&&  <p>Seleziona un filtro per visualizzare i ticket</p>}
+    {filter!==""&& elementi.length===0&& <p>Non ci sono ticket con questo filtro</p>}
+  
+    </ConditionalRenderer>
+  </div>
+);
 }
 
 export default Interni
