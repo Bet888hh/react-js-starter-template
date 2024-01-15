@@ -103,7 +103,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro }) {
                         documentId: id,
                         data: {
                             Ultima_visita: user.Permesso,
-                            Assegnatario: user.Username,
+                            Operatore: user.Username,
                         },
                         permissions: [`read("any")`],
                     }),
