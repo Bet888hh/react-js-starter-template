@@ -10,17 +10,20 @@ import Paginator from "../../Components/Paginator/Paginator";
 import SortableTableHead from "../../Components/SortableTable/SortableTableHead";
 import PulsantieraFiltri from "../../Components/PulsantieraFiltri/PulsantieraFiltri";
 import { headers, urlbase } from "../../Utility/urls";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
+import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/ErrorSlice";
 const MieiTicket = () => {
   const firstRender = useRef(true);
   const navigate = useNavigate();
   const location = useLocation();
   console.log("location: ", location);
+  const dispatch = useDispatch();
+  const error = useSelector(SelectErrorSlice);
   const numeroPagina = useRef();
   const [showContent, setShowContent] = useState(false);
   const [elementi, setElementi] = useState([]);
@@ -32,45 +35,49 @@ const MieiTicket = () => {
   //cose da mettere in un hook personalizzato
   const init = useCallback(async () => {
     setShowContent(false);
-    const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
-    const responses = await Promise.all(
-      stati.map((stato) =>
-        fetch(
-          urlbase("TICKET") +
-          `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
-          {
-            method: "GET",
-            headers: headers,
-          }
+    try {
+      const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
+      const responses = await Promise.all(
+        stati.map((stato) =>
+          fetch(
+            urlbase("TICKET") +
+            `?queries[0]=search("Stato", ["${stato}"])&queries[1]=search("Utente", ["${user.Username}"])`,
+            {
+              method: "GET",
+              headers: headers,
+            }
+          )
         )
-      )
-    );
-    const jsonResponses = await Promise.all(
-      responses.map((response) => response.json())
-    );
-    const [
-      { documents: dAperti, total: totalAperti },
-      { documents: dlavorazione, total: totalLavorazione },
-      { documents: dchiusi, total: totalChiusi },
-    ] = jsonResponses;
+      );
+      const jsonResponses = await Promise.all(
+        responses.map((response) => response.json())
+      );
+      const [
+        { documents: dAperti, total: totalAperti },
+        { documents: dlavorazione, total: totalLavorazione },
+        { documents: dchiusi, total: totalChiusi },
+      ] = jsonResponses;
 
-    setTotali((prev) => ({
-      ...prev,
-      aperti: totalAperti,
-      chiusi: totalChiusi,
-      inLavorazione: totalLavorazione,
-    }));
+      setTotali((prev) => ({
+        ...prev,
+        aperti: totalAperti,
+        chiusi: totalChiusi,
+        inLavorazione: totalLavorazione,
+      }));
 
-    //Aggiunta da me speriamo sia giusta
+      //Aggiunta da me speriamo sia giusta
 
-    if (filter === "APERTO") {
-      setElementi(dAperti)
-    }
-    if (filter === "CHIUSO") {
-      setElementi(dchiusi)
-    }
-    if (filter === "IN_LAVORAZIONE") {
-      setElementi(dlavorazione)
+      if (filter === "APERTO") {
+        setElementi(dAperti)
+      }
+      if (filter === "CHIUSO") {
+        setElementi(dchiusi)
+      }
+      if (filter === "IN_LAVORAZIONE") {
+        setElementi(dlavorazione)
+      }
+    } catch (error) {
+      dispatch(setError(error.message));
     }
     setShowContent(true);
   }, [filter, user.Username])
@@ -84,10 +91,10 @@ const MieiTicket = () => {
 
 
 
-  
-  const sortElementi = useCallback((datiStraordinari=null) => {
-    const datiClone=
-          datiStraordinari? [...datiStraordinari]: [...elementi];
+
+  const sortElementi = useCallback((datiStraordinari = null) => {
+    const datiClone =
+      datiStraordinari ? [...datiStraordinari] : [...elementi];
 
     if (sortConfig.current.campo) {
       datiClone.sort((a, b) => {
@@ -124,10 +131,10 @@ const MieiTicket = () => {
     setElementi(datiClone);
   }, [elementi, sortConfig]);
 
-  
-  
+
+
   const onSort = useCallback((campo) => {
-  
+
     const nuovoOrdine =
       sortConfig.current.campo === campo && sortConfig.current.ordine === "asc"
         ? "desc"
@@ -140,30 +147,35 @@ const MieiTicket = () => {
 
   const takeData = useCallback(
     async (type) => {
-      const response = await fetch(
-        urlbase("TICKET") +
-        `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Utente",+["${user.Username}"])`,
-        {
-          method: "GET",
-          headers: headers,
-        }
-      );
-      const rs = await response.json();
+      try {
+        const response = await fetch(
+          urlbase("TICKET") +
+          `?queries[0]=search("Stato",+["${type}"])&queries[1]=search("Utente",+["${user.Username}"])`,
+          {
+            method: "GET",
+            headers: headers,
+          }
+        );
+        const rs = await response.json();
 
-      if (rs.message) {
-        //errori cazzo
-      } else {
-        return rs.total > 0 ? rs.documents.map((doc) => ({
-          ...doc,
-          ApertoIl: doc.$createdAt,
-          UltimaModifica: doc.$updatedAt,
-        })) : [];
+        if (rs.message) {
+          //errori cazzo
+        } else {
+          return rs.total > 0 ? rs.documents.map((doc) => ({
+            ...doc,
+            ApertoIl: doc.$createdAt,
+            UltimaModifica: doc.$updatedAt,
+          })) : [];
+        }
+      } catch (error) {
+        dispatch(setError(error.message))
       }
     },
-    [user.Username]
-  );
+    [user.Username]);
+
   const handleFiltra = useCallback(
     async (e) => {
+      try{
       let data = null;
       if (filter === e) {
         setElementi([]);
@@ -185,15 +197,17 @@ const MieiTicket = () => {
         }
         setElementi(data);
         return data
+      }}catch(error){
+        dispatch(setError(error));
       }
     },
     [filter, takeData]
   );
 
 
-  const getNumeroPagina= useCallback((pagina)=>{
+  const getNumeroPagina = useCallback((pagina) => {
     numeroPagina.current = pagina;
-  },[])
+  }, [])
 
 
 
@@ -267,15 +281,15 @@ const MieiTicket = () => {
 
 
   useEffect(() => {
-    
+
     init();
-    if (location.state ) {
-      (async()=>{
-     
-        const { filter, sort} = location.state.prevstate.previousState
-       const dati= await handleFiltra(filter)
-        sortConfig.current.campo= sort.campo 
-        sortConfig.current.ordine= sort.ordine
+    if (location.state) {
+      (async () => {
+
+        const { filter, sort } = location.state.prevstate.previousState
+        const dati = await handleFiltra(filter)
+        sortConfig.current.campo = sort.campo
+        sortConfig.current.ordine = sort.ordine
         setFilter(filter)
         sortElementi(dati)
 
@@ -301,7 +315,7 @@ const MieiTicket = () => {
             <tbody>
               {perTabella.length > 0
                 &&
-                (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={ location.state!== null ? location.state.prevstate.previousState.page : 1}>
+                (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
                   {perTabella.map((riga) => {
                     return (
                       <tr key={riga.id}>
@@ -326,9 +340,9 @@ const MieiTicket = () => {
             </tbody>
           </table>
         )}
-        {filter===""&&  <p>Seleziona un filtro per visualizzare i ticket</p>}
-      {filter!==""&& elementi.length===0&& <p>Non ci sono ticket con questo filtro</p>}
-    
+        {filter === "" && <p>Seleziona un filtro per visualizzare i ticket</p>}
+        {filter !== "" && elementi.length === 0 && <p>Non ci sono ticket con questo filtro</p>}
+
       </ConditionalRenderer>
     </div>
   );
