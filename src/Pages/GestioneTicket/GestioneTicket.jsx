@@ -408,7 +408,7 @@ const accetta = useCallback((id) => {
     // altro se entriamo dal dettaglio 
     if (location.state ) {
       (async()=>{
-        debugger
+       
         const { filter, sort} = location.state.prevstate.previousState
        const dati= await handleFiltra(filter)
         sortConfig.current.campo= sort.campo 

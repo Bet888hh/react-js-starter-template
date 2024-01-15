@@ -188,9 +188,13 @@ const MieiTicket = () => {
     [filter, takeData]
   );
 
+
+  
   const goToDettaglio = useCallback((e) => {
     navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sort: sortConfig.current, filter: filter } } })
   }, [filter, navigate]);
+
+
 
   const perTabella = useMemo(() => {
     return elementi

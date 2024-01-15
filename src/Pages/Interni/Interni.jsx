@@ -4,20 +4,43 @@ import SortableTableHead from '../../Components/SortableTable/SortableTableHead'
 import PulsantieraFiltri from '../../Components/PulsantieraFiltri/PulsantieraFiltri';
 import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable';
 import { headers, urlbase } from '../../Utility/urls';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { setegid } from 'process';
 
 function Interni() {
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "Titolo", ordine: "asc" });
   const [filter, setFilter] = useState("");
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  //cose da mettere in un hook personalizzato
-  const handleTableAction = (e) => {
-    //logica per i pulsanti della tabella
-  };
+  const goToDettaglio = useCallback((id)=>{
+
+    navigate("/dettaglio/"+id,{state:{previousPath:"/interni",previousState:{sort:sortConfig.current,filter:filter}}})
+  },[filter, navigate])
+  
+
+  const handleTableAction = useCallback((e) => {
+    
+    const [action, id] = e.split("-");
+    switch (action) {
+   
+      case "dettaglio":
+        goToDettaglio(id)
+        break;
+    }
+  }, [goToDettaglio]);
 
 
-  const sortElementi = useCallback(() => {
-    const datiClone = [...elementi];
+
+ 
+
+
+ 
+  const sortElementi = useCallback((datiStraordinari=null) => {
+   
+    const datiClone=
+          datiStraordinari? [...datiStraordinari]: [...elementi];
 
     if (sortConfig.current.campo) {
       datiClone.sort((a, b) => {
@@ -53,6 +76,8 @@ function Interni() {
     }
     setElementi(datiClone);
   }, [elementi, sortConfig]);
+
+
 
   const onSort = useCallback((campo) => {
     const nuovoOrdine =
@@ -106,7 +131,7 @@ function Interni() {
         };
       })
       : null;
-  }, [elementi]);
+  }, [elementi, handleTableAction]);
 
 
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0]) : [];
@@ -140,6 +165,10 @@ function Interni() {
     }
   }, []);
   useEffect(() => {
+   
+
+
+   
     async function init() {
 
       const response = await fetch(
@@ -155,10 +184,12 @@ function Interni() {
         ApertoIl: doc.$createdAt,
         UltimaModifica: doc.$updatedAt,
       })))
+     
     }
+
     init()
 
-  }, [])
+  }, [sortElementi])
   return (
     <div>
 

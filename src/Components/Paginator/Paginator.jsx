@@ -47,3 +47,6 @@ const Paginator = ({ elemPerPagina, children }) => {
 };
 
 export default Paginator;
+
+
+
