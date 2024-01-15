@@ -17,6 +17,7 @@ import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice"
 import { useLocation, useNavigate } from "react-router-dom";
 const GestioneTicket = () => {
   const navigate = useNavigate()
+  const numeroPagina = useRef();
   const [elementi, setElementi] = useState([]);
   const sortConfig = useRef({ campo: "niente", ordine: "desc" });
   const [filter, setFilter] = useState("");
@@ -70,10 +71,13 @@ const GestioneTicket = () => {
     );
   }, []);
   
+  const getNumeroPagina= useCallback((pagina)=>{
+    numeroPagina.current = pagina;
+  },[])
 
   const goToDettaglio = useCallback((id)=>{
-
-    navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sort:sortConfig.current,filter:filter}}})
+    debugger
+    navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sort:sortConfig.current,filter:filter, page: numeroPagina.current}}})
   },[filter, navigate])
   
 
@@ -437,7 +441,7 @@ const accetta = useCallback((id) => {
           />
           <tbody>
             {/* TODO: aggiungere la funzione getNumeroPagina */}
-            <Paginator elemPerPagina={5} getNumeroPagina={null}>
+            <Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state.prevstate.previousState.page!== null ? location.state.prevstate.previousState.page : 1}>
               {perTabella.map((riga, index) => {
                 return (
                 <tr key={riga.id}>
