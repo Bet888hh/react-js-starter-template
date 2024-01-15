@@ -190,10 +190,10 @@ const accetta = useCallback((id) => {
           })
           .then((r) => {
               alert("Ticket accettato!");
-              init();
+             goToDettaglio(id)
           });
   }
-}, [init, totali.inLavorazione, user.Permesso, user.Username]);
+}, [goToDettaglio, totali.inLavorazione, user.Permesso, user.Username]);
 
 
 
@@ -434,7 +434,7 @@ const accetta = useCallback((id) => {
 
   return (
     <div>
-      <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
+      <PulsantieraFiltri filter={filter} totali={totali} handleFiltra={handleFiltra} />
       <ConditionalRenderer showContent={showContent}>
       {elementi.length > 0 && intestazioni.length > 0 && (
       <table>
