@@ -18,7 +18,7 @@ const TabellaHome = ({ ticketsAperti,parolaRicerc }) => {
   
   const goToDettaglio = useCallback((e) => {
     console.log("numero pagina: ", numeroPagina.current);
-    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/home", previousState: {page: numeroPagina.current,parolaRicerca:parolaRicerc&&parolaRicerc } } })
+    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/", previousState: {page: numeroPagina.current,parolaRicerca:parolaRicerc&&parolaRicerc } } })
   }, [navigate, parolaRicerc]);
 
   /* const visualizza = useCallback((e) => {
