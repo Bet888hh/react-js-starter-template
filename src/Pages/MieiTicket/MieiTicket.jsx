@@ -20,6 +20,7 @@ const MieiTicket = () => {
   const firstRender = useRef(true);
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("location: ", location);
   const numeroPagina = useRef();
   const [showContent, setShowContent] = useState(false);
   const [elementi, setElementi] = useState([]);
@@ -189,14 +190,14 @@ const MieiTicket = () => {
     [filter, takeData]
   );
 
-  const getNumeroPagina= useCallback((numeroPagina)=>{
-    return numeroPagina.current=numeroPagina;
+  const getNumeroPagina= useCallback((pagina)=>{
+    numeroPagina.current = pagina;
   },[])
 
 
   const goToDettaglio = useCallback((e) => {
-    console.log("numero pagina: ", numeroPagina);
-    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sort: sortConfig.current, filter: filter } } })
+    console.log("numero pagina: ", numeroPagina.current);
+    navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sort: sortConfig.current, filter: filter, page: numeroPagina.current } } })
   }, [filter, navigate]);
 
   const perTabella = useMemo(() => {
@@ -296,7 +297,7 @@ const MieiTicket = () => {
             <tbody>
               {perTabella.length > 0
                 &&
-                (<Paginator elemPerPagina={5}>
+                (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={ location.state.prevstate.previousState.page!== 0 ? location.state.prevstate.previousState.page : 1}>
                   {perTabella.map((riga) => {
                     return (
                       <tr key={riga.id}>

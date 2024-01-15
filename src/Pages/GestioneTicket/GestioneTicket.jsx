@@ -408,7 +408,6 @@ const accetta = useCallback((id) => {
     // altro se entriamo dal dettaglio 
     if (location.state ) {
       (async()=>{
-        debugger
         const { filter, sort} = location.state.prevstate.previousState
        const dati= await handleFiltra(filter)
         sortConfig.current.campo= sort.campo 
@@ -437,7 +436,8 @@ const accetta = useCallback((id) => {
             sort={sortConfig.current}
           />
           <tbody>
-            <Paginator elemPerPagina={5}>
+            {/* TODO: aggiungere la funzione getNumeroPagina */}
+            <Paginator elemPerPagina={5} getNumeroPagina={null}>
               {perTabella.map((riga, index) => {
                 return (
                 <tr key={riga.id}>
