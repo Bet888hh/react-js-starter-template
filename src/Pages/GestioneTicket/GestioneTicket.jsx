@@ -28,7 +28,7 @@ const GestioneTicket = () => {
     inCarico: -1,
   });
   const location = useLocation();
-  debugger
+ 
   console.log(location.state)
   const [isloading, setIsLoading] = useState(false);
   const backFromDetails = false
@@ -77,7 +77,7 @@ const GestioneTicket = () => {
   },[])
 
   const goToDettaglio = useCallback((id)=>{
-    debugger
+   
     navigate("/dettaglio/"+id,{state:{previousPath:"/gestione_ticket",previousState:{sort:sortConfig.current,filter:filter, page: numeroPagina.current}}})
   },[filter, navigate])
   
@@ -464,6 +464,8 @@ const accetta = useCallback((id) => {
           </tbody>
         </table>
       )}
+      {filter===""&&  <p>Seleziona un filtro per visualizzare i ticket</p>}
+      {filter!==""&& elementi.length===0&& <p>Non ci sono ticket con questo filtro</p>}
     
     </div>
   );

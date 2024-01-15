@@ -326,6 +326,9 @@ const MieiTicket = () => {
             </tbody>
           </table>
         )}
+        {filter===""&&  <p>Seleziona un filtro per visualizzare i ticket</p>}
+      {filter!==""&& elementi.length===0&& <p>Non ci sono ticket con questo filtro</p>}
+    
       </ConditionalRenderer>
     </div>
   );

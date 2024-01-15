@@ -8,7 +8,7 @@ const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagi
   const [elementiPagina, setElementiPagina] = useState([]);
   
   const paginaSuccessiva = useCallback(() => {
-    debugger
+   
     const max = Math.ceil((children.length ) / elemPerPagina);
     if ((numeroPaginaCorrente) < max) {
       setNumeroPaginaCorrente(p => p + 1);
