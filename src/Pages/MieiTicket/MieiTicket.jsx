@@ -301,7 +301,7 @@ const MieiTicket = () => {
             <tbody>
               {perTabella.length > 0
                 &&
-                (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={ location.state.prevstate.previousState.page!== null ? location.state.prevstate.previousState.page : 1}>
+                (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={ location.state!== null ? location.state.prevstate.previousState.page : 1}>
                   {perTabella.map((riga) => {
                     return (
                       <tr key={riga.id}>
