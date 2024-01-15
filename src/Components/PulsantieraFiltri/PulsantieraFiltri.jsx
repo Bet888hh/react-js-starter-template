@@ -8,6 +8,7 @@ import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice"
 const PulsantieraFiltri = ({
   handleFiltra,
   totali: { aperti, chiusi, inLavorazione, inCarico },
+  filter
 }) => {
   const user = useSelector(SelectUserSlice);
   const location = useLocation();
@@ -16,21 +17,21 @@ const PulsantieraFiltri = ({
   };
   return (
     <div>
-      <button onClick={filtra} id="APERTO">
+      <button style={{border:filter==="APERTO"&&"green 2px solid"}} onClick={filtra} id="APERTO">
         Aperti {aperti >= 0 && aperti}
       </button>
       {((user.Permesso === "SENIOR" &&
         location.pathname === "/gestione_ticket") ||
         location.pathname !== "/gestione_ticket") && (
-        <button onClick={filtra} id="IN_LAVORAZIONE">
+        <button style={{border:filter==="IN_LAVORAZIONE"&&"green 2px solid"}} onClick={filtra} id="IN_LAVORAZIONE">
           In lavorazione{inLavorazione >= 0 && inLavorazione}
         </button>
       )}
-      <button onClick={filtra} id="CHIUSO">
+      <button style={{border:filter==="CHIUSO"&&"green 2px solid"}} onClick={filtra} id="CHIUSO">
         Chiusi {chiusi >= 0 && chiusi}
       </button>
       {location.pathname === "/gestione_ticket" && (
-        <button onClick={filtra} id="in-carico">
+        <button style={{border:filter==="in-carico"&&"green 2px solid"}} onClick={filtra} id="in-carico">
           In Carico{inCarico}
         </button>
       )}

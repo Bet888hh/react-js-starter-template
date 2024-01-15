@@ -31,7 +31,7 @@ const MieiTicket = () => {
   const [filter, setFilter] = useState("");
   /* const navigate = useNavigate(); */
   const user = useSelector(SelectUserSlice);
-
+  const backFromDetails =useRef( location.state?.previousPath === "/dettaglio" ? true : false);
   //cose da mettere in un hook personalizzato
   const init = useCallback(async () => {
     setShowContent(false);
@@ -175,6 +175,7 @@ const MieiTicket = () => {
 
   const handleFiltra = useCallback(
     async (e) => {
+    backFromDetails.current=false;
       try{
       let data = null;
       if (filter === e) {
@@ -248,7 +249,7 @@ const MieiTicket = () => {
       : null;
   }, [elementi, goToDettaglio]);
 
-
+  console.log(perTabella);
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];
   const excludeFromSorting = ["Azioni"];
   const includeInTableIf = { filter: "nan", include: "nan" };
@@ -300,7 +301,7 @@ const MieiTicket = () => {
 
   return (
     <div>
-      <PulsantieraFiltri totali={totali} handleFiltra={handleFiltra} />
+      <PulsantieraFiltri filter={filter} totali={totali} handleFiltra={handleFiltra} />
       <ConditionalRenderer showContent={showContent}>
         {elementi.length > 0 && intestazioni.length > 0 && (
           <table>
@@ -315,7 +316,7 @@ const MieiTicket = () => {
             <tbody>
               {perTabella.length > 0
                 &&
-                (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
+                (<Paginator backFromDetails={backFromDetails.current} elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
                   {perTabella.map((riga) => {
                     return (
                       <tr key={riga.id}>

@@ -2,7 +2,7 @@
 import { current } from '@reduxjs/toolkit';
 import React, { useCallback, useEffect, useState } from 'react';
 
-const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagina=null }) => {
+const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagina=null, backFromDetails }) => {
 
   const [numeroPaginaCorrente, setNumeroPaginaCorrente] = useState(paginaCorrente!=null ? paginaCorrente : 1);
   const [elementiPagina, setElementiPagina] = useState([]);
@@ -31,8 +31,13 @@ const Paginator = ({ elemPerPagina, children, paginaCorrente=null, getNumeroPagi
     }
     if(getNumeroPagina!== null)//da togliere una volta aggiunta la funzione in tutti i componenti
     getNumeroPagina(numeroPaginaCorrente);
-  }, [numeroPaginaCorrente, elemPerPagina, children]);
+  }, [numeroPaginaCorrente, elemPerPagina, children, getNumeroPagina]);
 
+  useEffect(()=>{
+    console.log(backFromDetails);
+   !backFromDetails&& setNumeroPaginaCorrente(1)
+  },[backFromDetails, children])
+  
   return (
     <>
       {elementiPagina}
