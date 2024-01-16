@@ -9,7 +9,7 @@ import {
   SelectUserSlice,
   setUser,
 } from "./store/Reducer/Slices/UserSlice/UserSlice";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Home from "./Pages/Home/Home";
 import ProtectedRoute from "./Utility/ProtectedRoute";
@@ -27,9 +27,11 @@ const BaseLayer = () => {
     ticketInCarico: [],
     ticketLavorazione: [],
   });
-
- const [mieiTicketNotifNumber, setMieiTicketNotifNumber] = useState([])
-const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState([])
+  const location = useLocation();
+  const [mieiTicketNotifNumber, setMieiTicketNotifNumber] = useState([]);
+  const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState(
+    []
+  );
   const permits = useMemo(() => {
     return {
       home: user.Ruolo !== "NOLOG" && user.Ruolo === "SEMPLICE",
@@ -54,23 +56,14 @@ const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState([])
   }, []);
   const getTicketMieiInLavorazione = useCallback(async () => {
     return fetch(
-      urlbase("TICKET") +
-        `?queries[0]=search("Operatore", [${user.Username}])`,
+      urlbase("TICKET") + `?queries[0]=search("Operatore", [${user.Username}])`,
       {
         method: "GET",
         headers: headers,
       }
     );
   }, [user.Username]);
-  const getOperatori = useCallback(() => {
-    return fetch(
-      urlbase("USER") + `?queries[0]=search("Ruolo", ["OPERATORE"])`,
-      {
-        method: "GET",
-        headers: headers,
-      }
-    );
-  }, []);
+
 
   const getTickeUtente = useCallback(async () => {
     return fetch(
@@ -82,135 +75,102 @@ const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState([])
     );
   }, [user.Username]);
 
-  
-
-  /* const takeDataForSeniorr = useCallback(async () => {
-    let ticketInCarico = await getTicketMieiInLavorazione();
-    ticketInCarico = await ticketInCarico.json();
-    let ticketLavorazione = await getTicketLavorazione();
-    ticketLavorazione = await ticketLavorazione.json();
-    let operatoriJunior = await getOperatori();
-    operatoriJunior = await operatoriJunior.json();
-
-    if (
-      ticketInCarico.message ||
-      ticketLavorazione.message ||
-      operatoriJunior.message
-    ) {
-      dispatch(setError(ticketInCarico.message));
-    } else {
-      operatoriJunior = operatoriJunior.documents
-        .filter((e) => e.Permesso === "JUNIOR")
-        .map((e) => e.Username);
-      ticketLavorazione = ticketLavorazione.documents.filter((e) =>
-        operatoriJunior.includes(e.Operatore)
-      );
-     
-     const returnValue = { ticketInCarico: ticketInCarico.documents, ticketLavorazione: ticketLavorazione }
-     
-      return returnValue;
-    }
-  }, [
-    dispatch,
-    getOperatori,
-    getTicketLavorazione,
-    getTicketMieiInLavorazione,
-  ]); */
 
   const takeDataForOperatore = useCallback(async () => {
-    
     let ticketInCarico = await getTicketMieiInLavorazione();
     ticketInCarico = await ticketInCarico.json();
     if (ticketInCarico.message) {
       dispatch(setError(ticketInCarico.message));
     } else {
+      const returnValue = { ticketInCarico: ticketInCarico.documents };
 
-      const returnValue = { ticketInCarico: ticketInCarico.documents }
-   
       return returnValue;
     }
   }, [dispatch, getTicketMieiInLavorazione]);
 
   const takeDataForUser = useCallback(async () => {
-    
     let ticketUtente = await getTickeUtente();
     ticketUtente = await ticketUtente.json();
     if (ticketUtente.message) {
       dispatch(setError(ticketUtente.message));
     } else {
       const returnValue = { mieiTicket: ticketUtente.documents };
-    
+
       return returnValue;
     }
   }, [dispatch, getTickeUtente]);
-
 
   const compareDataForUser = useCallback(({ mieiTicket }) => {
     let newMieiTicket = mieiTicket;
     let oldMieiTicket = state.current.mieiTicket;
     let notifiche = [];
-   
-   
- 
+
     newMieiTicket.forEach((newTicket) => {
       let notif = false;
-      const oldTicket = oldMieiTicket.find((ticket) => ticket.$id === newTicket.$id);
+      const oldTicket = oldMieiTicket.find(
+        (ticket) => ticket.$id === newTicket.$id
+      );
 
       if (oldTicket) {
         if (newTicket.Messaggi.length > oldTicket.Messaggi.length) {
           notif = true;
-          
-         
-        }else if(newTicket.Stato==="CHIUSO" &&  oldTicket.Stato ==="IN_LAVORAZIONE"){
+        } else if (
+          newTicket.Stato === "CHIUSO" &&
+          oldTicket.Stato === "IN_LAVORAZIONE"
+        ) {
           console.log("chiusooo");
           notif = true;
         }
-        notifiche= notif? [...notifiche, newTicket.$id]: notifiche;
-    }  });
-    setMieiTicketNotifNumber(prev=>{
-     //merge prevand notifiche and remove duplicates and return the new array
-      return [...new Set([...prev, ...notifiche])]
-
-    })
-    state.current ={mieiTicket:newMieiTicket}
+        notifiche = notif ? [...notifiche, newTicket.$id] : notifiche;
+      }
+    });
+    setMieiTicketNotifNumber((prev) => {
+      //merge prevand notifiche and remove duplicates and return the new array
+      return [...new Set([...prev, ...notifiche])];
+    });
+    state.current = { mieiTicket: newMieiTicket };
   }, []);
 
+  const compareDataForOperatore = useCallback(
+    ({ ticketInCarico }) => {
+      let newTicketInCarico = ticketInCarico;
+      let oldMieiTicketInCarico = state.current.ticketInCarico;
+      let notifiche = [];
 
-  const compareDataForOperatore = useCallback(({ ticketInCarico }) => {
-    let newTicketInCarico =ticketInCarico;
-    let oldMieiTicketInCarico = state.current.ticketInCarico;
-    let notifiche = [];
-   
-   
-   newTicketInCarico.forEach((newTicket) => {
-     let notif = false;
-     const oldTicket = oldMieiTicketInCarico.find((ticket) => ticket.$id === newTicket.$id);
-    
-     console.log(newTicket.Messaggi[newTicket.Messaggi.length]);
-      if (oldTicket) {
-        if ((newTicket.Messaggi.length > oldTicket.Messaggi.length )&&(!newTicket.Messaggi[newTicket.Messaggi.length-1].includes(user.Username)) ) {
-          notif = true;
-          
-         
-        }else if(newTicket.Stato==="IN_LAVORAZIONE" &&  oldTicket.Stato ==="CHIUSO"){
-          console.log("apertooo");
-          notif = true;
+      newTicketInCarico.forEach((newTicket) => {
+        let notif = false;
+        const oldTicket = oldMieiTicketInCarico.find(
+          (ticket) => ticket.$id === newTicket.$id
+        );
+
+        console.log(newTicket.Messaggi[newTicket.Messaggi.length]);
+        if (oldTicket) {
+          if (
+            newTicket.Messaggi.length > oldTicket.Messaggi.length &&
+            !newTicket.Messaggi[newTicket.Messaggi.length - 1].includes(
+              user.Username
+            )
+          ) {
+            notif = true;
+          } else if (
+            newTicket.Stato === "IN_LAVORAZIONE" &&
+            oldTicket.Stato === "CHIUSO"
+          ) {
+            console.log("apertooo");
+            notif = true;
+          }
+          notifiche = notif ? [...notifiche, newTicket.$id] : notifiche;
         }
-        notifiche= notif? [...notifiche, newTicket.$id]: notifiche;
-    }  });
-    setGestioneTicketNotifNumber(prev=>{
-  
-      return [...new Set([...prev, ...notifiche])]
-
-    })
-    state.current ={ticketInCarico:newTicketInCarico}
-  }, [user.Username]);
-
-
+      });
+      setGestioneTicketNotifNumber((prev) => {
+        return [...new Set([...prev, ...notifiche])];
+      });
+      state.current = { ticketInCarico: newTicketInCarico };
+    },
+    [user.Username]
+  );
 
   const poll = useCallback(() => {
-  
- 
     if (user.Ruolo === "SEMPLICE") {
       takeDataForUser().then((value) => {
         compareDataForUser(value);
@@ -221,8 +181,13 @@ const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState([])
         compareDataForOperatore(value);
       });
     }
-  }, [compareDataForOperatore, compareDataForUser, takeDataForOperatore, takeDataForUser, user.Ruolo]);
-
+  }, [
+    compareDataForOperatore,
+    compareDataForUser,
+    takeDataForOperatore,
+    takeDataForUser,
+    user.Ruolo,
+  ]);
 
   useEffect(() => {
     const loggedUser = JSON.parse(sessionStorage.getItem("loggedUser"));
@@ -231,30 +196,44 @@ const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState([])
     }
 
     if (user.Ruolo === "SEMPLICE") {
-      takeDataForUser().then(r=>{state.current= r})
-    } else if (user.Ruolo === "OPERATORE" ) {
-      takeDataForOperatore().then(r=>{state.current= r})
+      takeDataForUser().then((r) => {
+        state.current = r;
+      });
+    } else if (user.Ruolo === "OPERATORE") {
+      takeDataForOperatore().then((r) => {
+        state.current = r;
+      });
     }
-    
-   
-  }, [dispatch, takeDataForOperatore,  takeDataForUser, user.Permesso, user.Ruolo]);
+  }, [
+    dispatch,
+    takeDataForOperatore,
+    takeDataForUser,
+    user.Permesso,
+    user.Ruolo,
+  ]);
 
+  useEffect(() => {
+    const id = setInterval(poll, 20000);
+    return () => {
+      clearInterval(id);
+    };
+  }, [poll]);
 
-useEffect(()=>{
- 
- 
-  const id = setInterval(poll, 5000);
-  return () => {
-   clearInterval(id);
-  };
-},[poll])
-
-
+  useEffect(() => {
+    location.pathname === "/miei_ticket" && setMieiTicketNotifNumber([]);
+    location.pathname === "/gestione_ticket" &&
+      setGestioneTicketNotifNumber([]);
+  }, [location.pathname]);
   return (
     <fieldset className="rutto">
       {user.Ruolo !== "NOLOG" && (
         <>
-          <Navbar gestioneTicketNotifNumber={gestioneTicketNotifNumber.length} mieiTicketNotifNumber= {mieiTicketNotifNumber.length} /* render={render} forceRender={forceRender}  */ />
+          <Navbar
+            gestioneTicketNotifNumber={gestioneTicketNotifNumber.length}
+            mieiTicketNotifNumber={
+              mieiTicketNotifNumber.length
+            } /* render={render} forceRender={forceRender}  */
+          />
           <ErrorModal />
         </>
       )}
