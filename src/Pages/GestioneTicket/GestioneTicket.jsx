@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
-import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/ErrorSlice";
+import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/errorSlice";
 const GestioneTicket = () => {
   const [showContent, setShowContent] = useState(false);
   const navigate = useNavigate();

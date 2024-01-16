@@ -6,9 +6,9 @@ import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 import Messaggi from "../../Components/Messaggi/Messaggi";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
-import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/ErrorSlice";
+import { setError, SelectErrorSlice } from "../../store/Reducer/Slices/ErrorSlice/errorSlice";
 
-
+import { SelectNotifSlice, deleteNotification } from "../../store/Reducer/Slices/notifSlice/notifSlice";
 const DettaglioTicket = () => {
 
   const location = useLocation();
@@ -21,6 +21,7 @@ const DettaglioTicket = () => {
   const [ticket, setTicket] = useState({});
   const { id } = useParams();
   const refCat = useRef("");
+  const notif = useSelector(SelectNotifSlice)
 
   const init = useCallback(async () => {
     if (id) {
@@ -64,24 +65,6 @@ const DettaglioTicket = () => {
     }
   }, [dispatch, id, navigate]);
 
-  useEffect(() => {
-    setLoading(true);
-    init();
-    setLoading(false);
-    let id, id1;
-    id1 = setTimeout(() => {
-      id = setInterval(() => {
-        initMessages()
-      }, 5000);
-    }, 2000);
-
-    return () => {
-      clearInterval(id)
-      clearTimeout(id1)
-    }
-
-
-  }, []);
 
 
   const getTicketLavorazione = useCallback(async () => {
@@ -288,6 +271,30 @@ const DettaglioTicket = () => {
     [dispatch, id, initMessages, user.Username]
   );
 
+
+   useEffect(() => {
+    setLoading(true);
+    init();
+    setLoading(false);
+    let id, id1;
+    id1 = setTimeout(() => {
+      id = setInterval(() => {
+         initMessages() 
+      }, 5000);
+    }, 2000);
+
+    return () => {
+      clearInterval(id)
+      clearTimeout(id1)
+    }
+
+
+  }, []);
+
+useEffect(() => {
+
+  dispatch(deleteNotification(id))
+},[dispatch, id, user.Ruolo])
   return (
     <>
       <ConditionalRenderer showContent={!loading}>
