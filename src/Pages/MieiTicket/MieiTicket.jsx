@@ -290,7 +290,7 @@ const MieiTicket = () => {
           };
         })
       : null;
-  }, [elementi, goToDettaglio, indietro]);
+  }, [elementi, goToDettaglio, indietro, notif.mieiTicketNotifNumber]);
 
   const intestazioni =
     perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];
