@@ -6,6 +6,8 @@ import PulsantieraTable from '../../Components/PulsantieraTable/PulsantieraTable
 import { headers, urlbase } from '../../Utility/urls';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ConditionalRenderer from '../../Utility/ConditionalRenderer';
+import { useDispatch } from 'react-redux';
+import { setError } from '../../store/Reducer/Slices/ErrorSlice/errorSlice';
 
 
 
@@ -15,24 +17,25 @@ function Interni() {
   const [filter, setFilter] = useState("");
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useDispatch();
   const [showContent, setShowContent] = useState(false);
   const numeroPagina = useRef();
 
-  const getNumeroPagina= useCallback((pagina)=>{
+  const getNumeroPagina = useCallback((pagina) => {
     numeroPagina.current = pagina;
-  },[])
+  }, [])
 
-  const goToDettaglio = useCallback((id)=>{
+  const goToDettaglio = useCallback((id) => {
 
-    navigate("/dettaglio/"+id,{state:{previousPath:"/interni",previousState:{sort:sortConfig.current,filter:filter, page: numeroPagina.current}}})
-  },[filter, navigate])
-  
+    navigate("/dettaglio/" + id, { state: { previousPath: "/interni", previousState: { sort: sortConfig.current, filter: filter, page: numeroPagina.current } } })
+  }, [filter, navigate])
+
 
   const handleTableAction = useCallback((e) => {
-    
+
     const [action, id] = e.split("-");
     switch (action) {
-   
+
       case "dettaglio":
         goToDettaglio(id)
         break;
@@ -41,14 +44,14 @@ function Interni() {
 
 
 
- 
 
 
- 
-  const sortElementi = useCallback((datiStraordinari=null) => {
-   
-    const datiClone=
-          datiStraordinari? [...datiStraordinari]: [...elementi];
+
+
+  const sortElementi = useCallback((datiStraordinari = null) => {
+
+    const datiClone =
+      datiStraordinari ? [...datiStraordinari] : [...elementi];
 
     if (sortConfig.current.campo) {
       datiClone.sort((a, b) => {
@@ -159,8 +162,8 @@ function Interni() {
         const messaggi = [...valore]
         return messaggi.length > 0 ?
           (<button onClick={() => {
-            const listaMessaggi = messaggi.map((messaggio) => { return `${messaggio}\n`})
-            
+            const listaMessaggi = messaggi.map((messaggio) => { return `${messaggio}\n` })
+
             alert(listaMessaggi)
           }
           }>Apri</button>)
@@ -173,10 +176,7 @@ function Interni() {
     }
   }, []);
   useEffect(() => {
-   
 
-
-   
     async function init() {
       setShowContent(false)
       const response = await fetch(
@@ -193,77 +193,81 @@ function Interni() {
         UltimaModifica: doc.$updatedAt,
       })))
       setShowContent(true)
-     return rs
+      return rs
     }
 
-    init().then((rs)=>{
-      if (location.state ) {
-     
-  
-          const { filter, sort} = location.state.prevstate.previousState
-        
-          sortConfig.current.campo= sort.campo 
-          sortConfig.current.ordine= sort.ordine 
-          
+    try {
+      init().then((rs) => {
+        if (location.state) {
+
+
+          const { filter, sort } = location.state.prevstate.previousState
+
+          sortConfig.current.campo = sort.campo
+          sortConfig.current.ordine = sort.ordine
+
           sortElementi(rs.documents.map((doc) => ({
             ...doc,
             ApertoIl: doc.$createdAt,
             UltimaModifica: doc.$updatedAt,
           })))
-  
-       
-      }
-    })
 
-  }, [])
+
+        }
+      })
+    } catch (e) {
+      dispatch(setError(e));
+    }
+
+  }, [dispatch, location.state, sortElementi])
   return (
     <div>
-   
-    <ConditionalRenderer showContent={showContent}>
-      {elementi.length > 0 && intestazioni.length > 0 && (
-        <table>
-          <SortableTableHead
-            filter={filter}
-            includeInTableIf={includeInTableIf}
-            excludeFromSorting={excludeFromSorting}
-            intestazioni={intestazioni}
-            onSort={onSort}
-            sort={sortConfig.current}
-          />
-          <tbody>
-            {perTabella.length > 0
-              &&
-              (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
-                {perTabella.map((riga) => {
-                  return (
-                    <tr key={riga.id}>
-                      {intestazioni.map((intestazione) => {
-                        return (
-                          <>
-                            {((intestazione === includeInTableIf.include &&
-                              includeInTableIf.filter === filter) ||
-                              intestazione !== includeInTableIf.include) && (
-                                <td key={intestazione}>
-                                  {formatCell(intestazione, riga[intestazione])}
-                                </td>
-                              )}
-                          </>
-                        )
-                      })}
-                    </tr>
-                  )
-                })}
-              </Paginator>)
-            }
-          </tbody>
-        </table>
-      )}
-      {filter===""&&  <p>Seleziona un filtro per visualizzare i ticket</p>}
-    {filter!==""&& elementi.length===0&& <p>Non ci sono ticket con questo filtro</p>}
-  
-    </ConditionalRenderer>
-  </div>
-);
+
+      <ConditionalRenderer showContent={showContent}>
+        {elementi.length > 0 && intestazioni.length > 0 && (
+          <table>
+            <SortableTableHead
+              filter={filter}
+              includeInTableIf={includeInTableIf}
+              excludeFromSorting={excludeFromSorting}
+              intestazioni={intestazioni}
+              onSort={onSort}
+              sort={sortConfig.current}
+            />
+            <tbody>
+              {perTabella.length > 0
+                &&
+                (<Paginator elemPerPagina={5} getNumeroPagina={getNumeroPagina} paginaCorrente={location.state !== null ? location.state.prevstate.previousState.page : 1}>
+                  {perTabella.map((riga) => {
+                    return (
+                      <tr key={riga.id}>
+                        {intestazioni.map((intestazione) => {
+                          return (
+                            <>
+                              {((intestazione === includeInTableIf.include &&
+                                includeInTableIf.filter === filter) ||
+                                intestazione !== includeInTableIf.include) && (
+                                  <td key={intestazione}>
+                                    {formatCell(intestazione, riga[intestazione])}
+                                  </td>
+                                )}
+                            </>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
+                </Paginator>)
+              }
+            </tbody>
+          </table>
+        )}
+        {filter === "" && <p>Seleziona un filtro per visualizzare i ticket</p>}
+        {filter !== "" && elementi.length === 0 && <p>Non ci sono ticket con questo filtro</p>}
+
+      </ConditionalRenderer>
+    </div>
+  );
 }
 
 export default Interni
