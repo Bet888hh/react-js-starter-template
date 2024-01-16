@@ -178,6 +178,7 @@ function Interni() {
   useEffect(() => {
 
     async function init() {
+     
       setShowContent(false)
       const response = await fetch(
         urlbase("TICKET") + `?queries[0]=search("Stato",+["INTERNO"])`,
@@ -219,7 +220,7 @@ function Interni() {
       dispatch(setError(e));
     }
 
-  }, [dispatch, location.state, sortElementi])
+  }, [])
   return (
     <div>
 
@@ -262,8 +263,8 @@ function Interni() {
             </tbody>
           </table>
         )}
-        {filter === "" && <p>Seleziona un filtro per visualizzare i ticket</p>}
-        {filter !== "" && elementi.length === 0 && <p>Non ci sono ticket con questo filtro</p>}
+       
+        { elementi.length === 0 && <p>Non ci sono ticket con questo filtro</p>}
 
       </ConditionalRenderer>
     </div>

@@ -28,6 +28,7 @@ const BaseLayer = () => {
     mieiTicket: [],
     ticketInCarico: [],
     ticketLavorazione: [],
+    ticketInterniOperatore: [],
   });
   const location = useLocation();
   
@@ -62,7 +63,26 @@ const BaseLayer = () => {
       }
     );
   }, [user.Username]);
+  const getTicketMieiInterniSenior = useCallback(async () => {
+    return fetch(
+      urlbase("TICKET") + `?queries[0]=search("Operatore", [${user.Username}])&queries[0]=search("Stato", ["INTERNO"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, [user.Username]);
+  const getTicketMieiInterniJunior = useCallback(async () => {
+    return fetch(
+      urlbase("TICKET") + `?queries[0]=search("Utente", [${user.Username}])&queries[0]=search("Stato", ["INTERNO"])`,
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+  }, [user.Username]);
 
+  
 
   const getTickeUtente = useCallback(async () => {
     return fetch(
@@ -98,6 +118,19 @@ const BaseLayer = () => {
       return returnValue;
     }
   }, [dispatch, getTickeUtente]);
+  
+  const takeDataForInterni = useCallback(async () => {
+   let ticketInterni = user.Permesso ==="SENIOR"?await getTicketMieiInterniSenior():await getTicketMieiInterniJunior();
+   ticketInterni = await ticketInterni.json();
+    if (ticketInterni.message) {
+      dispatch(setError(ticketInterni.message));
+    } else {
+      const returnValue = {ticketInterniOperatore: ticketInterni.documents };
+  
+      return returnValue;
+    }
+
+  }, [dispatch, getTicketMieiInterniJunior, getTicketMieiInterniSenior, user.Permesso]);
 
   const compareDataForUser = useCallback(({ mieiTicket }) => {
     let newMieiTicket = mieiTicket;
@@ -114,7 +147,13 @@ const BaseLayer = () => {
       if (oldTicket) {
         
         if (newTicket.Messaggi.length > oldTicket.Messaggi.length) {
+          if (
+            !newTicket.Messaggi[newTicket.Messaggi.length - 1].includes(
+              user.Username
+            )
+          ) {
             notif = true;
+          }
          
           
         } else if (
@@ -152,8 +191,13 @@ const BaseLayer = () => {
           if (
             newTicket.Messaggi.length > oldTicket.Messaggi.length
           ) {
-           
-            notif = true;
+           if (
+             !newTicket.Messaggi[newTicket.Messaggi.length - 1].includes(
+               user.Username
+             )
+           ) {
+             notif = true;
+           }
          
           } else if (
             newTicket.Stato === "IN_LAVORAZIONE" &&
@@ -170,6 +214,38 @@ const BaseLayer = () => {
       }); */
       dispatch(setGestioneTicketNotifNumber(notifiche))
       state.current = { ticketInCarico: newTicketInCarico };
+    },
+    [dispatch]
+  );
+  const compareDataForInterni = useCallback(
+    ({ ticketInCarico }) => {
+      let newTicketInCarico = ticketInCarico;
+      let oldMieiTicketInCarico = state.current.ticketInCarico;
+      let notifiche = [];
+
+      newTicketInCarico.forEach((newTicket) => {
+        let notif = false;
+        const oldTicket = oldMieiTicketInCarico.find(
+          (ticket) => ticket.$id === newTicket.$id
+        );
+
+       
+        if (oldTicket) {
+          if (
+            newTicket.Messaggi.length > oldTicket.Messaggi.length
+          ) {
+           
+            notif = true;
+         
+          } 
+          notifiche = notif ? [...notifiche, newTicket.$id] : notifiche;
+        }
+      });
+      /* setGestioneTicketNotifNumber((prev) => {
+        return [...new Set([...prev, ...notifiche])];
+      }); */
+      dispatch(setGestioneTicketNotifNumber(notifiche))
+      state.current = { ticketInterniOperatore: newTicketInCarico };
     },
     [dispatch]
   );
