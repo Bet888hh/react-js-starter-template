@@ -18,8 +18,10 @@ import DettaglioTicket from "./Pages/DettaglioTicket/DettaglioTicket";
 import { ErrorModal } from "./Components/ErrorModal/ErrorModal";
 import { headers, urlbase } from "./Utility/urls";
 import { setError } from "./store/Reducer/Slices/ErrorSlice/ErrorSlice";
+import { SelectNotifSlice, setGestioneTicketNotifNumber, setMieiTicketNotifNumber } from "./store/Reducer/Slices/notifSlice/notifSlice";
 const BaseLayer = () => {
   const user = useSelector(SelectUserSlice);
+  const notif = useSelector(SelectNotifSlice)
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const state = useRef({
@@ -28,10 +30,7 @@ const BaseLayer = () => {
     ticketLavorazione: [],
   });
   const location = useLocation();
-  const [mieiTicketNotifNumber, setMieiTicketNotifNumber] = useState([]);
-  const [gestioneTicketNotifNumber, setGestioneTicketNotifNumber] = useState(
-    []
-  );
+  
   const permits = useMemo(() => {
     return {
       home: user.Ruolo !== "NOLOG" && user.Ruolo === "SEMPLICE",
@@ -112,8 +111,14 @@ const BaseLayer = () => {
       );
 
       if (oldTicket) {
+        console.log(newTicket.Messaggi);
         if (newTicket.Messaggi.length > oldTicket.Messaggi.length) {
-          notif = true;
+          let lastMessage = newTicket.Messaggi[newTicket.Messaggi.length - 1];
+          console.log("piulungo");
+          if (!lastMessage.includes(user.Username)) {
+            notif = true;
+          }
+          
         } else if (
           newTicket.Stato === "CHIUSO" &&
           oldTicket.Stato === "IN_LAVORAZIONE"
@@ -124,10 +129,11 @@ const BaseLayer = () => {
         notifiche = notif ? [...notifiche, newTicket.$id] : notifiche;
       }
     });
-    setMieiTicketNotifNumber((prev) => {
+   /*  setMieiTicketNotifNumber((prev) => {
       //merge prevand notifiche and remove duplicates and return the new array
       return [...new Set([...prev, ...notifiche])];
-    });
+    }); */
+    dispatch(setMieiTicketNotifNumber(notifiche))
     state.current = { mieiTicket: newMieiTicket };
   }, []);
 
@@ -143,15 +149,16 @@ const BaseLayer = () => {
           (ticket) => ticket.$id === newTicket.$id
         );
 
-        console.log(newTicket.Messaggi[newTicket.Messaggi.length]);
+        console.log(newTicket.Messaggi[newTicket.Messaggi.length-1]);
         if (oldTicket) {
           if (
-            newTicket.Messaggi.length > oldTicket.Messaggi.length &&
-            !newTicket.Messaggi[newTicket.Messaggi.length - 1].includes(
-              user.Username
-            )
+            newTicket.Messaggi.length > oldTicket.Messaggi.length
           ) {
+            let lastMessage = newTicket.Messaggi[newTicket.Messaggi.length - 1];
+          console.log("piulungo");
+          if (!lastMessage.includes(user.Username)) {
             notif = true;
+          }
           } else if (
             newTicket.Stato === "IN_LAVORAZIONE" &&
             oldTicket.Stato === "CHIUSO"
@@ -162,9 +169,10 @@ const BaseLayer = () => {
           notifiche = notif ? [...notifiche, newTicket.$id] : notifiche;
         }
       });
-      setGestioneTicketNotifNumber((prev) => {
+      /* setGestioneTicketNotifNumber((prev) => {
         return [...new Set([...prev, ...notifiche])];
-      });
+      }); */
+      dispatch(setGestioneTicketNotifNumber(notifiche))
       state.current = { ticketInCarico: newTicketInCarico };
     },
     [user.Username]
@@ -213,7 +221,7 @@ const BaseLayer = () => {
   ]);
 
   useEffect(() => {
-    const id = setInterval(poll, 20000);
+    const id = setInterval(poll, 2000);
     return () => {
       clearInterval(id);
     };
@@ -229,9 +237,9 @@ const BaseLayer = () => {
       {user.Ruolo !== "NOLOG" && (
         <>
           <Navbar
-            gestioneTicketNotifNumber={gestioneTicketNotifNumber.length}
+            gestioneTicketNotifNumber={notif.gestioneTicketNotifNumber.length}
             mieiTicketNotifNumber={
-              mieiTicketNotifNumber.length
+              notif.mieiTicketNotifNumber.length
             } /* render={render} forceRender={forceRender}  */
           />
           <ErrorModal />

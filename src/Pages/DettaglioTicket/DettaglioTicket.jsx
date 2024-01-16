@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 import Messaggi from "../../Components/Messaggi/Messaggi";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
+import { SelectNotifSlice, deleteNotification } from "../../store/Reducer/Slices/notifSlice/notifSlice";
 
 
 const DettaglioTicket = () => {
@@ -25,7 +26,8 @@ useParams
   const [ticket, setTicket] = useState({});
   const { id } = useParams();
   const refCat = useRef("");
-
+  const notif = useSelector(SelectNotifSlice)
+  const dispatch = useDispatch()
   const init = useCallback(async () => {
     if (id) {
       const response = await fetch(urlbase("TICKET") + `/${id}`, {
@@ -61,24 +63,7 @@ useParams
      }
    }, [id, navigate]);
 
-  useEffect(() => {
-    setLoading(true);
-    init();
-    setLoading(false);
-    let id, id1;
-    id1 = setTimeout(() => {
-      id = setInterval(() => {
-         initMessages() 
-      }, 5000);
-    }, 2000);
 
-    return () => {
-      clearInterval(id)
-      clearTimeout(id1)
-    }
-
-
-  }, []);
 
 
   const getTicketLavorazione = useCallback(async () => {
@@ -281,6 +266,30 @@ useParams
      [id, initMessages, user.Username]
    );
 
+
+   useEffect(() => {
+    setLoading(true);
+    init();
+    setLoading(false);
+    let id, id1;
+    id1 = setTimeout(() => {
+      id = setInterval(() => {
+         initMessages() 
+      }, 5000);
+    }, 2000);
+
+    return () => {
+      clearInterval(id)
+      clearTimeout(id1)
+    }
+
+
+  }, []);
+
+useEffect(() => {
+
+  dispatch(deleteNotification(id))
+},[dispatch, id, user.Ruolo])
   return (
     <>
       <ConditionalRenderer showContent={!loading}>
