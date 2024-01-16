@@ -9,7 +9,7 @@ const TabellaHome = ({ ticketsAperti,parolaRicerc }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("location: ", location);
+  
   const numeroPagina = useRef()
 
   const getNumeroPagina= useCallback((pagina)=>{
@@ -17,7 +17,7 @@ const TabellaHome = ({ ticketsAperti,parolaRicerc }) => {
   },[]);
   
   const goToDettaglio = useCallback((e) => {
-    console.log("numero pagina: ", numeroPagina.current);
+    
     navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/", previousState: {page: numeroPagina.current,parolaRicerca:parolaRicerc&&parolaRicerc } } })
   }, [navigate, parolaRicerc]);
 

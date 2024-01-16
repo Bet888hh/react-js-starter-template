@@ -34,7 +34,7 @@ const GestioneTicket = () => {
   });
   const location = useLocation();
 
-  console.log(location.state)
+  
   const [isloading, setIsLoading] = useState(false);
   const backFromDetails = false
   //cose da mettere in un hook personalizzato
@@ -425,7 +425,7 @@ const GestioneTicket = () => {
     // altro se entriamo dal dettaglio 
     init()
     const id = setInterval(()=>{
-      console.log("ciao");
+     
       init(false)
     }, 10000)
     if (location.state) {

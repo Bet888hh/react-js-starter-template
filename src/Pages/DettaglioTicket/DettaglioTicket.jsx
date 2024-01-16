@@ -12,7 +12,7 @@ import { SelectNotifSlice, deleteNotification } from "../../store/Reducer/Slices
 const DettaglioTicket = () => {
 
   const location = useLocation();
-  console.log(location.state);
+  
   const user = useSelector(SelectUserSlice);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -112,7 +112,7 @@ const DettaglioTicket = () => {
       .then((r) => {
         if (!r.message) {
 
-          console.log(location.state);
+      
           indietro();
         } else {
           //erroroni

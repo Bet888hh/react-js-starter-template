@@ -42,7 +42,7 @@ export const TabellaComponent = ({ dati = [], colonne = [] }) => {
     };
 
     const goToDettaglio = useCallback((e) => {
-        console.log("numero pagina: ", currentPage);
+       
         navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/", previousState: {page: currentPage } } })
       }, [currentPage, navigate]);
 

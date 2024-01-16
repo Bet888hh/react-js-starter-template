@@ -160,7 +160,7 @@ const BaseLayer = () => {
           newTicket.Stato === "CHIUSO" &&
           oldTicket.Stato === "IN_LAVORAZIONE"
         ) {
-          console.log("chiusooo");
+          
           notif = true;
         }
         notifiche = notif ? [...notifiche, newTicket.$id] : notifiche;
@@ -203,7 +203,7 @@ const BaseLayer = () => {
             newTicket.Stato === "IN_LAVORAZIONE" &&
             oldTicket.Stato === "CHIUSO"
           ) {
-            console.log("apertooo");
+           
             notif = true;
           }
           notifiche = notif ? [...notifiche, newTicket.$id] : notifiche;
@@ -257,7 +257,7 @@ const BaseLayer = () => {
       });
     } else if (user.Ruolo === "OPERATORE") {
     await  takeDataForOperatore().then((value) => {
-        console.log("lol");
+        
         compareDataForOperatore(value);
       });
     }
