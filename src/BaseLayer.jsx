@@ -17,8 +17,8 @@ import { useDispatch } from "react-redux";
 import DettaglioTicket from "./Pages/DettaglioTicket/DettaglioTicket";
 import { ErrorModal } from "./Components/ErrorModal/ErrorModal";
 import { headers, urlbase } from "./Utility/urls";
-import { setError } from "./store/Reducer/Slices/ErrorSlice/ErrorSlice";
 import { SelectNotifSlice, setGestioneTicketNotifNumber, setMieiTicketNotifNumber } from "./store/Reducer/Slices/notifSlice/notifSlice";
+import { setError } from "./store/Reducer/Slices/ErrorSlice/errorSlice";
 const BaseLayer = () => {
   const user = useSelector(SelectUserSlice);
   const notif = useSelector(SelectNotifSlice)

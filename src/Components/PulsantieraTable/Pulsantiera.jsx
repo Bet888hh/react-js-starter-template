@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
-import { SelectError, setError } from "../../store/Reducer/Slices/ErrorSlice/errorSlice";
+import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/errorSlice";
 import { headers, urlbase } from "../../Utility/urls";
 
 export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro, goToDettaglio }) {
@@ -12,7 +12,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro, goToDe
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const error = useSelector(SelectError);
+    const error = useSelector(SelectErrorSlice);
     const user = useSelector(SelectUserSlice);
     const [ticket, setTicket] = useState({});
     const [ticketInCarico, setTicketInCarico] = useState(0);
