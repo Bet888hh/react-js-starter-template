@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
 import { SelectErrorSlice, setError } from "../../store/Reducer/Slices/ErrorSlice/errorSlice";
 import { headers, urlbase } from "../../Utility/urls";
+import { SelectNotifSlice } from "../../store/Reducer/Slices/notifSlice/notifSlice";
 
 export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro, goToDettaglio }) {
     const idRef = useRef(id);
@@ -14,6 +15,7 @@ export const Pulsantiera = memo(function Pulsantiera({ id = "", indietro, goToDe
     const dispatch = useDispatch();
     const error = useSelector(SelectErrorSlice);
     const user = useSelector(SelectUserSlice);
+    const notif = useSelector(SelectNotifSlice);
     const [ticket, setTicket] = useState({});
     const [ticketInCarico, setTicketInCarico] = useState(0);
 

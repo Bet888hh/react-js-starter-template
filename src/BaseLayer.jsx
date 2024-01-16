@@ -103,6 +103,7 @@ const BaseLayer = () => {
     let newMieiTicket = mieiTicket;
     let oldMieiTicket = state.current.mieiTicket;
     let notifiche = [];
+   
 
     newMieiTicket.forEach((newTicket) => {
       let notif = false;
@@ -111,13 +112,10 @@ const BaseLayer = () => {
       );
 
       if (oldTicket) {
-        console.log(newTicket.Messaggi);
+        
         if (newTicket.Messaggi.length > oldTicket.Messaggi.length) {
-          let lastMessage = newTicket.Messaggi[newTicket.Messaggi.length - 1];
-          console.log("piulungo");
-          if (!lastMessage.includes(user.Username)) {
             notif = true;
-          }
+         
           
         } else if (
           newTicket.Stato === "CHIUSO" &&
@@ -135,7 +133,7 @@ const BaseLayer = () => {
     }); */
     dispatch(setMieiTicketNotifNumber(notifiche))
     state.current = { mieiTicket: newMieiTicket };
-  }, []);
+  }, [dispatch]);
 
   const compareDataForOperatore = useCallback(
     ({ ticketInCarico }) => {
@@ -149,16 +147,14 @@ const BaseLayer = () => {
           (ticket) => ticket.$id === newTicket.$id
         );
 
-        console.log(newTicket.Messaggi[newTicket.Messaggi.length-1]);
+       
         if (oldTicket) {
           if (
             newTicket.Messaggi.length > oldTicket.Messaggi.length
           ) {
-            let lastMessage = newTicket.Messaggi[newTicket.Messaggi.length - 1];
-          console.log("piulungo");
-          if (!lastMessage.includes(user.Username)) {
+           
             notif = true;
-          }
+         
           } else if (
             newTicket.Stato === "IN_LAVORAZIONE" &&
             oldTicket.Stato === "CHIUSO"
@@ -175,16 +171,16 @@ const BaseLayer = () => {
       dispatch(setGestioneTicketNotifNumber(notifiche))
       state.current = { ticketInCarico: newTicketInCarico };
     },
-    [user.Username]
+    [dispatch]
   );
 
-  const poll = useCallback(() => {
+  const poll = useCallback(async () => {
     if (user.Ruolo === "SEMPLICE") {
-      takeDataForUser().then((value) => {
+    await   takeDataForUser().then((value) => {
         compareDataForUser(value);
       });
     } else if (user.Ruolo === "OPERATORE") {
-      takeDataForOperatore().then((value) => {
+    await  takeDataForOperatore().then((value) => {
         console.log("lol");
         compareDataForOperatore(value);
       });

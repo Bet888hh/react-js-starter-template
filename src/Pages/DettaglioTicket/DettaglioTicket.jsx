@@ -46,6 +46,7 @@ const DettaglioTicket = () => {
 
 
   const initMessages = useCallback(async () => {
+    dispatch(deleteNotification(id))
     if (id) {
       try{const response = await fetch(urlbase("TICKET") + `/${id}`, {
         method: "GET",
@@ -353,8 +354,8 @@ useEffect(() => {
 
             <br /><br /><br /><br /><br /><br />
 
-            <Messaggi messaggi={ticket.Messaggi} setMessaggi={setMessaggi} />
-
+           {(ticket.Operatore === user.Username || ticket.Utente === user.Username)&& <Messaggi messaggi={ticket.Messaggi} setMessaggi={setMessaggi} />
+}
 
           </div>
         }

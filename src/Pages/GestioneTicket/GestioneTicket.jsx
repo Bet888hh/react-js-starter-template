@@ -126,8 +126,8 @@ const GestioneTicket = () => {
     }
   }, [dispatch, getTicketLavorazione, goToDettaglio, user.Permesso, user.Username])
 
-  const init = useCallback(async () => {
-    setShowContent(false);
+  const init = useCallback(async (load= true ) => {
+   load&& setShowContent(false);
     const stati = ["APERTO", "IN_LAVORAZIONE", "CHIUSO"];
     try {
       const responses = await Promise.all([
@@ -168,7 +168,7 @@ const GestioneTicket = () => {
     } catch (e) {
       dispatch(setError(e.message))
     }
-    setShowContent(true);
+  load&&  setShowContent(true);
   }, [dispatch, getOperatori, getTicketAperti, getTicketChiusi, getTicketLavorazione, user.Username]);
 
 
@@ -421,11 +421,15 @@ const GestioneTicket = () => {
 
 
 
-    init()
+    
     // altro se entriamo dal dettaglio 
+    init()
+    const id = setInterval(()=>{
+      console.log("ciao");
+      init(false)
+    }, 10000)
     if (location.state) {
       (async () => {
-
         const { filter, sort } = location.state.prevstate.previousState
         const dati = await handleFiltra(filter)
         sortConfig.current.campo = sort.campo
@@ -436,6 +440,9 @@ const GestioneTicket = () => {
       })()
     }
 
+    return ()=>{
+      clearInterval(id)
+    }
 
 
   }, []);

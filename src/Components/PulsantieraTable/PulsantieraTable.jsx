@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import { SelectUserSlice } from "../../store/Reducer/Slices/UserSlice/UserSlice";
+import { SelectNotifSlice } from "../../store/Reducer/Slices/notifSlice/notifSlice";
 const PulsantieraTable = ({
   
   id,
@@ -15,15 +16,19 @@ const PulsantieraTable = ({
   const navigate= useNavigate()
   const location = useLocation();
   const user = useSelector(SelectUserSlice);
+  const notif = useSelector(SelectNotifSlice)
   const action = (e) => {
     handleTableAction(e.target.id);
   };
  /* const goToDettaglio = (e)=>{
     navigate("/dettaglio/"+e.target.id)
   } */
+  const buttonNotifStyle = {
+    border: user.Ruolo === "OPERATORE" ? notif.gestioneTicketNotifNumber.includes(id) ? "2px solid red" : "none" : notif.mieiTicketNotifNumber.includes(id) ? "2px solid red" : "none"
+  }
   return (
     <>
-      <button onClick={action} id={"dettaglio-"+id}>
+      <button style = {buttonNotifStyle} onClick={action} id={"dettaglio-"+id}>
         dettaglio
       </button>
       {location.pathname == "/gestione_ticket" && (
