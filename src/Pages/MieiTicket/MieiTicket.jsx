@@ -26,7 +26,6 @@ const MieiTicket = () => {
   const firstRender = useRef(true);
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("location: ", location);
   const dispatch = useDispatch();
   const error = useSelector(SelectErrorSlice);
   const numeroPagina = useRef();
@@ -225,7 +224,6 @@ const MieiTicket = () => {
 
   const goToDettaglio = useCallback(
     (e) => {
-      console.log("numero pagina: ", numeroPagina.current);
       navigate("/dettaglio/" + e.target.id, {
         state: {
           previousPath: "/miei_ticket",

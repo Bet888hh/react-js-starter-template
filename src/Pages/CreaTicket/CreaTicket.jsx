@@ -205,7 +205,6 @@ const CreaTicket = () => {
       contoMieiTicketApertiInLavorazione();
     }
     ottieniListaAssegnatari();
-    console.log("listaAssegnatari", listaAssegnatari);
   }, []);
 
 
@@ -262,7 +261,6 @@ const CreaTicket = () => {
                     <option value="">Selziona un senior</option>
                     {listaAssegnatari.length > 0 && (
                       listaAssegnatari.map((elem, index) => {
-                        console.log("elem", elem);
                         return (<option key={index} value={elem.username}>{elem.username}-{elem.ticketAssegnati}</option>)//username con la u minuscola per distinguerlo con l'oggetto dello sliceS
                       })
                     )}
