@@ -6,63 +6,64 @@ import { headers, urlbase } from "../../Utility/urls";
 import ConditionalRenderer from "../../Utility/ConditionalRenderer";
 import Messaggi from "../../Components/Messaggi/Messaggi";
 import { Pulsantiera } from "../../Components/PulsantieraTable/Pulsantiera";
+import { setError, SelectErrorSlice } from "../../store/Reducer/Slices/ErrorSlice/errorSlice";
+
 import { SelectNotifSlice, deleteNotification } from "../../store/Reducer/Slices/notifSlice/notifSlice";
-
-
 const DettaglioTicket = () => {
-  /*   const navigate = useNavigate();
-  const user = useSelector(SelectUserSlice);
-useParams
-  const [titolo, setTitolo] = useState('');
-  const [testo, setTesto] = useState('');
-  const [categoria, setCategoria] = useState(''); // Categoria di default
-  const [categoriaManuale, setCategoriaManuale] = useState('');
-  const [assegnaA, setAssegnaA] = useState(''); */
+
   const location = useLocation();
   console.log(location.state);
   const user = useSelector(SelectUserSlice);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const error = useSelector(SelectErrorSlice);
   const [loading, setLoading] = useState(true);
   const [ticket, setTicket] = useState({});
   const { id } = useParams();
   const refCat = useRef("");
   const notif = useSelector(SelectNotifSlice)
-  const dispatch = useDispatch()
+
   const init = useCallback(async () => {
     if (id) {
-      const response = await fetch(urlbase("TICKET") + `/${id}`, {
+      try {
+        const response = await fetch(urlbase("TICKET") + `/${id}`, {
+          method: "GET",
+          headers: headers,
+        })
+        const rs = await response.json();
+
+        if (!rs.message) {
+          setTicket(rs);
+          refCat.current = rs.Categoria;
+        } else {
+          navigate("/");
+        }
+      } catch (e) {
+        dispatch(e.message);
+      }
+    }
+  }, [dispatch, id, navigate]);
+
+
+  const initMessages = useCallback(async () => {
+    if (id) {
+      try{const response = await fetch(urlbase("TICKET") + `/${id}`, {
         method: "GET",
         headers: headers,
       });
       const rs = await response.json();
 
       if (!rs.message) {
-        setTicket(rs);
-        refCat.current = rs.Categoria;
+        //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
+        setTicket(prev => ({ ...prev, Messaggi: [...rs.Messaggi] }))
       } else {
         navigate("/");
       }
+    }catch(e){
+      dispatch(setError(e.message));
     }
-  }, [id, navigate]);
-
-
-   const initMessages = useCallback(async () => {
-     if (id) {
-       const response = await fetch(urlbase("TICKET") + `/${id}`, {
-         method: "GET",
-         headers: headers,
-       });
-       const rs = await response.json();
- 
-       if (!rs.message) {
-          //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
-          setTicket(prev=>({...prev,Messaggi:[...rs.Messaggi]}))
-       } else {
-         navigate("/");
-       }
-     }
-   }, [id, navigate]);
-
+    }
+  }, [dispatch, id, navigate]);
 
 
 
@@ -84,13 +85,13 @@ useParams
   );
 
   const indietro = useCallback(() => {
-  
-    navigate(location.state.previousPath,{state:{prevstate:{...location.state ,previousPath:"/dettaglio"}}});
+
+    navigate(location.state.previousPath, { state: { prevstate: { ...location.state, previousPath: "/dettaglio" } } });
   }, [location.state, navigate])
 
   const handleSalva = useCallback(() => {
     setLoading(true);
-    fetch(
+    try{fetch(
       urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
       {
         method: "PATCH",
@@ -109,14 +110,16 @@ useParams
       })
       .then((r) => {
         if (!r.message) {
-         
+
           console.log(location.state);
-        indietro();
+          indietro();
         } else {
           //erroroni
         }
-        
-      });
+
+      })}catch(e){
+        dispatch(setError(e.message))
+      }
   }, [id, indietro, location.state, ticket.Categoria]);
 
   /* const handleChiudi = useCallback(() => {
@@ -198,73 +201,75 @@ useParams
     [getTicketLavorazione, init, user.Permesso, user.Username]
   ); */
 
-/*   const accetta = useCallback(() => {
-    setLoading(true);
-    
-    fetch(
-      urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
-      {
-        method: "PATCH",
+  /*   const accetta = useCallback(() => {
+      setLoading(true);
+      
+      fetch(
+        urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+        {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify(
+            {
+              documentId: id,
+              data: {
+                Operatore: user.Username,
+              },
+              permissions: [`read("any")`],
+            }
+          ),
+        }
+      )
+        .then((r) => {
+          return r.json();
+        })
+        .then((r) => {
+          if (!r.message) {
+            init();
+          } else {
+            //erroroni
+          }
+          setLoading(false);
+        });
+    }, [id, init, user.Username]) */
+
+  const setMessaggi = useCallback(
+    async (mess) => {
+      //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
+
+      try{const response = await fetch(urlbase("TICKET") + `/${id}`, {
+        method: "GET",
         headers: headers,
-        body: JSON.stringify(
-          {
+      });
+      const rs = await response.json();
+
+      fetch(
+        urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
+        {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({
             documentId: id,
             data: {
-              Operatore: user.Username,
+
+              Messaggi: [...rs.Messaggi, `${user.Username}: ${mess}`],
             },
             permissions: [`read("any")`],
-          }
-        ),
-      }
-    )
-      .then((r) => {
-        return r.json();
-      })
-      .then((r) => {
-        if (!r.message) {
-          init();
-        } else {
-          //erroroni
+          }),
         }
-        setLoading(false);
-      });
-  }, [id, init, user.Username]) */
+      )
+        .then((r) => {
+          return r.json();
+        })
+        .then((r) => {
+          initMessages();
 
-   const setMessaggi = useCallback(
-    async (mess) => {
-       //   setMessaggi([...messaggi, `${user.Username}: ${nuovoMessaggio}`]);
-       
-       const response = await fetch(urlbase("TICKET") + `/${id}`, {
-         method: "GET",
-         headers: headers,
-       });
-       const rs = await response.json();
-       
-       fetch(
-         urlbase("TICKET") + "/" + id, //categoria manuale per il junior nel ticket interno è l'id del ticket semplice
-         {
-           method: "PATCH",
-           headers: headers,
-           body: JSON.stringify({
-             documentId: id,
-             data: {
-             
-               Messaggi: [...rs.Messaggi, `${user.Username}: ${mess}`],
-             },
-             permissions: [`read("any")`],
-           }),
-         }
-       )
-         .then((r) => {
-           return r.json();
-         })
-         .then((r) => {
-           initMessages();
-          
-         })
-     },
-     [id, initMessages, user.Username]
-   );
+        })}catch(e){
+          dispatch(setError(e.message));
+        }
+    },
+    [dispatch, id, initMessages, user.Username]
+  );
 
 
    useEffect(() => {
