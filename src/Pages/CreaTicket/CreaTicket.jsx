@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { SelectUserSlice } from '../../store/Reducer/Slices/UserSlice/UserSlice';
 import { headers, urlbase } from '../../Utility/urls';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ConditionalRenderer from '../../Utility/ConditionalRenderer';
+import { SelectErrorSlice, setError } from '../../store/Reducer/Slices/ErrorSlice/errorSlice';
 
 
 const CreaTicket = () => {
@@ -38,6 +39,8 @@ const CreaTicket = () => {
   const [ticketDaLavorare, setTicketDaLavorare] = useState(location.state);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const error = useSelector(SelectErrorSlice);
   const user = useSelector(SelectUserSlice);
   const [mieiTicketApertiInLavorazione, setMieiTicketApertiLavorazione] = useState(0);
 
@@ -73,7 +76,7 @@ const CreaTicket = () => {
       ticket = { ...ticket, Operatore: assegnaA, Stato: "INTERNO" }
       pathNavigazione = '../gestione_ticket'
     }
-    
+
     const tuttiICampiValidi = Object.values(ticket).every(valore => typeof valore === 'string' && valore.trim() !== '');
     if (!tuttiICampiValidi) {
       alert("Compilare tutti i campi");
@@ -88,51 +91,50 @@ const CreaTicket = () => {
     };
 
 
-    fetch(urlbase("TICKET"), {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(request),
-    })
-      .then(() => {
-        if (user.Ruolo === "OPERATORE") {
-          return fetch(urlbase("TICKET") + "/" + categoriaManuale, {
-            method: "PATCH",
-            headers: headers,
-            body: JSON.stringify({
-              documentId: categoriaManuale,
-              data: {
-                Stato: "IN_LAVORAZIONE",
-                Ultima_visita: "JUNIOR",
-                Assegnatario: assegnaA,
-              },
-              permissions: [`read("any")`],
-            }),
-          })
-            //.then(() => alert('Ticket creato con successo!'))
-            .then(() => navigate(pathNavigazione))
-            .catch(() => {
-              throw new Error('Qualcosa è andato storto durante la PATCH');
-            });
-        }
+    try {
+      fetch(urlbase("TICKET"), {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(request),
       })
-      .then(() => {
-        creaButtonRef.current.disabled = false;
-        alert('Ticket creato con successo!')
-      })
-      .then(() => navigate(pathNavigazione))
-      .catch((error) => {
-        alert(error);
-      });
+        .then(() => {
+          if (user.Ruolo === "OPERATORE") {
+            return fetch(urlbase("TICKET") + "/" + categoriaManuale, {
+              method: "PATCH",
+              headers: headers,
+              body: JSON.stringify({
+                documentId: categoriaManuale,
+                data: {
+                  Stato: "IN_LAVORAZIONE",
+                  Ultima_visita: "JUNIOR",
+                  Assegnatario: assegnaA,
+                },
+                permissions: [`read("any")`],
+              }),
+            })
+              //.then(() => alert('Ticket creato con successo!'))
+              .then(() => navigate(pathNavigazione))
+          }
+        })
+        .then(() => {
+          creaButtonRef.current.disabled = false;
+          alert('Ticket creato con successo!')
+        })
+        .then(() => navigate(pathNavigazione))
+    } catch (e) {
+      dispatch(setError(e.message));
+    }
 
 
-  }, [assegnaA, categoria, categoriaManuale, mieiTicketApertiInLavorazione, navigate, testo, titolo, user.Permesso, user.Ruolo, user.Username]);
+  }, [assegnaA, categoria, categoriaManuale, dispatch, mieiTicketApertiInLavorazione, navigate, testo, titolo, user.Permesso, user.Ruolo, user.Username]);
 
   const ottieniListaAssegnatari = useCallback(() => {
-    fetch(urlbase("USER") + `?queries[0]=search("Ruolo",+["OPERATORE"])&queries[1]=search("Permesso",+["SENIOR"])`
-      , {
-        method: "GET",
-        headers: headers,
-      })
+    try {
+      fetch(urlbase("USER") + `?queries[0]=search("Ruolo",+["OPERATORE"])&queries[1]=search("Permesso",+["SENIOR"])`
+        , {
+          method: "GET",
+          headers: headers,
+        })
       .then(res => res.json())
       .then(res => {
         const operatoriSenior = res.documents;
@@ -170,14 +172,14 @@ const CreaTicket = () => {
             throw new Error('Qualcosa è andato storto durante la PATCH');
           });
       })
-      .catch(error => {
-        alert(error)
-      });
+    } catch (e) {
+      dispatch(setError(e.message));
+    }
 
   }, []);
 
   const contoMieiTicketApertiInLavorazione = useCallback(() => {
-    showContent.current = false;
+    try{showContent.current = false;
     fetch(urlbase("TICKET") + `?queries[0]=search("Utente",+["${user.Username}"])&queries[1]=search("Stato",+["APERTO"])|queries[2]=search("Stato",+["IN_LAVORAZIONE"])`
       , {
         method: "GET",
@@ -187,11 +189,10 @@ const CreaTicket = () => {
       .then(res => {
         setMieiTicketApertiLavorazione(res.total)
         showContent.current = true;
-      })
-      .catch((error) => {
-        alert('Qualcosa è andato storto durante la GET');
-      })
-  }, []);
+      })}catch(e) {
+        dispatch(setError(e.message));
+      }
+  }, [dispatch, user.Username]);
 
   useEffect(() => {
     if (user.Ruolo === "OPERATORE" && user.Permesso === "JUNIOR") {
