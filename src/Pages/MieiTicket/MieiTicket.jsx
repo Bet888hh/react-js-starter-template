@@ -220,7 +220,12 @@ const MieiTicket = () => {
     navigate("/dettaglio/" + e.target.id, { state: { previousPath: "/miei_ticket", previousState: { sort: sortConfig.current, filter: filter, page: numeroPagina.current } } })
   }, [filter, navigate]);
 
-
+const indietro =useCallback(async  ()=>{
+  const data = await takeData("CHIUSO")
+  if(!data.message){
+    setElementi(data)
+  }
+},[takeData])
 
   const perTabella = useMemo(() => {
     return elementi
@@ -243,6 +248,8 @@ const MieiTicket = () => {
                 </button>
                 <Pulsantiera
                   id={e.$id}
+                  indietro={indietro}
+                  goToDettaglio = {()=>{goToDettaglio({target:{id:e.$id}})}}
                 />
               </>
             ),
@@ -250,7 +257,7 @@ const MieiTicket = () => {
         };
       })
       : null;
-  }, [elementi, goToDettaglio]);
+  }, [elementi, goToDettaglio, indietro]);
 
  
   const intestazioni = perTabella.length > 0 ? Object.keys(perTabella[0].content) : [];

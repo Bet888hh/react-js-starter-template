@@ -45,7 +45,11 @@ const TabellaHome = ({ ticketsAperti,parolaRicerc }) => {
               <tr key={index}>
                 <td>{elem.Titolo}</td>
                 <td>{elem.Testo}</td>
-                <td><button id={elem.$id} onClick={goToDettaglio}>Visualizza</button></td>
+                <td><button id={elem.$id} onClick={()=>{goToDettaglio({
+                  target: {
+                    id: elem.$id,
+                  },
+                });}}>Visualizza</button></td>
                 {/* <td><Pulsantiera id={elem.$id}  /></td> */}
               </tr>
             ))}
